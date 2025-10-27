@@ -21,7 +21,6 @@ sentencepiece>=0.1.99
 huggingface-hub>=0.20.3
 onnxruntime 
 tiktoken 
-llama-cpp-python==0.2.*
 networkx 
 pytest 
 pytest-asyncio 

@@ -102,8 +102,9 @@ with ChronoGuard controls gating each phase.
 - Embeddings default to `BAAI/bge-base-en-v1.5`.
 - Reranking uses `BAAI/bge-reranker-v2-m3` with fallback cross-encoders.
 - LLM strategy now targets the Lightning AI hosted `openai/gpt-5` endpoint
-  configured in `config/models.yaml`. Optional llama.cpp and Ollama backends are
-  autodetected when binaries/models are present.
+  configured in `config/models.yaml`. Optional llama.cpp and Ollama backends
+  remain supported, but you must install their dependencies manually if you
+  enable them.
 - Prompt limits cap per-pass passage counts and snippet sizes to keep context
   within GPU memory constraints while preserving determinism.
 

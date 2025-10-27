@@ -51,6 +51,8 @@ os.environ["PYTHONPATH"] = str(repo)
 Additional tips:
 - Export `LIGHTNING_API_KEY="b829fb3f-d518-42df-9333-f5a657b5a5c7/asthaclover26/deploy-model-project"` to use your own secret; otherwise the config fallback is used.
 - Install `bitsandbytes` (`pip install bitsandbytes`) if you re-enable 4-bit Hugging Face models.
+- If you want to bring back local llama.cpp generation, install `llama-cpp-python`
+  separately after provisioning the required toolchain/OpenMP libs.
 - Persist `models_bin` to `/kaggle/working` or Google Drive if you need reuse across sessions.
 - CLI/API responses now return minified JSON objects with `range` + 2 `bullets`
   when the LLM succeeds. Parse the JSON payload directly or inspect

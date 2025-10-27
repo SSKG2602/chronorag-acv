@@ -30,5 +30,4 @@ dependencies:
       - sentence-transformers
       - tiktoken
       - openai>=2.6.1
-      - llama-cpp-python==0.2.*
       - pyyaml
