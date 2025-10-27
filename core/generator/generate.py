@@ -167,6 +167,11 @@ def generate_answer(
             stop_list = entry.get("stop", stop_list)
             max_tokens = entry.get("max_new_tokens", max_tokens)
             temperature = entry.get("temperature", temperature)
+        elif backend_name == "lightning_ai":
+            entry = llm_cfg.get("lightning_ai", {})
+            stop_list = entry.get("stop", stop_list)
+            max_tokens = entry.get("max_tokens", max_tokens)
+            temperature = entry.get("temperature", temperature)
         elif backend_name == "openai_compat":
             entry = llm_cfg.get("openai_compat", {})
             stop_list = entry.get("stop", stop_list)

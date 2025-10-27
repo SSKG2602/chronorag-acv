@@ -13,7 +13,7 @@ dependencies:
   - sqlalchemy
   - sqlmodel
   - pgvector
-  - httpx
+  - httpx<0.28
   - orjson
   - redis-py
   - opentelemetry-api
@@ -29,5 +29,6 @@ dependencies:
       - rank-bm25
       - sentence-transformers
       - tiktoken
+      - openai>=2.6.1
       - llama-cpp-python==0.2.*
       - pyyaml

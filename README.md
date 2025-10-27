@@ -101,8 +101,8 @@ with ChronoGuard controls gating each phase.
 
 - Embeddings default to `BAAI/bge-base-en-v1.5`.
 - Reranking uses `BAAI/bge-reranker-v2-m3` with fallback cross-encoders.
-- LLM strategy prioritizes local Hugging Face models (Phi-3 Mini by default),
-  then OpenAI-compatible endpoints. Optional llama.cpp and Ollama backends are
+- LLM strategy now targets the Lightning AI hosted `openai/gpt-5` endpoint
+  configured in `config/models.yaml`. Optional llama.cpp and Ollama backends are
   autodetected when binaries/models are present.
 - Prompt limits cap per-pass passage counts and snippet sizes to keep context
   within GPU memory constraints while preserving determinism.
@@ -114,8 +114,9 @@ with ChronoGuard controls gating each phase.
 - `config/models.yaml` toggles model backends, prompt limits, and generation
   temperatures (default 0.0 for repeatability).
 - Environment variables:
-  - `HF_TOKEN` for gated Hugging Face downloads.
-  - `LLM_ENDPOINT` / `LLM_API_KEY` for OpenAI-compatible providers.
+  - `LIGHTNING_API_KEY` overrides the baked-in API key for the Lightning AI endpoint.
+  - `LLM_ENDPOINT` / `LLM_API_KEY` remain available for custom OpenAI-compatible providers.
+  - `HF_TOKEN` is only needed when you re-enable gated Hugging Face models.
   - `CHRONORAG_LIGHT` to switch between stubbed light mode and full models.
 
 ## Observability & Telemetry

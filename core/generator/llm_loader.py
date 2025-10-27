@@ -47,6 +47,38 @@ class OpenAICompat:
         return response.json()["choices"][0]["message"]["content"]
 
 
+class LightningAIBackend:
+    def __init__(self, base_url: str, api_key: str, model: str):
+        if not base_url or not api_key:
+            raise RuntimeError("Lightning AI backend not configured")
+        try:
+            from openai import OpenAI  # type: ignore[import]
+        except ImportError as exc:
+            raise RuntimeError("openai package is required for Lightning AI backend") from exc
+
+        self.client = OpenAI(base_url=base_url, api_key=api_key)
+        self.model = model
+
+    def generate(self, messages, max_tokens, temperature, stop=None) -> str:
+        # Lightning's GPT-5 endpoint ignores OpenAI max_tokens; rely on stop markers and post-processing.
+        kwargs = {}
+        if stop:
+            kwargs["stop"] = stop
+        response = self.client.chat.completions.create(model=self.model, messages=messages, **kwargs)
+        message = response.choices[0].message
+        content = getattr(message, "content", "") or ""
+        if isinstance(content, list):
+            # Reasoning models can return structured segments; concatenate text fragments.
+            text = []
+            for chunk in content:
+                if isinstance(chunk, dict):
+                    text.append(chunk.get("text") or "")
+                else:
+                    text.append(str(chunk))
+            content = "".join(text)
+        return str(content)
+
+
 class LlamaCppBackend:
     def __init__(self, gguf_path: str, n_ctx: int = 4096, n_gpu_layers: int = -1):
         from llama_cpp import Llama  # local import
@@ -190,7 +222,20 @@ def load_backend(cfg) -> tuple[LLMBackend, str]:
     order = cfg["strategy_order"]
     for name in order:
         try:
-            if name == "openai_compat":
+            if name == "lightning_ai":
+                entry = cfg["lightning_ai"]
+                base_url = entry.get("base_url") or ""
+                api_key_env = entry.get("api_key_env")
+                api_key_default = entry.get("api_key_default")
+                api_key = ""
+                if api_key_env:
+                    api_key = os.getenv(api_key_env, "")
+                if not api_key and api_key_default:
+                    api_key = api_key_default
+                model = entry.get("model", "openai/gpt-5")
+                if base_url and api_key:
+                    return LightningAIBackend(base_url, api_key, model), "lightning_ai"
+            elif name == "openai_compat":
                 entry = cfg["openai_compat"]
                 endpoint = os.getenv(entry["endpoint_env"] or "")
                 api_key = os.getenv(entry["api_key_env"] or "")

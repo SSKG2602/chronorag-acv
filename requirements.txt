@@ -2,7 +2,8 @@ fastapi
 uvicorn 
 pydantic 
 orjson 
-httpx
+httpx<0.28
+openai>=2.6.1
 sqlalchemy 
 sqlmodel 
 psycopg 

@@ -4,8 +4,8 @@
 
 - **Embeddings**: `BAAI/bge-base-en-v1.5` (CPU/GPU friendly; swaps via `config/models.yaml`).
 - **Reranker**: `BAAI/bge-reranker-v2-m3` with fallback `cross-encoder/ms-marco-MiniLM-L-6-v2`.
-- **LLM Answerer**: local Hugging Face `microsoft/Phi-3-mini-4k-instruct` (deterministic, GPU-friendly).  
-  - For higher-quality generations, point the OpenAI-compatible slot at a stronger hosted model (e.g., GPT-4o, Claude 3 Opus, Gemini 1.5 Pro) by setting `LLM_ENDPOINT` and `LLM_API_KEY`.
+- **LLM Answerer**: Lightning AI hosted `openai/gpt-5` via the OpenAI Python client in `config/models.yaml`.  
+  - Override the baked-in key by exporting `LIGHTNING_API_KEY`, or swap to another OpenAI-compatible endpoint by setting `LLM_ENDPOINT` and `LLM_API_KEY`.
 - **Mode selection**:
   - `HARD`: strict time window adherence, fewer candidates, most conservative.
   - `INTELLIGENT`: decays outside-window evidence to surface broader context.
@@ -49,8 +49,8 @@ os.environ["PYTHONPATH"] = str(repo)
 ```
 
 Additional tips:
-- Accept the Hugging Face license for Phi-3 Mini and export `HF_TOKEN`.
-- Install `bitsandbytes` (`pip install bitsandbytes`) when using GPU-based 4-bit loading.
+- Export `LIGHTNING_API_KEY="b829fb3f-d518-42df-9333-f5a657b5a5c7/asthaclover26/deploy-model-project"` to use your own secret; otherwise the config fallback is used.
+- Install `bitsandbytes` (`pip install bitsandbytes`) if you re-enable 4-bit Hugging Face models.
 - Persist `models_bin` to `/kaggle/working` or Google Drive if you need reuse across sessions.
 - CLI/API responses now return minified JSON objects with `range` + 2 `bullets`
   when the LLM succeeds. Parse the JSON payload directly or inspect
@@ -67,7 +67,8 @@ source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 
-export HF_TOKEN=hf_xxx          # optional: for gated Hugging Face models
+export LIGHTNING_API_KEY="b829fb3f-d518-42df-9333-f5a657b5a5c7/asthaclover26/deploy-model-project"
+export HF_TOKEN=hf_xxx          # optional: only if you re-enable gated Hugging Face models
 export CHRONORAG_LIGHT=0        # use 1 for CPU-only rapid iteration
 
 bash install.sh                 # installs extra tooling (optional)
@@ -106,7 +107,8 @@ source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 
-export HF_TOKEN=hf_xxx
+export LIGHTNING_API_KEY="b829fb3f-d518-42df-9333-f5a657b5a5c7/asthaclover26/deploy-model-project"
+export HF_TOKEN=hf_xxx          # optional: only if Hugging Face models are enabled
 export CHRONORAG_LIGHT=0
 
 bash install.sh
