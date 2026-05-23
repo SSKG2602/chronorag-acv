@@ -233,13 +233,19 @@ Minimum screenshots to commit:
 
 ## Temporal Retrieval Ablation
 
-This benchmark isolates retrieval-stage contributions in light mode. It does not
-evaluate LLM writing quality. It measures whether each retrieval variant returns
-evidence with the expected valid-time window, source, unit surface, and temporal
-text signal.
+This small ablation isolates retrieval-stage behavior in light mode. The goal is
+not to evaluate LLM writing quality, but to test whether each retrieval
+configuration returns evidence with the expected valid-time window, source, unit,
+and temporal text signal.
 
-The current benchmark is intentionally small: three world-economy temporal QA
-cases under `benchmarks/temporal_qa_sample.jsonl`.
+The result shows that ordinary keyword/vector retrieval can find relevant GDP
+evidence, but fails the temporal-window constraint. Adding ChronoRAG's temporal
+filter and temporal fusion raises Window Hit@5 from 0.00 to 1.00 on the sample
+cases.
+
+These numbers are from a deliberately small 3-query sanity benchmark, not a full
+external benchmark. They validate component behavior rather than
+state-of-the-art performance.
 
 | Method | Window Hit@5 | Source Hit@5 | Unit Hit@5 | Text Hit@5 | Latency ms |
 |---|---:|---:|---:|---:|---:|
