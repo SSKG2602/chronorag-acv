@@ -13,6 +13,7 @@ import logging
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
+from app.light_mode import light_mode_enabled
 from app.utils.chrono_reducer import ChronoPassage
 from app.utils.time_windows import TimeWindow
 from core.generator.llm_loader import load_backend
@@ -147,6 +148,11 @@ def generate_answer(
     window_kind: str,
 ) -> Tuple[str, int]:
     """Generate an answer string and a token estimate from supplied evidence."""
+    if light_mode_enabled():
+        clipped = _fallback_response(query, evidence).split(STOP_MARKER)[0].strip()
+        token_estimate = max(1, len(clipped.split()))
+        return clipped, token_estimate
+
     llm_cfg = models_cfg.get("llm", {})
     prompt_limits = llm_cfg.get("prompt_limits", {})
     max_passages = prompt_limits.get("max_passages")

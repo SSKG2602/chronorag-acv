@@ -110,7 +110,7 @@ chronorag/
 - This is not a deployed production service.
 - No public hosted demo URL is currently documented.
 - No benchmark table is included yet.
-- No screenshots are committed yet.
+- Demo screenshots are committed under `assets/demo/`.
 - No reproducible evaluation report is committed yet.
 - No Dockerfile or production deployment manifest is visible in the repo root.
 - Storage currently appears oriented around local persisted state and experimental PVDB abstractions, not a hardened multi-tenant Postgres/pgvector deployment.
@@ -157,7 +157,7 @@ export REDIS_URL=...            # optional Redis cache/freshness backend
 
 ```bash
 # Start API
-python -m app.uvicorn_runner --host 0.0.0.0 --port 8000
+python -m app.uvicorn_runner
 
 # Health check
 curl http://localhost:8000/healthz
@@ -167,7 +167,10 @@ curl http://localhost:8000/healthz
 
 ```bash
 # Ingest sample documents
-python -m cli.chronorag_cli ingest data/sample/docs
+python -m cli.chronorag_cli ingest \
+  data/sample/docs/aihistory1.txt \
+  data/sample/docs/aihistory2.txt \
+  data/sample/docs/aihistory3.txt
 
 # Ask a temporal question
 python -m cli.chronorag_cli answer \
@@ -209,7 +212,7 @@ When grounding is weak or conflicts are detected, the system should degrade to a
 
 ## Screenshots / Demo Assets
 
-Create this directory before the final public polish pass:
+Demo assets are stored in:
 
 ```text
 assets/demo/
