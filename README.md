@@ -231,13 +231,41 @@ Minimum screenshots to commit:
 4. Rendered answer JSON showing attribution card and controller stats.
 5. One evidence-only degradation example.
 
+## Temporal Retrieval Ablation
+
+This benchmark isolates retrieval-stage contributions in light mode. It does not
+evaluate LLM writing quality. It measures whether each retrieval variant returns
+evidence with the expected valid-time window, source, unit surface, and temporal
+text signal.
+
+The current benchmark is intentionally small: three world-economy temporal QA
+cases under `benchmarks/temporal_qa_sample.jsonl`.
+
+| Method | Window Hit@5 | Source Hit@5 | Unit Hit@5 | Text Hit@5 | Latency ms |
+|---|---:|---:|---:|---:|---:|
+| BM25 only | 0.00 | 1.00 | 1.00 | 1.00 | 163.7 |
+| Vector only | 0.00 | 1.00 | 0.67 | 0.00 | 240.2 |
+| Hybrid without temporal filter | 0.00 | 1.00 | 1.00 | 0.67 | 163.2 |
+| Hybrid with temporal filter | 1.00 | 1.00 | 1.00 | 1.00 | 239.3 |
+| Hybrid + temporal fusion | 1.00 | 1.00 | 1.00 | 1.00 | 164.8 |
+| Hybrid + temporal fusion + rerank | 1.00 | 1.00 | 1.00 | 1.00 | 228.7 |
+
+Reproduce:
+
+```bash
+CHRONORAG_LIGHT=1 python -m benchmarks.run_ablation \
+  --cases benchmarks/temporal_qa_sample.jsonl \
+  --top-k 5 \
+  --candidate-k 150
+```
+
 ## Technical Limitations
 
 - Temporal extraction is partly heuristic and depends on document formatting.
 - Domain support is strongest for the world-economy/Maddison-style path; other domains need dedicated policy sets and evaluation.
 - Cross-encoder and LLM reranking can be expensive in full mode.
 - Local model execution depends on CPU/GPU memory and Hugging Face model access.
-- Current documentation does not prove benchmarked retrieval quality against a temporal QA dataset.
+- Current benchmark coverage is a small sanity check, not a broad temporal QA evaluation.
 - Conflict detection is only as good as the extracted windows, passage granularity, and evidence coverage.
 - Production use would require stronger persistence, migrations, background ingestion jobs, auth, monitoring, and deployment automation.
 
