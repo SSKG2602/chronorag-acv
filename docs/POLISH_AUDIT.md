@@ -1,86 +1,67 @@
 # ChronoRAG Repo Polish Audit
 
-## Verdict
+## Current Status
 
-ChronoRAG has a strong research idea and a real multi-layer code scaffold. The public presentation needs tighter claim discipline, a single clean README, demo evidence, screenshots, and benchmark framing.
+ChronoRAG now has a consistent public quickstart, verified light-mode demo path,
+and committed demo assets under `assets/demo/`. The repository should still be
+presented as a temporal-RAG research scaffold, not as a production service.
 
-## Strong Signals
+## Completed Polish Items
 
-- Clear project identity: temporal RAG, not generic RAG.
-- App/service/core/storage separation.
-- Ingestion handles structured JSONL and text fallback.
-- Retrieval combines lexical, vector, temporal filtering, reranking, and temporal fusion.
-- Answer path includes temporal routing, ChronoSanity conflict handling, attribution, and telemetry.
-- YAML-driven policy/model configuration.
-- Tests directory exists with unit/e2e/fixture organization.
-- Apache-2.0 license is appropriate for public open-source positioning.
+- README now includes an honest "what works / what does not work" section.
+- Demo screenshots exist in `assets/demo/`.
+- `howtorunme.md` run commands have been corrected.
+- Demo ingest commands use explicit sample files:
+  `data/sample/docs/aihistory1.txt`, `aihistory2.txt`, and `aihistory3.txt`.
+- The API quickstart uses the actual runner command:
+  `python -m app.uvicorn_runner`.
+- Light mode avoids heavyweight LLM loading and returns a deterministic evidence
+  digest for smoke demos.
+- The verified demo path includes API health, CLI ingest, CLI answer,
+  attribution card, and controller stats.
 
-## Weak Signals
+## Remaining Gaps
 
-- README reads more like an internal architecture note than a polished public project page.
-- No screenshots or demo assets are visible.
-- No benchmark table.
-- No “what works / what does not work” honesty section.
-- No minimal quickstart path at the top.
-- `howtorunme.md` contains notebook command typos like spaced shell commands. This weakens trust.
-- Makefile is too minimal for a research repo.
-- No Dockerfile or deployment story.
-- Claims can sound stronger than proof currently shown.
+- No benchmark table or reproducible evaluation report is committed yet.
+- No ablation study is committed yet.
+- No production deployment layer, migration path, or external observability stack
+  is committed yet.
+- No public hosted demo URL is documented.
+- The CLI output is verbose for large ingests and should eventually support a
+  concise demo mode.
+- The light-mode answer screenshot is a smoke-mode evidence digest, not a
+  full-quality model-backed answer.
 
-## Priority Fixes
+## Next Priority
 
-### P0: Public credibility
+### P1: Benchmark Proof
 
-- Replace README with the polished README in this pack.
-- Add Mermaid architecture diagram.
-- Add honest limitations section.
-- Add demo screenshot placeholders and then commit real screenshots.
-- Add one command-tested smoke demo.
+Add a small sanity benchmark for temporal retrieval correctness:
 
-### P1: Developer trust
-
-- Fix `howtorunme.md` command typos.
-- Expand Makefile:
-
-```makefile
-.PHONY: setup run test ingest demo purge
-
-setup:
-	pip install -r requirements.txt
-
-run:
-	python -m app.uvicorn_runner --host 0.0.0.0 --port 8000
-
-test:
-	CHRONORAG_LIGHT=1 pytest -q
-
-ingest:
-	python -m cli.chronorag_cli ingest data/sample/docs
-
-demo:
-	python -m cli.chronorag_cli answer --query "Europe GDP per capita in 1870 (1990 intl$$)" --mode INTELLIGENT --axis valid
-
-purge:
-	python -m cli.chronorag_cli purge
+```text
+benchmarks/
+├── temporal_qa_sample.jsonl
+├── run_benchmark.py
+└── results/
+    └── light_mode_baseline.json
 ```
 
-### P2: Research trust
+Minimum reported metrics:
 
-- Add a small benchmark CSV/JSONL.
-- Add ablation script.
-- Add `docs/FUTURE_RESEARCH.md`.
-- Add `docs/TECHNICAL_LIMITATIONS.md`.
+- `temporal_window_hit_rate`
+- `source_hit_rate`
+- `unit_hit_rate`
+- `evidence_recall_at_5`
+- `fallback_rate`
+- `latency_ms`
 
-## Suggested Git Commit Plan
+### P2: Ablation Study
 
-```bash
-git checkout -b polish/public-readme
+Add an ablation script comparing:
 
-mkdir -p docs assets/demo
-cp README.md README.old.md
-# Replace README.md with polished version
-# Add docs from this pack
-
-git add README.md docs assets
-git commit -m "Polish ChronoRAG public README and research docs"
-```
+- BM25 only
+- Vector only
+- Hybrid without temporal filter
+- Hybrid with temporal filter
+- Hybrid plus temporal fusion
+- Hybrid plus temporal fusion plus rerank

@@ -38,7 +38,10 @@ pip install -r requirements.txt
 
 export CHRONORAG_LIGHT=1
 
-python -m cli.chronorag_cli ingest data/sample/docs
+python -m cli.chronorag_cli ingest \
+  data/sample/docs/aihistory1.txt \
+  data/sample/docs/aihistory2.txt \
+  data/sample/docs/aihistory3.txt
 
 python -m cli.chronorag_cli answer \
   --query "Europe GDP per capita in 1870 (1990 intl$)" \
@@ -62,14 +65,21 @@ cli-ingest.png
 cli-answer.png
 attribution-card.png
 controller-stats.png
-evidence-only-fallback.png
 ```
 
 ## Demo Transcript Template
 
 ```text
-$ python -m cli.chronorag_cli ingest data/sample/docs
-Ingested: <N> chunks
+$ python -m cli.chronorag_cli ingest data/sample/docs/aihistory1.txt data/sample/docs/aihistory2.txt data/sample/docs/aihistory3.txt
+{
+  "ingested_chunks": 24052,
+  "source_files": [
+    "data/sample/docs/aihistory1.txt",
+    "data/sample/docs/aihistory2.txt",
+    "data/sample/docs/aihistory3.txt"
+  ],
+  "chunk_ids": ["..."]
+}
 
 $ python -m cli.chronorag_cli answer --query "Europe GDP per capita in 1870 (1990 intl$)" --mode INTELLIGENT --axis valid
 {
@@ -99,7 +109,9 @@ $ python -m cli.chronorag_cli answer --query "Europe GDP per capita in 1870 (199
 
 ## Evidence-Only Fallback Demo
 
-Add one test case where retrieved evidence conflicts or falls outside the requested window.
+Not committed yet as a separate screenshot. The current public demo assets focus on the
+verified light-mode smoke path: health check, ingest, answer, attribution card, and
+controller stats.
 
 Expected behavior:
 
