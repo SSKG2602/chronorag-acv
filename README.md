@@ -1,155 +1,280 @@
-# TimeGuard ChronoRAG
+# ChronoRAG
 
-TimeGuard ChronoRAG is a research-grade retrieval-augmented generation (RAG)
-stack designed for time-sensitive knowledge bases. The scaffold emphasizes
-deterministic temporality, auditable provenance, and modular experimentation
-with retrieval and large language models (LLMs). ChronoGuard policies enforce
-temporal compliance from ingest through answer synthesis, enabling analysts to
-trace every statement back to overlapping validity windows.
+Temporal retrieval-augmented generation for questions where **when** a source was valid is as important as **what** the source says.
 
-## Architecture Overview
+ChronoRAG is a research-grade Python RAG scaffold for time-sensitive knowledge bases. It ingests documents with validity windows, transaction windows, provenance, authority signals, entities, regions, and units; retrieves evidence through hybrid lexical/vector search; applies temporal routing and monotone time-aware fusion; then generates an answer with attribution, conflict checks, and controller telemetry.
 
-ChronoRAG is organized as a service-oriented Python 3.11 application:
+The project is not a generic chatbot. It is a temporal reasoning layer for RAG systems that need auditable answers over changing evidence.
 
-- **API layer** (`app/`): FastAPI endpoints exposed by `uvicorn_runner`,
-  dependency-injection helpers (`deps.py`), and orchestration services.
-- **Core pipeline** (`core/`): Retrieval heuristics, fusion strategies,
-  generator utilities, and LLM backends.
-- **Storage layer** (`storage/`): Persistent vector database (PVDB) adapters,
-  Postgres/pgvector schemas, and ORM models.
-- **CLI tooling** (`cli/`): Operational workflows for ingesting corpora,
-  issuing queries, and performing smoke tests.
-- **Configuration** (`config/` + `environment.yml`): Model selection, policy
-  tuning, and environment pinning.
-- **Notebooks & scripts** (`notebooks/`, `scripts/`): Colab integration,
-  lightweight benchmarking, and developer automation.
+## Problem Statement
 
-The system operates on three pillars—**ingest**, **retrieve**, and **answer**—
-with ChronoGuard controls gating each phase.
+Standard RAG systems usually rank passages by semantic similarity. That fails when a question depends on time.
 
-## Data Flow
+Examples:
 
-1. **Ingest**  
-   Documents arrive through the CLI or API and are chunked, normalized, and
-   written to PVDB with temporal metadata (valid window, transaction window,
-   authority, units, region). Chrono fingerprints prevent drift between updates.
+- “What was Europe’s GDP per capita in 1870?”
+- “Which policy was valid during a specific period?”
+- “Which source should be trusted when two claims overlap but belong to different revisions?”
+- “Was the evidence valid at the requested time, or only published later?”
 
-2. **Retrieve**  
-   The hybrid retrieval service fans out across BM25 lexical search, ANN
-   embeddings, and temporal filters before reranking with a cross-encoder and
-   optional LLM judge. Monotone temporal fusion ensures relevance never improves
-   when time compliance worsens.
+ChronoRAG addresses this by treating time as a first-class retrieval and generation constraint. Every answer is grounded in passages with explicit temporal metadata and provenance.
 
-3. **Answer**  
-   The generator fuses ChronoPassages into a structured prompt, selects an LLM
-   backend (local Hugging Face, llama.cpp, Ollama, or OpenAI-compatible), and
-   renders an attribution card. When models fail or evidence conflicts,
-   deterministic fallbacks provide evidence-only digests.
+## Core Idea
 
-## Key Components
+ChronoRAG separates three concerns:
 
-- `app/services/ingest_service.py`  
-  Handles ingestion pipelines, chunking, and metadata enrichment. Supports
-  authoritative source tagging and Chrono fingerprinting.
+1. **Valid time** — when the claim is true in the real world.
+2. **Transaction time** — when the system observed or stored the claim.
+3. **Answer time** — the time window requested by the user.
 
-- `app/services/retrieve_service.py`  
-  Orchestrates hybrid retrieval with domain-aware weight profiles, time
-  filtering, and ranking via cross-encoder/LLM judge. Emits observability
-  metadata (coverage, fan-out, hop execution count).
+The system retrieves and ranks evidence using these temporal dimensions instead of relying only on embedding similarity.
 
-- `app/services/answer_service.py`  
-  Runs ChronoGuard controller planning, conflict detection, and answer
-  generation. Tracks planned vs. executed hops, ChronoSanity degradation, and
-  attribution assembly.
+## Architecture
 
-- `core/generator/*`  
-  Provides prompts, backend loaders, and structured fallbacks. Supports remote
-  Hugging Face models, 4-bit loading hints, and deterministic generation with
-  stop tokens.
+```mermaid
+flowchart TD
+    A[Documents / JSONL / Text Blobs] --> B[Ingest Service]
+    B --> C[Temporal Metadata Normalization]
+    C --> D[PVDB Persistence Layer]
 
-- **Answer JSON Envelope**  
-  The generator enforces a strict JSON schema for numeric timelines and range
-  estimates: `{ "range": {low, high, most_likely, unit}, "bullets": [...] }`.
-  Validation ensures the LLM supplies plausible values, two evidence bullets
-  with year references, and 1990 international dollar units before the payload
-  is returned downstream.
+    Q[User Query + Time Hint] --> R[Temporal Router]
+    R --> S[Mode + Axis + Time Window]
 
-- `core/dhqc/*`  
-  Implements the Domain Heuristic Query Controller (DHQC) for hop planning and
-  candidate budgets based on coverage signals.
+    S --> T[Hybrid Retrieval Service]
+    D --> T
+    T --> U[BM25 Lexical Search]
+    T --> V[ANN Vector Search]
+    U --> W[Candidate Merge]
+    V --> W
+    W --> X[Temporal Filter]
+    X --> Y[Cross-Encoder / LLM Rerank]
+    Y --> Z[Monotone Temporal Fusion]
 
-- `storage/pvdb/*`  
-  Defines data access objects and models for the Postgres + pgvector backing
-  store, including entity/unit extraction and temporal filters.
+    Z --> AA[Chrono Reducer]
+    AA --> AB[ChronoSanity Conflict Detection]
+    AB --> AC{Conflict Risk}
+    AC -->|Acceptable| AD[LLM Answer Generator]
+    AC -->|High Risk| AE[Evidence-Only Degradation]
 
-## Temporal Safety & ChronoGuard
+    AD --> AF[Attribution Card]
+    AE --> AF
+    AF --> AG[Answer + Audit Trail + Controller Stats]
+```
 
-- **Temporal pre-mask** trims candidates outside the requested window before
-  reranking.
-- **Monotone temporal fusion** penalizes misaligned evidence so time-respecting
-  passages dominate the final ranking.
-- **ChronoSanity** detects overlapping claims and can degrade responses to
-  evidence-only outputs when conflicts exceed configurable thresholds.
-- **Attribution cards** embed source URIs, windows, authority scores, and
-  counterfactual timelines to explain conflicting evidence.
-- **Structured validation** rejects malformed LLM output; on failure the system
-  retries with a narrower prompt and ultimately reverts to an evidence digest.
+## Repository Layout
 
-## Model Strategy
+```text
+chronorag/
+├── app/                    # FastAPI app, routes, schemas, services, dependency wiring
+│   ├── routes/             # API endpoints for ingest, retrieve, answer, policy, incidents
+│   ├── schemas/            # Pydantic request/response contracts
+│   └── services/           # Ingest, retrieve, answer, policy, maintenance logic
+├── core/                   # Temporal reasoning, retrieval, routing, generation modules
+│   ├── dhqc/               # Domain Heuristic Query Controller
+│   ├── generator/          # Prompting, backend loading, answer generation
+│   ├── gsm/                # Grounding/source/metadata heuristics
+│   ├── retrieval/          # BM25, reranking, LLM judge hooks
+│   └── router/             # Temporal query routing
+├── storage/                # Cache, graph, and PVDB persistence layers
+│   ├── cache/              # Redis-backed freshness/cache helpers
+│   ├── graph/              # Graph-oriented storage experiments
+│   └── pvdb/               # Persistent vector DB models and DAO
+├── config/                 # Model, temporal policy, tenant, and axis configuration
+├── cli/                    # Command-line ingestion/query workflows
+├── data/                   # Sample and experimental data
+├── tests/                  # Unit, fixture, and e2e test structure
+├── notebooks/              # Research notebooks / Colab workflows
+└── scripts/                # Developer automation
+```
 
-`config/models.yaml` describes the ensemble:
+## What Works
 
-- Embeddings default to `BAAI/bge-base-en-v1.5`.
-- Reranking uses `BAAI/bge-reranker-v2-m3` with fallback cross-encoders.
-- LLM strategy prioritizes local Hugging Face models (Phi-3 Mini by default),
-  then OpenAI-compatible endpoints. Optional llama.cpp and Ollama backends are
-  autodetected when binaries/models are present.
-- Prompt limits cap per-pass passage counts and snippet sizes to keep context
-  within GPU memory constraints while preserving determinism.
+- FastAPI application scaffold with health endpoint and routed services.
+- CLI/API style flow for ingesting documents, retrieving evidence, and generating answers.
+- Structured ingestion for Maddison/OECD-style world-economy JSONL plus unstructured text fallback.
+- Temporal metadata handling through valid windows, transaction windows, entities, regions, units, provenance, authority, and facets.
+- Hybrid retrieval using BM25 lexical search plus vector retrieval.
+- Domain-aware retrieval fan-out for world-economy queries.
+- Temporal filtering before final ranking.
+- Cross-encoder reranking and optional LLM judge reranking.
+- Monotone temporal fusion, so time compliance is part of the final ranking score.
+- ChronoSanity-style conflict detection over overlapping evidence.
+- Evidence-only fallback when conflicts or weak grounding make generation unsafe.
+- Attribution cards with source windows, confidence, alternative windows, and counterfactual timelines.
+- Controller telemetry: hop plan, executed hops, latency, token counts, degradation reason, retrieval weights, and router metrics.
+- Config-driven model and policy selection through YAML files.
+- Lightweight mode for tests/smoke runs and full mode for model-backed execution.
 
-## Policy & Configuration
+## What Does Not Work Yet
 
-- `config/policy.yaml` (and related policy sets) control authority weighting,
-  ChronoSanity overlap thresholds, and domain-specific fusion parameters.
-- `config/models.yaml` toggles model backends, prompt limits, and generation
-  temperatures (default 0.0 for repeatability).
-- Environment variables:
-  - `HF_TOKEN` for gated Hugging Face downloads.
-  - `LLM_ENDPOINT` / `LLM_API_KEY` for OpenAI-compatible providers.
-  - `CHRONORAG_LIGHT` to switch between stubbed light mode and full models.
+- This is not a deployed production service.
+- No public hosted demo URL is currently documented.
+- No benchmark table is included yet.
+- No screenshots are committed yet.
+- No reproducible evaluation report is committed yet.
+- No Dockerfile or production deployment manifest is visible in the repo root.
+- Storage currently appears oriented around local persisted state and experimental PVDB abstractions, not a hardened multi-tenant Postgres/pgvector deployment.
+- Authentication, authorization, rate limiting, and tenant isolation are not yet production-grade.
+- Observability is designed conceptually through telemetry fields, but no complete OpenTelemetry dashboard/export pipeline is documented.
+- The system should not be presented as a finished commercial RAG platform. Present it as a research scaffold and temporal-RAG prototype.
 
-## Observability & Telemetry
+## Setup
 
-- `controller_stats` emitted by the API exposes hop plans (planned vs executed),
-  coverage signals, latency, token counts, and degradation reasons.
-- `audit_trail` records ChronoSanity conflict traces and policy overrides.
-- Logging surfaces backend failures, fallback activations, and prompt trimming.
+### Option 1: Python virtual environment
 
-## Extensibility Roadmap
+```bash
+git clone https://github.com/SSKG2602/chronorag.git
+cd chronorag
 
-- Swap embeddings or rerankers by editing `config/models.yaml`.
-- Add new temporal policies or domains by extending `policy_sets`.
-- Integrate additional backends (e.g., custom inference endpoints) by
-  subclassing `LLMBackend` in `core/generator/llm_loader.py`.
-- Implement multi-hop retrieval plans by re-invoking `retrieve` when
-  `hop_shortfall` is detected in controller statistics.
+python3.11 -m venv .venv
+source .venv/bin/activate
 
-## Running ChronoRAG
+pip install --upgrade pip
+pip install -r requirements.txt
+```
 
-Operational setup, environment preparation, CLI workflows, and testing commands
-are documented in [`howtorunme.md`](howtorunme.md). Refer to that guide for
-platform-specific instructions (macOS, Linux, Kaggle, Colab).
+### Option 2: Conda
 
-##Refer [`Documentation`](https://tinyurl.com/C-RAGdoc) for complete explanation
+```bash
+git clone https://github.com/SSKG2602/chronorag.git
+cd chronorag
 
-## [`Author : Shreyas Shashi Kumar Gowda`](www.linkedin.com/in/shreyasshashi)
+conda env create -f environment.yml
+conda activate chronorag
+```
 
-## Contact info :
+## Environment Variables
 
-- Connect in <a href="https://www.linkedin.com/in/shreyasshashi/" target="_blank">Linkdein</a>
-- Website : <a href="https://syperith.com" target="_blank">Syperith</a>
-- For bespoke AI systems or private coaching, reach me at coaching@syperith.com
-- Book a Clarity Call / AI Sprint: <a href="https://topmate.io/shreyasshashi" target="_blank">Topmate</a>
-- <a href="https://www.linkedin.com/company/coaching-syperith/" target="_blank">coaching.syperith</a>
+```bash
+export CHRONORAG_LIGHT=1        # 1 for lightweight smoke mode; 0 for full model execution
+export HF_TOKEN=hf_xxx          # optional, for gated Hugging Face models
+export LLM_ENDPOINT=...         # optional OpenAI-compatible endpoint
+export LLM_API_KEY=...          # optional hosted LLM key
+export REDIS_URL=...            # optional Redis cache/freshness backend
+```
 
+## Run Locally
 
+```bash
+# Start API
+python -m app.uvicorn_runner --host 0.0.0.0 --port 8000
+
+# Health check
+curl http://localhost:8000/healthz
+```
+
+## CLI Demo
+
+```bash
+# Ingest sample documents
+python -m cli.chronorag_cli ingest data/sample/docs
+
+# Ask a temporal question
+python -m cli.chronorag_cli answer \
+  --query "Europe GDP per capita in 1870 (1990 intl$)" \
+  --mode INTELLIGENT \
+  --axis valid
+
+# Clean local ingested artifacts
+python -m cli.chronorag_cli purge
+```
+
+## Expected Demo Output Shape
+
+A successful answer should return an object containing:
+
+```json
+{
+  "answer": "...",
+  "attribution_card": {
+    "mode": "INTELLIGENT",
+    "axis": "valid",
+    "sources": [],
+    "confidence": {}
+  },
+  "controller_stats": {
+    "hops_used": 1,
+    "hop_plan": {},
+    "latency_ms": 0,
+    "degraded": null,
+    "retrieval_weights": {}
+  },
+  "audit_trail": [],
+  "evidence_only": false,
+  "reason": null
+}
+```
+
+When grounding is weak or conflicts are detected, the system should degrade to an evidence-only response rather than force a confident answer.
+
+## Screenshots / Demo Assets
+
+Create this directory before the final public polish pass:
+
+```text
+assets/demo/
+├── api-health.png
+├── cli-ingest.png
+├── cli-answer.png
+├── attribution-card.png
+└── controller-stats.png
+```
+
+Minimum screenshots to commit:
+
+1. API health check.
+2. CLI ingest command.
+3. CLI temporal answer command.
+4. Rendered answer JSON showing attribution card and controller stats.
+5. One evidence-only degradation example.
+
+## Technical Limitations
+
+- Temporal extraction is partly heuristic and depends on document formatting.
+- Domain support is strongest for the world-economy/Maddison-style path; other domains need dedicated policy sets and evaluation.
+- Cross-encoder and LLM reranking can be expensive in full mode.
+- Local model execution depends on CPU/GPU memory and Hugging Face model access.
+- Current documentation does not prove benchmarked retrieval quality against a temporal QA dataset.
+- Conflict detection is only as good as the extracted windows, passage granularity, and evidence coverage.
+- Production use would require stronger persistence, migrations, background ingestion jobs, auth, monitoring, and deployment automation.
+
+## Future Research Direction
+
+1. **Temporal evaluation benchmark**
+   - Build a small temporal QA set with known valid-time and transaction-time labels.
+   - Compare vanilla RAG vs ChronoRAG on time-window correctness.
+
+2. **Temporal retrieval ablations**
+   - BM25 only vs ANN only vs hybrid.
+   - Hybrid retrieval with and without temporal pre-mask.
+   - Monotone temporal fusion vs ordinary rerank score.
+
+3. **ChronoSanity reliability study**
+   - Measure false positives and false negatives for conflict detection.
+   - Evaluate when evidence-only degradation improves answer trust.
+
+4. **Policy-set expansion**
+   - Add domains beyond world economy: regulations, company filings, research papers, medical guidelines, and financial reports.
+
+5. **Production storage path**
+   - Move from local persisted state to Postgres + pgvector with migrations, tenant boundaries, and indexed temporal filters.
+
+6. **Observability layer**
+   - Export controller stats, degradation reasons, latency, token counts, and retrieval coverage to dashboards.
+
+7. **Human-readable temporal audit cards**
+   - Make the attribution card usable by analysts, not only developers.
+
+## Positioning
+
+ChronoRAG is best presented as:
+
+> A temporal RAG research system that makes validity windows, source revision time, and evidence conflict handling explicit in retrieval and answer generation.
+
+Do not position it as:
+
+> A complete enterprise RAG platform.
+
+## License
+
+Apache-2.0.

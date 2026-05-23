@@ -1,0 +1,27 @@
+flowchart TD
+    A[Documents / JSONL / Text Blobs] --> B[Ingest Service]
+    B --> C[Temporal Metadata Normalization]
+    C --> D[PVDB Persistence Layer]
+
+    Q[User Query + Time Hint] --> R[Temporal Router]
+    R --> S[Mode + Axis + Time Window]
+
+    S --> T[Hybrid Retrieval Service]
+    D --> T
+    T --> U[BM25 Lexical Search]
+    T --> V[ANN Vector Search]
+    U --> W[Candidate Merge]
+    V --> W
+    W --> X[Temporal Filter]
+    X --> Y[Cross-Encoder / LLM Rerank]
+    Y --> Z[Monotone Temporal Fusion]
+
+    Z --> AA[Chrono Reducer]
+    AA --> AB[ChronoSanity Conflict Detection]
+    AB --> AC{Conflict Risk}
+    AC -->|Acceptable| AD[LLM Answer Generator]
+    AC -->|High Risk| AE[Evidence-Only Degradation]
+
+    AD --> AF[Attribution Card]
+    AE --> AF
+    AF --> AG[Answer + Audit Trail + Controller Stats]
