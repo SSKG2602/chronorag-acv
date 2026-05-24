@@ -1,0 +1,79 @@
+name: ChronoRAG CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  light-mode-checks:
+    runs-on: ubuntu-latest
+
+    env:
+      CHRONORAG_LIGHT: "1"
+      PYTHONPATH: ${{ github.workspace }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential curl
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -s requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+          pip install pytest fastapi uvicorn pydantic pyyaml httpx numpy scikit-learn rank-bm25
+
+      - name: Compile core files
+        run: |
+          python -m py_compile core/generator/generate.py
+          python -m py_compile scripts/render_demo_assets.py
+          python -m py_compile benchmarks/run_ablation.py
+
+      - name: Run tests
+        run: |
+          pytest -q
+
+      - name: Run light-mode ingest smoke test
+        run: |
+          python -m cli.chronorag_cli ingest \
+            data/sample/docs/aihistory1.txt \
+            data/sample/docs/aihistory2.txt \
+            data/sample/docs/aihistory3.txt
+
+      - name: Run retrieval ablation smoke test
+        run: |
+          python -m benchmarks.run_ablation \
+            --cases benchmarks/temporal_qa_sample.jsonl \
+            --top-k 5 \
+            --candidate-k 150 \
+            --out benchmarks/results/ci_ablation_results.json
+
+      - name: Run API health smoke test
+        run: |
+          python -m app.uvicorn_runner &
+          SERVER_PID=$!
+
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:8000/healthz; then
+              echo
+              kill $SERVER_PID
+              exit 0
+            fi
+            sleep 1
+          done
+
+          kill $SERVER_PID
+          exit 1
