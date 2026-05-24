@@ -11,14 +11,18 @@ presented as a temporal-RAG research scaffold, not as a production service.
 - README now includes an honest "what works / what does not work" section.
 - Demo screenshots exist in `assets/demo/`.
 - `howtorunme.md` run commands have been corrected.
-- Demo ingest commands use explicit sample files:
-  `data/sample/docs/aihistory1.txt`, `aihistory2.txt`, and `aihistory3.txt`.
+- Demo ingest commands use the small smoke dataset by default:
+  `data/sample/smoke/*`. The larger `data/sample/docs/aihistory*.txt` files
+  are optional full-demo inputs.
 - The API quickstart uses the actual runner command:
   `python -m app.uvicorn_runner`.
 - Light mode avoids heavyweight LLM loading and returns a deterministic evidence
   digest for smoke demos.
 - The verified demo path includes API health, CLI ingest, CLI answer,
   attribution card, and controller stats.
+- Temporal Contextual Chunking is documented as ChronoRAG's intended chunking
+  strategy for separating raw evidence from retrieval context and temporal
+  metadata.
 
 ## Remaining Gaps
 
@@ -27,6 +31,7 @@ presented as a temporal-RAG research scaffold, not as a production service.
 - No production deployment layer, migration path, or external observability stack
   is committed yet.
 - No public hosted demo URL is documented.
+- Temporal Contextual Chunking is not fully implemented or evaluated yet.
 - The CLI output is verbose for large ingests and should eventually support a
   concise demo mode.
 - The light-mode answer screenshot is a smoke-mode evidence digest, not a

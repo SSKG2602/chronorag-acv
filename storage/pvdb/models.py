@@ -47,6 +47,10 @@ class ChunkRecord:
     authority: float
     valid_window: TimeWindow
     tx_window: Optional[TimeWindow]
+    raw_text: Optional[str] = None
+    retrieval_text: Optional[str] = None
+    global_context: Dict[str, Any] = field(default_factory=dict)
+    temporal_metadata: Dict[str, Any] = field(default_factory=dict)
     external_id: Optional[str] = None
     version_id: Optional[str] = None
     facets: Dict[str, str] = field(default_factory=dict)
@@ -63,6 +67,10 @@ class ChunkRecord:
             "chunk_id": self.chunk_id,
             "doc_id": self.doc_id,
             "text": self.text,
+            "raw_text": self.raw_text,
+            "retrieval_text": self.retrieval_text,
+            "global_context": self.global_context,
+            "temporal_metadata": self.temporal_metadata,
             "uri": self.uri,
             "authority": self.authority,
             "valid_window": {
@@ -92,10 +100,13 @@ class ChunkRecord:
     @classmethod
     def from_dict(cls, payload: Dict[str, Any]) -> "ChunkRecord":
         tx_payload = payload.get("tx_window")
+        text = payload["text"]
+        raw_text = payload.get("raw_text") or text
+        retrieval_text = payload.get("retrieval_text") or text
         return cls(
             chunk_id=payload["chunk_id"],
             doc_id=payload["doc_id"],
-            text=payload["text"],
+            text=raw_text,
             uri=payload["uri"],
             authority=payload["authority"],
             valid_window=TimeWindow(
@@ -108,6 +119,10 @@ class ChunkRecord:
             )
             if tx_payload
             else None,
+            raw_text=raw_text,
+            retrieval_text=retrieval_text,
+            global_context=payload.get("global_context", {}),
+            temporal_metadata=payload.get("temporal_metadata", {}),
             external_id=payload.get("external_id"),
             version_id=payload.get("version_id"),
             facets=payload.get("facets", {}),

@@ -39,6 +39,7 @@ jobs:
       - name: Compile core files
         run: |
           python -m py_compile core/generator/generate.py
+          python -m py_compile core/ingestion/temporal_contextual_chunker.py
           python -m py_compile scripts/render_demo_assets.py
           python -m py_compile benchmarks/run_ablation.py
 
@@ -48,17 +49,14 @@ jobs:
 
       - name: Run light-mode ingest smoke test
         run: |
-          python -m cli.chronorag_cli ingest \
-            data/sample/docs/aihistory1.txt \
-            data/sample/docs/aihistory2.txt \
-            data/sample/docs/aihistory3.txt
+          python -m cli.chronorag_cli ingest data/sample/smoke/*
 
       - name: Run retrieval ablation smoke test
         run: |
           python -m benchmarks.run_ablation \
-            --cases benchmarks/temporal_qa_sample.jsonl \
+            --cases benchmarks/temporal_qa_15.jsonl \
             --top-k 5 \
-            --candidate-k 150 \
+            --candidate-k 50 \
             --out benchmarks/results/ci_ablation_results.json
 
       - name: Run API health smoke test

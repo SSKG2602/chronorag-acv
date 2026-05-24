@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import hashlib
+import logging
+import os
 from dataclasses import dataclass
 from typing import Dict, Iterable, List, Tuple
 
@@ -10,8 +12,10 @@ import numpy as np
 
 from app.light_mode import light_mode_enabled
 
+logger = logging.getLogger(__name__)
 
-def _hash_embedding(text: str, dim: int = 16) -> np.ndarray:
+
+def _hash_embedding(text: str, dim: int) -> np.ndarray:
     """Return a deterministic pseudo-embedding for light-mode/integration tests."""
     digest = hashlib.sha256(text.encode("utf-8")).digest()
     seed = int.from_bytes(digest[:8], "big", signed=False)
@@ -22,8 +26,9 @@ def _hash_embedding(text: str, dim: int = 16) -> np.ndarray:
 
 
 class EmbeddingEncoder:
-    def __init__(self, name: str = "bge-base-en-v1.5"):
+    def __init__(self, name: str = "bge-small-en-v1.5", dim: int = 384):
         self.name = name
+        self.dim = dim
         self._model = None
 
     def _ensure_model(self) -> None:
@@ -35,12 +40,17 @@ class EmbeddingEncoder:
         from sentence_transformers import SentenceTransformer  # noqa: WPS433
 
         self._model = SentenceTransformer(self.name)
+        if os.getenv("CHRONORAG_EMBED_FP16", "").strip().lower() in ("1", "true", "yes"):
+            try:
+                self._model.half()
+            except Exception as exc:  # pragma: no cover - depends on local model backend
+                logger.warning("CHRONORAG_EMBED_FP16 requested but half precision failed: %s", exc)
 
     def encode(self, texts: List[str]) -> np.ndarray:
         """Encode text strings into L2-normalised vectors."""
         self._ensure_model()
         if self._model == "_stub_":
-            vectors = [_hash_embedding(text) for text in texts]
+            vectors = [_hash_embedding(text, self.dim) for text in texts]
             return np.stack(vectors, axis=0)
         return np.asarray(
             self._model.encode(texts, normalize_embeddings=True, show_progress_bar=False),
@@ -57,8 +67,8 @@ class ANNEntry:
 
 
 class InMemoryANNIndex:
-    def __init__(self, model_name: str):
-        self.encoder = EmbeddingEncoder(model_name)
+    def __init__(self, model_name: str, dim: int = 384):
+        self.encoder = EmbeddingEncoder(model_name, dim=dim)
         self.entries: Dict[str, ANNEntry] = {}
 
     def add(self, chunk_id: str, text: str, metadata: Dict) -> np.ndarray:

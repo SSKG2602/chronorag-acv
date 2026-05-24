@@ -28,6 +28,8 @@ class ChronoPassage:
     entities: List[str]
     units: List[str]
     region: Optional[str] = None
+    global_context: Optional[Dict] = None
+    temporal_metadata: Optional[Dict] = None
 
 
 def reduce_passages(passages: Iterable[ChronoPassage]) -> List[ChronoPassage]:
@@ -38,7 +40,7 @@ def reduce_passages(passages: Iterable[ChronoPassage]) -> List[ChronoPassage]:
         current = bucket.get(key)
         if current is None or passage.authority > current.authority or passage.score > current.score:
             bucket[key] = passage
-    ordered = sorted(bucket.values(), key=lambda p: (p.valid_window.start, -p.authority, -p.score))
+    ordered = sorted(bucket.values(), key=lambda p: (-p.score, p.valid_window.start, -p.authority))
     return ordered
 
 

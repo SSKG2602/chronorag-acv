@@ -79,6 +79,8 @@ def answer(query: str, time_hint: Dict | None, requested_mode: str, requested_ax
             entities=item.get("entities", []),
             units=item.get("units_detected", []),
             region=item.get("region"),
+            global_context=item.get("global_context", {}),
+            temporal_metadata=item.get("temporal_metadata", {}),
         )
         for item in results
     ]
@@ -141,6 +143,11 @@ def answer(query: str, time_hint: Dict | None, requested_mode: str, requested_ax
         audit_trail.append(conflict_event)
 
     generated_text, tokens_out = generate_answer(query, mode, axis, window, reduced, models_cfg, domain, window_kind)
+    generated_is_fallback = (
+        generated_text.startswith("ChronoGuard fallback mode")
+        or generated_text.startswith("No direct in-window evidence found")
+        or "Provider debug:" in generated_text
+    )
 
     confidence = {
         "level": "HIGH" if reduced else "LOW",
@@ -178,8 +185,8 @@ def answer(query: str, time_hint: Dict | None, requested_mode: str, requested_ax
         "attribution_card": card,
         "controller_stats": controller_stats,
         "audit_trail": audit_trail,
-        "evidence_only": False,
-        "reason": None,
+        "evidence_only": generated_is_fallback,
+        "reason": "PROVIDER_OR_LLM_FALLBACK" if generated_is_fallback else None,
     }
 
 

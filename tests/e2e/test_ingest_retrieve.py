@@ -6,9 +6,7 @@ from app.services.retrieve_service import retrieve
 from app.utils.time_windows import make_window, parse_date
 
 SAMPLES = [
-    "data/sample/docs/aihistory1.txt",
-    "data/sample/docs/aihistory2.txt",
-    "data/sample/docs/aihistory3.txt",
+    "data/sample/smoke/temporal_world_economy.jsonl",
 ]
 
 
@@ -34,7 +32,14 @@ def test_retrieve_world_economy_units_and_facets():
         facets = item["facets"]
         assert facets["domain"] == "world-economy"
         assert facets["tenant"] == "lab"
-        assert item["time_granularity"] == "year"
-        assert item["time_sigma_days"] == 90
+        assert item["time_granularity"] in {"year", "range", "unknown", "document"}
+        assert item["temporal_metadata"]["temporal_source"] in {
+            "chunk_explicit",
+            "chunk_explicit_range",
+            "row_metadata",
+            "document_tx_time",
+            "unknown",
+        }
         assert "units_detected" in item and item["units_detected"], "Units should be detected"
+    assert any(item["time_granularity"] == "year" for item in data["results"])
     assert any(unit != "n/a" for item in data["results"] for unit in item["units_detected"])

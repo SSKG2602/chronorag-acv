@@ -18,7 +18,11 @@ class PVDB:
     def __init__(self, model_cfg: Dict, persist_path: Optional[Path] = None):
         self.documents: Dict[str, DocumentRecord] = {}
         self.chunks: Dict[str, ChunkRecord] = {}
-        self.ann = InMemoryANNIndex(model_cfg["embeddings"]["name"])
+        embeddings_cfg = model_cfg.get("embeddings", {})
+        self.ann = InMemoryANNIndex(
+            embeddings_cfg.get("name", "BAAI/bge-small-en-v1.5"),
+            dim=int(embeddings_cfg.get("dim", 384)),
+        )
         self.external_index: Dict[str, str] = {}
         self._dirty: bool = False
         self.persist_path = persist_path
@@ -62,12 +66,18 @@ class PVDB:
         units: Optional[List[str]] = None,
         time_granularity: Optional[str] = None,
         time_sigma_days: Optional[int] = None,
+        raw_text: Optional[str] = None,
+        retrieval_text: Optional[str] = None,
+        global_context: Optional[Dict[str, Any]] = None,
+        temporal_metadata: Optional[Dict[str, Any]] = None,
     ) -> ChunkRecord:
         """Store a new chunk, assign ANN embedding, and maintain external-id lineage."""
+        raw_text = raw_text if raw_text is not None else text
+        retrieval_text = retrieval_text if retrieval_text is not None else text
         doc_key = doc_id or uuid.uuid4().hex
         document = self.documents.get(doc_key)
         if document is None:
-            document = DocumentRecord(doc_id=doc_key, source_path=uri, text=text, metadata={})
+            document = DocumentRecord(doc_id=doc_key, source_path=uri, text=raw_text, metadata={})
             self.documents[doc_key] = document
         if metadata:
             document.metadata.update(metadata)
@@ -76,7 +86,7 @@ class PVDB:
         chunk_id = uuid.uuid4().hex
         vector = self.ann.add(
             chunk_id,
-            text,
+            retrieval_text,
             {
                 "doc_id": doc_key,
                 "uri": uri,
@@ -104,11 +114,15 @@ class PVDB:
         payload = ChunkRecord(
             chunk_id=chunk_id,
             doc_id=doc_key,
-            text=text,
+            text=raw_text,
             uri=uri,
             authority=authority,
             valid_window=valid_window,
             tx_window=tx_window,
+            raw_text=raw_text,
+            retrieval_text=retrieval_text,
+            global_context=dict(global_context or {}),
+            temporal_metadata=dict(temporal_metadata or {}),
             external_id=external_id,
             version_id=version_id,
             facets=dict(facets or {}),
@@ -155,11 +169,12 @@ class PVDB:
         for chunk in chunks:
             if mode == "HARD":
                 if hard_mode_pre_mask(chunk.valid_window, query_window):
-                    filtered.append((chunk, 1.0))
+                    filtered.append((chunk, _temporal_quality_weight(chunk, query_window)))
             else:
                 weight = intelligent_decay(chunk.valid_window, query_window)
-                if weight > 0:
-                    filtered.append((chunk, weight))
+                quality = _temporal_quality_weight(chunk, query_window)
+                if quality > 0:
+                    filtered.append((chunk, min(1.0, weight * quality)))
         return filtered
 
     # persistence helpers
@@ -197,7 +212,7 @@ class PVDB:
             chunks[chunk.chunk_id] = chunk
             vector = self.ann.add(
                 chunk.chunk_id,
-                chunk.text,
+                chunk.retrieval_text or chunk.text,
                 {
                     "doc_id": chunk.doc_id,
                     "uri": chunk.uri,
@@ -210,3 +225,35 @@ class PVDB:
         self.chunks = chunks
         self.external_index = payload.get("external_index", {})
         self._dirty = False
+
+
+def _temporal_quality_weight(chunk: ChunkRecord, query_window: TimeWindow) -> float:
+    """Prefer precise valid-time evidence while keeping weak unknown chunks searchable."""
+    temporal = chunk.temporal_metadata or {}
+    source = temporal.get("temporal_source")
+    confidence = float(temporal.get("temporal_confidence") or 0.0)
+    granularity = temporal.get("granularity") or chunk.time_granularity
+    ambiguity = bool(temporal.get("temporal_ambiguity"))
+
+    if source == "unknown":
+        # Unknown-time evidence can help non-temporal/background queries, but it
+        # should not dominate a valid-time question.
+        return 0.10
+    if source == "document_tx_time":
+        # Publication/import time is transaction time, not claim-valid time.
+        return 0.12
+    if not chunk.valid_window.intersects(query_window):
+        return 0.0
+
+    if granularity == "year" and source in {"chunk_explicit", "row_metadata"}:
+        base = 0.95
+    elif granularity == "range" or source in {"section_range", "chunk_explicit_range"}:
+        base = 0.45
+    else:
+        base = 0.60
+
+    if ambiguity:
+        base *= 0.55
+    if confidence:
+        base = (base + confidence) / 2.0
+    return max(0.05, min(1.0, base))

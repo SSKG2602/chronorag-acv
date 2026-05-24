@@ -3,7 +3,7 @@
 ChronoRAG is organized around one core pipeline:
 
 ```text
-ingest -> normalize temporal metadata -> persist -> route query -> retrieve -> rerank -> temporal fusion -> reduce evidence -> detect conflicts -> answer or degrade
+ingest -> Temporal Contextual Chunking -> PVDB/BM25/vector index -> route query -> retrieve -> temporal filter -> temporal fusion -> ChronoSanity -> attribution/answer
 ```
 
 ## Main Layers
@@ -24,7 +24,7 @@ The service layer contains the project’s main behavioral logic.
 
 | Service | Responsibility |
 |---|---|
-| `ingest_service.py` | Loads JSONL/text, derives metadata, writes chunks into PVDB. |
+| `ingest_service.py` | Loads JSONL/text, derives metadata, and is the planned home for Temporal Contextual Chunking before writing chunks into PVDB. |
 | `retrieve_service.py` | Runs hybrid retrieval, temporal filtering, reranking, and fusion. |
 | `answer_service.py` | Orchestrates routing, retrieval, conflict detection, generation, and fallback. |
 | `policy_service.py` | Handles runtime policy configuration. |
@@ -53,6 +53,24 @@ Storage currently supports local/research persistence and cache-oriented helpers
 | `storage/graph/` | Graph-oriented storage experiments. |
 
 ## Temporal Concepts
+
+### Temporal Contextual Chunking
+
+Temporal Contextual Chunking is ChronoRAG's chunking strategy. It is inspired by
+contextual retrieval, but extends that idea for valid-time retrieval,
+transaction-time tracking, temporal fusion, ChronoSanity, and attribution.
+
+Each chunk should keep unchanged `raw_text` for attribution and answer grounding
+while using a separate `retrieval_text` for BM25/vector indexing. The retrieval
+text can include short global context such as document title, section, unit,
+entity, region, and temporal scope. Temporal metadata should record valid time,
+transaction time, granularity, source of the time signal, confidence, and
+ambiguity.
+
+The key rule is that context must never overwrite raw evidence. Publication time
+belongs to transaction time unless the source explicitly supports it as
+claim-valid time. Broad windows are useful background, but exact-year chunks
+should rank higher for exact-year queries when evidence quality is comparable.
 
 ### Valid Time
 
@@ -87,6 +105,7 @@ The strictness level for temporal matching.
 ```mermaid
 sequenceDiagram
     participant U as User / CLI / API
+    participant Chunker as Temporal Contextual Chunker
     participant Router as Temporal Router
     participant PVDB as PVDB
     participant Retriever as Retrieve Service
@@ -94,9 +113,11 @@ sequenceDiagram
     participant Reducer as Chrono Reducer
     participant Generator as Answer Generator
 
+    U->>Chunker: ingest documents / JSONL / text
+    Chunker->>PVDB: raw_text + retrieval_text + temporal metadata
     U->>Router: query + time hint
     Router->>Retriever: mode + axis + window + domain
-    Retriever->>PVDB: list chunks + ANN search
+    Retriever->>PVDB: BM25/vector candidates from retrieval_text
     Retriever->>Retriever: BM25 search
     Retriever->>Retriever: candidate merge
     Retriever->>Retriever: temporal filter
@@ -115,6 +136,7 @@ sequenceDiagram
 ## Design Strengths
 
 - Temporal information is enforced before final ranking, not added only after answer generation.
+- Chunk records are designed to separate raw evidence from retrieval context.
 - Retrieval uses lexical and vector channels instead of only embeddings.
 - Ranking includes authority, temporal alignment, age penalty, and unit/domain biases.
 - The answer path includes conflict detection and degradation logic.
@@ -125,5 +147,7 @@ sequenceDiagram
 - No production deployment layer yet.
 - No hardened database migration path yet.
 - No benchmark suite proving temporal QA gains yet.
+- Temporal Contextual Chunking is documented as an architecture layer, but still
+  needs full implementation and ablation.
 - No UI/demo surface yet.
 - No external observability stack yet.

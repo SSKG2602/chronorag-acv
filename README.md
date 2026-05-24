@@ -34,14 +34,15 @@ The system retrieves and ranks evidence using these temporal dimensions instead 
 ```mermaid
 flowchart TD
     A[Documents / JSONL / Text Blobs] --> B[Ingest Service]
-    B --> C[Temporal Metadata Normalization]
-    C --> D[PVDB Persistence Layer]
+    B --> C[Temporal Contextual Chunking]
+    C --> D[Temporal Metadata Normalization]
+    D --> E[PVDB / BM25 / Vector Index]
 
     Q[User Query + Time Hint] --> R[Temporal Router]
     R --> S[Mode + Axis + Time Window]
 
     S --> T[Hybrid Retrieval Service]
-    D --> T
+    E --> T
     T --> U[BM25 Lexical Search]
     T --> V[ANN Vector Search]
     U --> W[Candidate Merge]
@@ -93,6 +94,7 @@ chronorag/
 - CLI/API style flow for ingesting documents, retrieving evidence, and generating answers.
 - Structured ingestion for Maddison/OECD-style world-economy JSONL plus unstructured text fallback.
 - Temporal metadata handling through valid windows, transaction windows, entities, regions, units, provenance, authority, and facets.
+- Temporal Contextual Chunking architecture: raw evidence stays unchanged while retrieval text receives short document, section, unit, entity, region, and temporal context.
 - Hybrid retrieval using BM25 lexical search plus vector retrieval.
 - Domain-aware retrieval fan-out for world-economy queries.
 - Temporal filtering before final ranking.
@@ -147,11 +149,78 @@ conda activate chronorag
 
 ```bash
 export CHRONORAG_LIGHT=1        # 1 for lightweight smoke mode; 0 for full model execution
+export CHRONORAG_PROVIDER=vertex # optional provider when CHRONORAG_LIGHT=0
+export GOOGLE_CLOUD_PROJECT=ginkgo-2026
+export GOOGLE_CLOUD_LOCATION=us-central1
+export VERTEX_MODEL_ID=gemini-2.5-flash
+export CHRONORAG_EMBED_FP16=0   # optional experimental local embedding fp16 mode
 export HF_TOKEN=hf_xxx          # optional, for gated Hugging Face models
 export LLM_ENDPOINT=...         # optional OpenAI-compatible endpoint
 export LLM_API_KEY=...          # optional hosted LLM key
 export REDIS_URL=...            # optional Redis cache/freshness backend
 ```
+
+## Optional Vertex AI Provider Mode
+
+Light mode is the default reproducible path:
+
+```bash
+export CHRONORAG_LIGHT=1
+```
+
+Provider mode is optional and runs only after retrieval has selected evidence:
+
+```bash
+pip install -r requirements-provider.txt
+
+gcloud auth application-default login
+gcloud config set project ginkgo-2026
+gcloud services enable aiplatform.googleapis.com
+
+export CHRONORAG_LIGHT=0
+export CHRONORAG_PROVIDER=vertex
+export GOOGLE_CLOUD_PROJECT=ginkgo-2026
+export GOOGLE_CLOUD_LOCATION=us-central1
+export VERTEX_MODEL_ID=gemini-2.5-flash
+python -m benchmarks.run_provider_smoke
+```
+
+Vertex mode uses Application Default Credentials through Google Cloud Vertex AI,
+not a Gemini Developer API key. If the SDK, credentials, quota, project, or model
+call fails, ChronoRAG returns the deterministic evidence digest with a provider
+debug note instead of crashing. See `docs/PROVIDER_MODE.md`.
+
+Provider mode only moves answer synthesis to remote Gemini/Vertex. Local
+retrieval still uses a local embedding model. The default embedding model is
+`BAAI/bge-small-en-v1.5` with 384 dimensions for laptop-friendly runs. If you
+change embedding model or dimension, purge and reingest before querying because
+old vectors are incompatible with the new dimension:
+
+```bash
+python -m cli.chronorag_cli purge
+python -m cli.chronorag_cli ingest data/sample/smoke/*
+```
+
+Experimental lower-memory embedding mode:
+
+```bash
+export CHRONORAG_EMBED_FP16=1
+```
+
+This attempts to convert the local SentenceTransformer embedding model to half
+precision. If conversion fails, ChronoRAG logs a warning and continues in normal
+precision.
+
+## Temporal Contextual Chunking
+
+Temporal Contextual Chunking is ChronoRAG's chunking strategy, inspired by
+contextual retrieval but extended for valid-time retrieval, transaction-time
+tracking, temporal fusion, ChronoSanity, and attribution. Each chunk keeps
+unchanged `raw_text` for grounding while using a separate `retrieval_text` with
+short document, section, unit, entity/region, and temporal context for indexing.
+This matters because exact-year evidence should outrank broad document windows,
+and publication time must not be confused with claim-valid time. See
+`docs/TEMPORAL_CONTEXTUAL_CHUNKING.md`.
 
 ## Run Locally
 
@@ -167,20 +236,20 @@ curl http://localhost:8000/healthz
 
 ```bash
 # Ingest sample documents
-python -m cli.chronorag_cli ingest \
-  data/sample/docs/aihistory1.txt \
-  data/sample/docs/aihistory2.txt \
-  data/sample/docs/aihistory3.txt
+python -m cli.chronorag_cli ingest data/sample/smoke/*
 
 # Ask a temporal question
 python -m cli.chronorag_cli answer \
-  --query "Europe GDP per capita in 1870 (1990 intl$)" \
+  --query "Western Europe GDP per capita in 1870 1990 international dollars" \
   --mode INTELLIGENT \
   --axis valid
 
 # Clean local ingested artifacts
 python -m cli.chronorag_cli purge
 ```
+
+The larger `data/sample/docs/aihistory*.txt` files are optional full-demo inputs.
+Use `data/sample/smoke/*` for CI and laptop-safe validation.
 
 ## Expected Demo Output Shape
 
@@ -231,38 +300,50 @@ Minimum screenshots to commit:
 4. Rendered answer JSON showing attribution card and controller stats.
 5. One evidence-only degradation example.
 
-## Temporal Retrieval Ablation
+## Internal Smoke Benchmark
 
-This small ablation isolates retrieval-stage behavior in light mode. The goal is
-not to evaluate LLM writing quality, but to test whether each retrieval
-configuration returns evidence with the expected valid-time window, source, unit,
-and temporal text signal.
-
-The result shows that ordinary keyword/vector retrieval can find relevant GDP
-evidence, but fails the temporal-window constraint. Adding ChronoRAG's temporal
-filter and temporal fusion raises Window Hit@5 from 0.00 to 1.00 on the sample
-cases.
-
-These numbers are from a deliberately small 3-query sanity benchmark, not a full
-external benchmark. They validate component behavior rather than
-state-of-the-art performance.
-
-| Method | Window Hit@5 | Source Hit@5 | Unit Hit@5 | Text Hit@5 | Latency ms |
-|---|---:|---:|---:|---:|---:|
-| BM25 only | 0.00 | 1.00 | 1.00 | 1.00 | 163.7 |
-| Vector only | 0.00 | 1.00 | 0.67 | 0.00 | 240.2 |
-| Hybrid without temporal filter | 0.00 | 1.00 | 1.00 | 0.67 | 163.2 |
-| Hybrid with temporal filter | 1.00 | 1.00 | 1.00 | 1.00 | 239.3 |
-| Hybrid + temporal fusion | 1.00 | 1.00 | 1.00 | 1.00 | 164.8 |
-| Hybrid + temporal fusion + rerank | 1.00 | 1.00 | 1.00 | 1.00 | 228.7 |
-
-Reproduce:
+`benchmarks/temporal_qa_15.jsonl` is an internal smoke benchmark. It validates
+that the light-mode pipeline runs over the small smoke dataset. It is not the
+public benchmark claim and should not be used to imply broad retrieval
+superiority.
 
 ```bash
 CHRONORAG_LIGHT=1 python -m benchmarks.run_ablation \
-  --cases benchmarks/temporal_qa_sample.jsonl \
+  --cases benchmarks/temporal_qa_15.jsonl \
   --top-k 5 \
-  --candidate-k 150
+  --candidate-k 50
+```
+
+## Controlled Hard 15-Case Benchmark
+
+The public controlled benchmark is `benchmarks/temporal_qa_hard_15.jsonl` over
+`data/sample/hard_temporal/*`. It is designed to test temporal retrieval
+behavior, not broad open-domain QA. It includes exact-year lookups, same-entity
+different-year disambiguation, broad-window distractors, conflict cases, and
+expected failure/partial-answer cases. It is not an external benchmark and not a
+SOTA claim. See `docs/BENCHMARK_HARD_15.md`.
+
+Current light-mode result:
+
+| Method | Top1 Window | Window Hit@5 | Source Hit@5 | Unit Hit@5 | Text Hit@5 | Latency ms | Eval n |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| BM25 only | 0.54 | 1.00 | 1.00 | 1.00 | 1.00 | 0.3 | 13 |
+| Vector only | 0.38 | 1.00 | 1.00 | 0.85 | 1.00 | 0.3 | 13 |
+| Hybrid without temporal filter | 0.62 | 1.00 | 1.00 | 1.00 | 1.00 | 0.3 | 13 |
+| Hybrid with temporal filter | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.3 | 13 |
+| Hybrid + temporal fusion | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.3 | 13 |
+| Hybrid + temporal fusion + rerank | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.4 | 13 |
+
+Run:
+
+```bash
+CHRONORAG_LIGHT=1 python -m cli.chronorag_cli purge
+CHRONORAG_LIGHT=1 python -m cli.chronorag_cli ingest data/sample/hard_temporal/*
+CHRONORAG_LIGHT=1 python -m benchmarks.run_ablation \
+  --cases benchmarks/temporal_qa_hard_15.jsonl \
+  --top-k 5 \
+  --candidate-k 50 \
+  --out benchmarks/results/temporal_qa_hard_15_results.json
 ```
 
 ## Technical Limitations

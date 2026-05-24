@@ -31,6 +31,7 @@ Measure the effect of each major component:
 
 | Component | Test |
 |---|---|
+| Temporal Contextual Chunking | Does raw-text plus retrieval-context indexing improve exact-window evidence quality? |
 | Temporal pre-mask | Does retrieval avoid wrong-era evidence? |
 | Monotone temporal fusion | Does ranking penalize time mismatch correctly? |
 | Authority score | Does source reliability affect final answer quality? |

@@ -16,6 +16,9 @@ ChronoRAG should be presented honestly as a temporal-RAG research scaffold, not 
 
 4. **Temporal extraction is partly heuristic**
    - Valid windows, entities, regions, and units depend on structured input quality or pattern detection.
+   - Temporal Contextual Chunking is documented as the intended ChronoRAG
+     chunking strategy, but it still needs full implementation and evaluation
+     before claiming measurable gains.
 
 5. **Storage is not production-hardened yet**
    - A robust production path needs Postgres/pgvector migrations, tenant isolation, indexing strategy, backups, and migration tests.
@@ -40,7 +43,7 @@ ChronoRAG should be presented honestly as a temporal-RAG research scaffold, not 
 Use:
 
 ```text
-Temporal RAG research scaffold with auditable evidence windows, hybrid retrieval, temporal fusion, and conflict-aware answer generation.
+Temporal RAG research scaffold with Temporal Contextual Chunking architecture, auditable evidence windows, hybrid retrieval, temporal fusion, and conflict-aware answer generation.
 ```
 
 Avoid:

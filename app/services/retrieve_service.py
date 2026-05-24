@@ -54,7 +54,7 @@ def retrieve(
     lexical_k, vector_k, rerank_limit = _hybrid_ks(inferred_domain, top_k)
 
     chunks = pvdb.list_chunks()
-    docs = [(chunk.chunk_id, chunk.text) for chunk in chunks]
+    docs = [(chunk.chunk_id, chunk.retrieval_text or chunk.text) for chunk in chunks]
     lexical = bm25_search(query, docs, top_k=lexical_k)
     vector = pvdb.ann_search(query, top_k=vector_k)
 
@@ -82,7 +82,7 @@ def retrieve(
     pre_limit_candidate_count = len(ranked_candidates)
     ranked_candidates = ranked_candidates[:rerank_limit]
 
-    texts = [data["chunk"].text for _, data in ranked_candidates]
+    texts = [data["chunk"].retrieval_text or data["chunk"].text for _, data in ranked_candidates]
     rerank_scores: Dict[str, float] = {}
     if texts:
         for idx, score in reranker.rerank(query, texts):
@@ -93,7 +93,7 @@ def retrieve(
     judge_features = [
         (
             chunk_id,
-            data["chunk"].text,
+            data["chunk"].retrieval_text or data["chunk"].text,
             rerank_scores.get(chunk_id, float(data["lexical"] + data["vector"])),
             time_weights[chunk_id],
             data["chunk"].authority,
@@ -133,12 +133,18 @@ def retrieve(
             age_penalty,
             weights_cfg,
         )
+        # Apply the temporal quality again after fusion so unknown or
+        # transaction-time-only chunks stay available but cannot dominate exact
+        # valid-time evidence on temporal queries.
+        final = final * max(0.05, min(1.0, time_weight))
         region = _extract_region(chunk.entities, chunk.facets)
         results.append(
             {
                 "chunk_id": chunk_id,
                 "doc_id": chunk.doc_id,
-                "text": chunk.text,
+                "text": chunk.raw_text or chunk.text,
+                "raw_text": chunk.raw_text or chunk.text,
+                "retrieval_text": chunk.retrieval_text or chunk.text,
                 "uri": chunk.uri,
                 "valid_window": {
                     "from": chunk.valid_window.start.isoformat(),
@@ -153,6 +159,8 @@ def retrieve(
                 "units_detected": chunk.units,
                 "time_granularity": chunk.time_granularity,
                 "time_sigma_days": chunk.time_sigma_days,
+                "temporal_metadata": chunk.temporal_metadata,
+                "global_context": chunk.global_context,
                 "region": region,
             }
         )

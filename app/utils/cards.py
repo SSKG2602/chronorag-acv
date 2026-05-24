@@ -26,6 +26,9 @@ def build_sources(passages: Iterable[ChronoPassage]) -> List[Dict]:
                 "quote": passage.text[:280],
                 "interval": window_to_payload(passage.valid_window),
                 "score": round(passage.score, 4),
+                "temporal_source": (passage.temporal_metadata or {}).get("temporal_source"),
+                "temporal_confidence": (passage.temporal_metadata or {}).get("temporal_confidence"),
+                "temporal_ambiguity": (passage.temporal_metadata or {}).get("temporal_ambiguity"),
             }
         )
     return sources

@@ -25,6 +25,10 @@ except Exception:  # pragma: no cover
 
 from app.deps import get_cache, get_policy_cfg, get_pvdb
 from app.utils.time_windows import TimeWindow, make_window, parse_date
+from core.ingestion.temporal_contextual_chunker import (
+    build_temporal_contextual_chunks,
+    temporal_metadata_to_windows,
+)
 from core.gsm.source_risk import score_source
 
 # Canonical Maddison doc identifier used for all world-economy re-ingests.
@@ -177,8 +181,6 @@ def _ingest_structured(records: List[Dict], default_uri: str, pvdb, policy: Dict
             doc_id = WORLD_ECONOMY_DOC_ID
         if isinstance(text, str):
             external_id = payload.get("external_id")
-            valid_window, time_granularity, time_sigma = _resolve_valid_window(payload, facets)
-            tx_window = _resolve_tx_window(payload.get("tx"), valid_window)
             entities = _derive_entities(payload, facets)
             units = _detect_units(text, facets)
             raw_uri = (
@@ -187,59 +189,100 @@ def _ingest_structured(records: List[Dict], default_uri: str, pvdb, policy: Dict
                 or default_uri
             )
             source = score_source(raw_uri)
-            metadata = {
-                "uri": raw_uri,
-                "external_id": external_id,
-                "status": payload.get("status"),
-                "provenance": payload.get("provenance"),
-            }
-            record = pvdb.ingest_document(
-                text=text,
-                uri=raw_uri,
-                valid_window=valid_window,
-                tx_window=tx_window,
-                authority=source["authority"],
-                metadata=metadata,
-                doc_id=doc_id,
-                external_id=external_id,
-                version_id=_extract_version_id(payload),
+            contextual_chunks = build_temporal_contextual_chunks(
+                text,
+                payload=payload,
                 facets=facets,
-                entities=entities,
-                tags=payload.get("tags"),
+                uri=raw_uri,
                 units=units,
-                time_granularity=time_granularity,
-                time_sigma_days=time_sigma,
+                entities=entities,
             )
-            ingested.append(record.chunk_id)
-            _apply_freshness_policy(policy, entities, raw_uri)
+            for idx, contextual in enumerate(contextual_chunks):
+                valid_window, tx_window = temporal_metadata_to_windows(contextual.temporal)
+                metadata = {
+                    "uri": raw_uri,
+                    "external_id": external_id,
+                    "status": payload.get("status"),
+                    "provenance": payload.get("provenance"),
+                    "raw_text": contextual.raw_text,
+                    "retrieval_text": contextual.retrieval_text,
+                    "global_context": contextual.global_context.to_dict(),
+                    "temporal_metadata": contextual.temporal.to_dict(),
+                }
+                # Split chunks inherit the upstream external id with a suffix so
+                # bitemporal lineage remains stable without collapsing claims.
+                chunk_external_id = f"{external_id}:{idx}" if external_id and len(contextual_chunks) > 1 else external_id
+                record = pvdb.ingest_document(
+                    text=contextual.raw_text,
+                    uri=raw_uri,
+                    valid_window=valid_window,
+                    tx_window=tx_window,
+                    authority=source["authority"],
+                    metadata=metadata,
+                    doc_id=doc_id,
+                    external_id=chunk_external_id,
+                    version_id=_extract_version_id(payload),
+                    facets=facets,
+                    entities=entities,
+                    tags=payload.get("tags"),
+                    units=units,
+                    time_granularity=contextual.temporal.granularity,
+                    time_sigma_days=_time_sigma_days(contextual.temporal.granularity, facets),
+                    raw_text=contextual.raw_text,
+                    retrieval_text=contextual.retrieval_text,
+                    global_context=contextual.global_context.to_dict(),
+                    temporal_metadata=contextual.temporal.to_dict(),
+                )
+                ingested.append(record.chunk_id)
+                _apply_freshness_policy(policy, entities, raw_uri)
         else:
             _handle_ledger(payload, pvdb, doc_id or WORLD_ECONOMY_DOC_ID)
     return ingested
 
 
 def _ingest_unstructured(text: str, uri: str, pvdb, policy: Dict) -> List[str]:
-    """Fallback for arbitrary text where we only have a rough valid-from signal."""
-    valid_from = parse_date(text).date().isoformat()
-    valid_window = make_window(parse_date(valid_from), parse_date("9999-12-31"))
-    tx_window = make_window(parse_date(valid_from), parse_date(valid_from) + dt.timedelta(days=1))
+    """Fallback for arbitrary text, preserving unknown time instead of inventing it."""
     source = score_source(uri)
     entities: List[str] = []
-    record = pvdb.ingest_document(
-        text=text,
-        uri=uri,
-        valid_window=valid_window,
-        tx_window=tx_window,
-        authority=source["authority"],
-        metadata={"uri": uri},
+    units = _detect_units(text, {})
+    contextual_chunks = build_temporal_contextual_chunks(
+        text,
+        payload={},
         facets={},
+        uri=uri,
+        units=units,
         entities=entities,
-        tags=None,
-        units=_detect_units(text, {}),
-        time_granularity=None,
-        time_sigma_days=None,
     )
-    _apply_freshness_policy(policy, entities, uri)
-    return [record.chunk_id]
+    ingested = []
+    for contextual in contextual_chunks:
+        valid_window, tx_window = temporal_metadata_to_windows(contextual.temporal)
+        record = pvdb.ingest_document(
+            text=contextual.raw_text,
+            uri=uri,
+            valid_window=valid_window,
+            tx_window=tx_window,
+            authority=source["authority"],
+            metadata={
+                "uri": uri,
+                "raw_text": contextual.raw_text,
+                "retrieval_text": contextual.retrieval_text,
+                "global_context": contextual.global_context.to_dict(),
+                "temporal_metadata": contextual.temporal.to_dict(),
+            },
+            facets={},
+            entities=entities,
+            tags=None,
+            units=units,
+            time_granularity=contextual.temporal.granularity,
+            time_sigma_days=None,
+            raw_text=contextual.raw_text,
+            retrieval_text=contextual.retrieval_text,
+            global_context=contextual.global_context.to_dict(),
+            temporal_metadata=contextual.temporal.to_dict(),
+        )
+        ingested.append(record.chunk_id)
+        _apply_freshness_policy(policy, entities, uri)
+    return ingested
 
 
 def _is_world_economy(payload: Dict) -> bool:
@@ -293,6 +336,14 @@ def _resolve_tx_window(tx_payload: Optional[Dict], fallback: TimeWindow) -> Opti
     start = parse_date(start_raw) if start_raw else fallback.start
     end = parse_date(end_raw) if end_raw else None
     return make_window(start, end) if end else make_window(start)
+
+
+def _time_sigma_days(granularity: str, facets: Dict[str, str]) -> Optional[int]:
+    if facets.get("domain") == "world-economy" and granularity == "year":
+        return 90
+    if granularity == "range":
+        return 365
+    return None
 
 
 def _extract_version_id(payload: Dict) -> Optional[str]:

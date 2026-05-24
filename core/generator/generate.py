@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -18,6 +19,7 @@ from app.utils.chrono_reducer import ChronoPassage
 from app.utils.time_windows import TimeWindow
 from core.generator.llm_loader import load_backend
 from core.generator.prompts import build_messages
+from core.generator.vertex_provider import generate_grounded_answer
 
 # Separator injected into the prompt; we cut any text that follows this marker.
 STOP_MARKER = "<|ATTR_CARD|>"
@@ -33,16 +35,21 @@ def _format_passage_line(idx: int, passage: ChronoPassage) -> str:
     return f"{idx}. {text} (Window: {window}; Source: {source})"
 
 
-def _fallback_response(query: str, evidence: List[ChronoPassage]) -> str:
+def _fallback_response(query: str, evidence: List[ChronoPassage], provider_note: str | None = None) -> str:
     """Return a deterministic message when no LLM backend is reachable."""
     top = evidence[0] if evidence else None
     if not top:
-        return f"No direct in-window evidence found for: {query}\n\n{STOP_MARKER}"
+        lines = [f"No direct in-window evidence found for: {query}"]
+        if provider_note:
+            lines.append(provider_note)
+        return "\n".join(lines) + f"\n\n{STOP_MARKER}"
     lines = [
         "ChronoGuard fallback mode — unable to reach the language model, supplying evidence digest.",
         f"Query: {query}",
-        "Key evidence:",
     ]
+    if provider_note:
+        lines.append(provider_note)
+    lines.append("Key evidence:")
     for idx, passage in enumerate(evidence[:5], 1):
         lines.append(_format_passage_line(idx, passage))
     lines.append("Use the cited passages to construct the final narrative.")
@@ -137,6 +144,48 @@ def _run_structured_generation(
     return payload, text, []
 
 
+def _provider_note(provider_error: str, debug: str | None = None) -> str:
+    if debug:
+        return f"Provider debug: {provider_error} ({debug})"
+    return f"Provider debug: {provider_error}"
+
+
+def _run_optional_provider(
+    provider: str,
+    query: str,
+    mode: str,
+    axis: str,
+    window: TimeWindow,
+    evidence: List[ChronoPassage],
+    domain: str,
+    window_kind: str,
+    llm_cfg: Dict[str, Any],
+) -> Tuple[Optional[str], Optional[str]]:
+    provider = provider.strip().lower()
+    if provider == "vertex":
+        vertex_cfg = llm_cfg.get("vertex", {})
+        max_tokens = vertex_cfg.get("max_output_tokens", 512)
+        if not isinstance(max_tokens, int) or max_tokens <= 0:
+            max_tokens = 512
+        result = generate_grounded_answer(
+            question=query,
+            evidence_items=evidence,
+            temporal_context={
+                "mode": mode,
+                "axis": axis,
+                "window": window,
+                "domain": domain,
+                "window_kind": window_kind,
+            },
+            max_output_tokens=max_tokens,
+        )
+        if result.ok:
+            return result.text.strip(), None
+        return None, _provider_note(result.provider_error or "Vertex provider failed.", result.debug)
+
+    return None, _provider_note(f"Unknown CHRONORAG_PROVIDER={provider!r}; using evidence-only fallback.")
+
+
 def generate_answer(
     query: str,
     mode: str,
@@ -162,6 +211,26 @@ def generate_answer(
     prompt_evidence = evidence
     if isinstance(max_passages, int) and max_passages > 0:
         prompt_evidence = evidence[:max_passages]
+
+    provider = os.getenv("CHRONORAG_PROVIDER", "").strip()
+    if provider:
+        provider_text, provider_note = _run_optional_provider(
+            provider=provider,
+            query=query,
+            mode=mode,
+            axis=axis,
+            window=window,
+            evidence=prompt_evidence,
+            domain=domain,
+            window_kind=window_kind,
+            llm_cfg=llm_cfg,
+        )
+        if provider_text:
+            token_estimate = max(1, len(provider_text.split()))
+            return provider_text, token_estimate
+        clipped = _fallback_response(query, evidence, provider_note).split(STOP_MARKER)[0].strip()
+        token_estimate = max(1, len(clipped.split()))
+        return clipped, token_estimate
 
     stop_list = [STOP_MARKER]
     max_tokens = 512

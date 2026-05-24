@@ -17,13 +17,20 @@ Europe GDP per capita in 1870 (1990 intl$)
 Expected behavior:
 
 1. Ingest sample historical/world-economy documents.
-2. Route the query into the world-economy domain.
-3. Use valid-time axis.
-4. Retrieve candidate passages through BM25 + ANN.
-5. Apply temporal filtering around 1870.
-6. Rerank candidates.
-7. Produce an answer with source attribution.
-8. Emit controller stats.
+2. Build chunk records with raw evidence, retrieval context, and temporal metadata.
+3. Route the query into the world-economy domain.
+4. Use valid-time axis.
+5. Retrieve candidate passages through BM25 + ANN.
+6. Apply temporal filtering around 1870.
+7. Rerank candidates.
+8. Produce an answer with source attribution.
+9. Emit controller stats.
+
+The intended chunking architecture is Temporal Contextual Chunking: ChronoRAG's
+chunking strategy, inspired by contextual retrieval but extended for valid-time
+retrieval, transaction-time tracking, temporal fusion, ChronoSanity, and
+attribution. Demo claims should distinguish this documented architecture from
+the current smoke path and should not claim SOTA performance.
 
 ## Commands
 
@@ -38,16 +45,16 @@ pip install -r requirements.txt
 
 export CHRONORAG_LIGHT=1
 
-python -m cli.chronorag_cli ingest \
-  data/sample/docs/aihistory1.txt \
-  data/sample/docs/aihistory2.txt \
-  data/sample/docs/aihistory3.txt
+python -m cli.chronorag_cli ingest data/sample/smoke/*
 
 python -m cli.chronorag_cli answer \
-  --query "Europe GDP per capita in 1870 (1990 intl$)" \
+  --query "Western Europe GDP per capita in 1870 1990 international dollars" \
   --mode INTELLIGENT \
   --axis valid
 ```
+
+The larger `data/sample/docs/aihistory*.txt` files are optional full-demo inputs.
+The smoke dataset is the default CI/laptop path.
 
 ## Screenshots to Capture
 
@@ -70,13 +77,11 @@ controller-stats.png
 ## Demo Transcript Template
 
 ```text
-$ python -m cli.chronorag_cli ingest data/sample/docs/aihistory1.txt data/sample/docs/aihistory2.txt data/sample/docs/aihistory3.txt
+$ python -m cli.chronorag_cli ingest data/sample/smoke/*
 {
-  "ingested_chunks": 24052,
+  "ingested_chunks": 6,
   "source_files": [
-    "data/sample/docs/aihistory1.txt",
-    "data/sample/docs/aihistory2.txt",
-    "data/sample/docs/aihistory3.txt"
+    "data/sample/smoke/temporal_world_economy.jsonl"
   ],
   "chunk_ids": ["..."]
 }

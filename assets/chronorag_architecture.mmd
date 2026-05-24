@@ -1,13 +1,14 @@
 flowchart TD
     A[Documents / JSONL / Text Blobs] --> B[Ingest Service]
-    B --> C[Temporal Metadata Normalization]
-    C --> D[PVDB Persistence Layer]
+    B --> C[Temporal Contextual Chunking]
+    C --> D[Temporal Metadata Normalization]
+    D --> E[PVDB / BM25 / Vector Index]
 
     Q[User Query + Time Hint] --> R[Temporal Router]
     R --> S[Mode + Axis + Time Window]
 
     S --> T[Hybrid Retrieval Service]
-    D --> T
+    E --> T
     T --> U[BM25 Lexical Search]
     T --> V[ANN Vector Search]
     U --> W[Candidate Merge]

@@ -42,8 +42,17 @@ def load_cases(path: Path) -> List[Dict[str, Any]]:
     return cases
 
 
+def query_text(case: Dict[str, Any]) -> str:
+    return str(case.get("query") or case.get("question"))
+
+
 def query_window(case: Dict[str, Any]) -> TimeWindow:
-    return TimeWindow(start=parse_date(case["window_start"]), end=parse_date(case["window_end"]))
+    expected = case.get("expected_valid_window") or {}
+    start = case.get("window_start") or expected.get("from") or expected.get("start")
+    end = case.get("window_end") or expected.get("to") or expected.get("end")
+    if not start or not end:
+        raise ValueError(f"Case {case.get('id')} is missing window_start/window_end or expected_valid_window")
+    return TimeWindow(start=parse_date(start), end=parse_date(end))
 
 
 def normalize_scores(items: Iterable[Tuple[str, float]]) -> Dict[str, float]:
@@ -83,7 +92,7 @@ def candidate_maps(query: str, candidate_k: int) -> Tuple[Dict[str, Any], Dict[s
     state = get_app_state()
     chunks = state.pvdb.list_chunks()
     by_id = {chunk.chunk_id: chunk for chunk in chunks}
-    docs = [(chunk.chunk_id, chunk.text) for chunk in chunks]
+    docs = [(chunk.chunk_id, chunk.retrieval_text or chunk.text) for chunk in chunks]
 
     bm25_raw = bm25_search(query, docs, top_k=candidate_k)
     vector_raw = [(chunk.chunk_id, score) for chunk, score in state.pvdb.ann_search(query, top_k=candidate_k)]
@@ -97,6 +106,7 @@ def as_result(chunk: Any, score: float, method: str, extra: Dict[str, Any] | Non
         "chunk_id": chunk.chunk_id,
         "doc_id": chunk.doc_id,
         "text": chunk.text,
+        "retrieval_text": chunk.retrieval_text or chunk.text,
         "uri": chunk.uri,
         "score": float(score),
         "valid_window": {
@@ -107,6 +117,8 @@ def as_result(chunk: Any, score: float, method: str, extra: Dict[str, Any] | Non
         "units_detected": list(chunk.units or []),
         "facets": dict(chunk.facets or {}),
         "entities": list(chunk.entities or []),
+        "temporal_metadata": dict(chunk.temporal_metadata or {}),
+        "global_context": dict(chunk.global_context or {}),
     }
     if extra:
         payload.update(extra)
@@ -211,6 +223,8 @@ def run_full_chronorag(query: str, axis: str, window: TimeWindow, top_k: int) ->
                 "units_detected": item.get("units_detected", []),
                 "facets": item.get("facets", {}),
                 "entities": item.get("entities", []),
+                "temporal_metadata": item.get("temporal_metadata", {}),
+                "global_context": item.get("global_context", {}),
                 "rerank": item.get("rerank"),
                 "time_weight": item.get("time_weight"),
             }
@@ -235,27 +249,43 @@ def contains_any(text: str, needles: List[str]) -> bool:
 def score_case(case: Dict[str, Any], results: List[Dict[str, Any]], latency_ms: float) -> Dict[str, Any]:
     expected_window = query_window(case)
     window_hit = False
+    top1_window_hit = False
     source_hit = False
     unit_hit = False
     text_hit = False
 
-    for result in results:
+    for idx, result in enumerate(results):
         candidate_window = result_window(result)
         if candidate_window and candidate_window.intersects(expected_window):
             window_hit = True
-        if case.get("expected_source_contains", "").lower() in result.get("uri", "").lower():
+            if idx == 0:
+                top1_window_hit = True
+
+        expected_source = str(case.get("expected_source") or case.get("expected_source_contains") or "").lower()
+        if expected_source and expected_source in result.get("uri", "").lower():
             source_hit = True
         text = result.get("text", "")
         units = " ".join(result.get("units_detected", []) or [])
-        if contains_any(f"{units} {text}", case.get("expected_unit_any", [])):
+        expected_units = case.get("expected_unit_signal") or case.get("expected_unit_any", [])
+        if isinstance(expected_units, str):
+            expected_units = [expected_units]
+        if contains_any(f"{units} {text}", expected_units):
             unit_hit = True
-        if contains_any(text, case.get("expected_text_any", [])):
+        expected_text = case.get("expected_text_signals") or case.get("expected_text_any", [])
+        if contains_any(text, expected_text):
             text_hit = True
 
+    expected_behavior = case.get("expected_behavior", "success")
+    retrieval_evaluable = expected_behavior != "insufficient_evidence"
     return {
         "id": case["id"],
-        "query": case["query"],
+        "query": query_text(case),
+        "expected_behavior": expected_behavior,
+        "difficulty": case.get("difficulty", "medium"),
+        "feature_tested": case.get("feature_tested", ""),
+        "retrieval_evaluable": retrieval_evaluable,
         "window_hit_at_5": 1 if window_hit else 0,
+        "top1_window_hit": 1 if top1_window_hit else 0,
         "source_hit_at_5": 1 if source_hit else 0,
         "unit_hit_at_5": 1 if unit_hit else 0,
         "text_hit_at_5": 1 if text_hit else 0,
@@ -265,7 +295,7 @@ def score_case(case: Dict[str, Any], results: List[Dict[str, Any]], latency_ms: 
 
 
 def run_method(method: str, case: Dict[str, Any], top_k: int, candidate_k: int) -> Dict[str, Any]:
-    query = case["query"]
+    query = query_text(case)
     window = query_window(case)
     started = time.perf_counter()
     if method == "BM25 only":
@@ -295,15 +325,18 @@ def summarize(details: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     rows = []
     for method in METHODS:
         method_rows = [row for row in details if row["method"] == method]
+        evaluable_rows = [row for row in method_rows if row.get("retrieval_evaluable", True)]
         rows.append(
             {
                 "method": method,
-                "window_hit_at_5": mean([row["window_hit_at_5"] for row in method_rows]),
-                "source_hit_at_5": mean([row["source_hit_at_5"] for row in method_rows]),
-                "unit_hit_at_5": mean([row["unit_hit_at_5"] for row in method_rows]),
-                "text_hit_at_5": mean([row["text_hit_at_5"] for row in method_rows]),
+                "top1_window_hit": mean([row["top1_window_hit"] for row in evaluable_rows]),
+                "window_hit_at_5": mean([row["window_hit_at_5"] for row in evaluable_rows]),
+                "source_hit_at_5": mean([row["source_hit_at_5"] for row in evaluable_rows]),
+                "unit_hit_at_5": mean([row["unit_hit_at_5"] for row in evaluable_rows]),
+                "text_hit_at_5": mean([row["text_hit_at_5"] for row in evaluable_rows]),
                 "latency_ms": mean([row["latency_ms"] for row in method_rows]),
                 "n": len(method_rows),
+                "eval_n": len(evaluable_rows),
             }
         )
     return rows
@@ -311,18 +344,49 @@ def summarize(details: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 def markdown_table(summary: List[Dict[str, Any]]) -> str:
     lines = [
-        "| Method | Window Hit@5 | Source Hit@5 | Unit Hit@5 | Text Hit@5 | Latency ms |",
-        "|---|---:|---:|---:|---:|---:|",
+        "| Method | Top1 Window | Window Hit@5 | Source Hit@5 | Unit Hit@5 | Text Hit@5 | Latency ms | Eval n |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in summary:
         lines.append(
-            "| {method} | {window:.2f} | {source:.2f} | {unit:.2f} | {text:.2f} | {latency:.1f} |".format(
+            "| {method} | {top1:.2f} | {window:.2f} | {source:.2f} | {unit:.2f} | {text:.2f} | {latency:.1f} | {eval_n} |".format(
                 method=row["method"],
+                top1=row["top1_window_hit"],
                 window=row["window_hit_at_5"],
                 source=row["source_hit_at_5"],
                 unit=row["unit_hit_at_5"],
                 text=row["text_hit_at_5"],
                 latency=row["latency_ms"],
+                eval_n=row["eval_n"],
+            )
+        )
+    return "\n".join(lines)
+
+
+def per_case_markdown(details: List[Dict[str, Any]]) -> str:
+    full_rows = [row for row in details if row["method"] == "Hybrid + temporal fusion + rerank"]
+    lines = [
+        "| Case | Behavior | Difficulty | Feature | Top1 Window | Window Hit@5 | Text Hit@5 |",
+        "|---|---|---|---|---:|---:|---:|",
+    ]
+    for row in full_rows:
+        if not row.get("retrieval_evaluable", True):
+            top1 = "n/a"
+            window = "n/a"
+            text = row["text_hit_at_5"]
+        else:
+            top1 = row["top1_window_hit"]
+            window = row["window_hit_at_5"]
+            text = row["text_hit_at_5"]
+        lines.append(
+            "| {id} | {behavior} | {difficulty} | {feature} | {top1} | {window} | {text} |".format(
+                id=row["id"],
+                behavior=row["expected_behavior"],
+                difficulty=row["difficulty"],
+                feature=row["feature_tested"],
+                top1=top1,
+                window=window,
+                text=text,
             )
         )
     return "\n".join(lines)
@@ -341,9 +405,7 @@ def main() -> None:
         raise SystemExit(
             "PVDB is empty. Run ingest first, for example:\n"
             "CHRONORAG_LIGHT=1 python -m cli.chronorag_cli ingest "
-            "data/sample/docs/aihistory1.txt "
-            "data/sample/docs/aihistory2.txt "
-            "data/sample/docs/aihistory3.txt"
+            "data/sample/smoke/*"
         )
 
     cases = load_cases(Path(args.cases))
@@ -362,7 +424,16 @@ def main() -> None:
     }
     out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     md_path = out_path.with_suffix(".md")
-    md = markdown_table(summary)
+    md = "\n\n".join(
+        [
+            "# ChronoRAG Retrieval Ablation",
+            "This is a controlled temporal retrieval benchmark. It is not an external benchmark and not a SOTA claim. Expected failure and partial-answer cases are part of the design.",
+            "## Method Summary",
+            markdown_table(summary),
+            "## Per-Case Full ChronoRAG Results",
+            per_case_markdown(details),
+        ]
+    )
     md_path.write_text(md + "\n", encoding="utf-8")
 
     print(md)
