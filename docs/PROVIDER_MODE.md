@@ -10,11 +10,11 @@ retrieval still uses the local embedding stack and therefore still needs memory
 for embedding-based retrieval.
 
 Provider answer quality depends on retrieved evidence quality. Temporal
-Contextual Chunking improves evidence precision before Gemini/Vertex synthesis
-by keeping raw evidence separate from retrieval context and by attaching
-valid-time and transaction-time metadata to each chunk. The provider is not used
-to invent missing timestamps; uncertain or missing temporal metadata should stay
-uncertain.
+Contextual Chunking is intended to improve evidence precision before
+Gemini/Vertex synthesis by keeping raw evidence separate from retrieval context
+and by attaching valid-time and transaction-time metadata to each chunk. The
+provider is not used to invent missing timestamps; uncertain or missing temporal
+metadata should stay uncertain.
 
 The default local embedding model is `BAAI/bge-small-en-v1.5` with 384
 dimensions for laptop-friendly runs. If you change the embedding model or
@@ -86,4 +86,14 @@ Provider mode fails closed. If the Vertex SDK is missing, credentials are not av
 Provider mode calls Vertex AI and may incur cost or quota usage. Keep the smoke test small, avoid putting provider mode in CI, and prefer light mode for repeatable tests.
 
 Retrieval ablation numbers remain controlled sanity results, not an external
-benchmark and not a state-of-the-art claim.
+benchmark or broad performance claim.
+
+The Layer 1B answer-validation benchmark has a full Vertex mode:
+
+```bash
+python benchmarks/run_temporal_answer_validation_v2.py --mode vertex --top-k 5
+```
+
+Vertex mode is explicit and does not silently fall back to the light harness. It
+uses BGE/vector retrieval by default; pass `--skip-vector` only when intentionally
+downgrading retrieval for a constrained local machine.

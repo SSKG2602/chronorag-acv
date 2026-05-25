@@ -11,7 +11,7 @@ surface and explicit temporal metadata. The goal is to make each indexed chunk
 more retrievable without letting generated or inherited context overwrite the
 source text.
 
-This is a ChronoRAG architecture definition. It is not a state-of-the-art claim
+This is a ChronoRAG architecture definition. It is not a broad benchmark claim
 and should not be described as Anthropic's method.
 
 ## Why Normal Chunking Fails For Temporal RAG
@@ -45,8 +45,8 @@ metadata envelope for each chunk:
   filtering, fusion, ChronoSanity, and attribution.
 
 The core principle is simple: never let generated or global context overwrite
-raw evidence. Raw evidence remains the truth anchor. Context improves retrieval
-and metadata reasoning only.
+raw evidence. Raw evidence remains the truth anchor. Context is used only for
+retrieval and metadata reasoning.
 
 ## Raw Text vs Retrieval Text
 
@@ -270,7 +270,8 @@ temporal_ambiguity: true
 
 ## Retrieval Scoring Implications
 
-Temporal Contextual Chunking improves retrieval before temporal filtering:
+Temporal Contextual Chunking is intended to improve retrieval before temporal
+filtering:
 
 - BM25 can match document title, section, unit, entity, and temporal scope.
 - Vector retrieval embeds the chunk with compact source context.
@@ -320,7 +321,7 @@ Recommended attribution behavior:
 - Context prefixes can improve retrieval but may also bias retrieval if too long
   or too speculative.
 - The method needs benchmark evaluation before claiming measurable improvement.
-- It is not an answer-quality evaluation and not a SOTA claim.
+- It is not an answer-quality evaluation and not a broad benchmark claim.
 
 ## Implementation Plan
 
@@ -352,8 +353,8 @@ Benchmarks should report the chunking mode, embedding model, embedding
 dimension, candidate count, and whether provider mode was used. Provider-backed
 answer synthesis should be evaluated separately from retrieval quality.
 
-The controlled hard benchmark in `benchmarks/temporal_qa_hard_15.jsonl` includes
-cases for exact-year evidence, broad ranges, unknown timestamps,
-publication-time-only evidence, and conflicting evidence. It is intended to test
-whether Temporal Contextual Chunking improves temporal retrieval behavior before
-answer synthesis. It is not an external benchmark and not a SOTA claim.
+Temporal Eval v2 includes cases for exact-year evidence, broad ranges, unknown
+timestamps, publication-time-only evidence, and conflicting evidence. It is
+intended to test whether Temporal Contextual Chunking changes temporal retrieval
+behavior before answer synthesis. It is not an external benchmark and not a
+broad performance claim.

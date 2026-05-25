@@ -1,0 +1,20 @@
+{
+  "maddison_project_2023": [
+    "data/raw/temporal_eval_v2/maddison/mpd2023_web.xlsx"
+  ],
+  "owid_maddison_gdppc": [
+    "data/raw/temporal_eval_v2/owid/gdp-per-capita-maddison-project-database.csv"
+  ],
+  "owid_maddison_gdp": [
+    "data/raw/temporal_eval_v2/owid/gdp-maddison-project-database.csv"
+  ],
+  "owid_global_gdp_long_run": [
+    "data/raw/temporal_eval_v2/owid/global-gdp-over-the-long-run.csv"
+  ],
+  "oecd_world_economy_pdf": [
+    "data/raw/temporal_eval_v2/oecd/oecd3.pdf"
+  ],
+  "synthetic_temporal_traps": [
+    "data/sample/temporal_eval_v2/synthetic_traps.jsonl"
+  ]
+}

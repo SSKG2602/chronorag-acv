@@ -427,7 +427,7 @@ def main() -> None:
     md = "\n\n".join(
         [
             "# ChronoRAG Retrieval Ablation",
-            "This is a controlled temporal retrieval benchmark. It is not an external benchmark and not a SOTA claim. Expected failure and partial-answer cases are part of the design.",
+            "This is a controlled temporal retrieval benchmark. It is not an external benchmark and not a broad performance claim. Expected failure and partial-answer cases are part of the design.",
             "## Method Summary",
             markdown_table(summary),
             "## Per-Case Full ChronoRAG Results",

@@ -7,8 +7,9 @@ ChronoRAG should be presented honestly as a temporal-RAG research scaffold, not 
 1. **No public hosted deployment**
    - The repo documents local and notebook workflows, not a live production URL.
 
-2. **No reproducible benchmark report**
-   - The project needs a temporal QA benchmark before claiming measurable superiority over vanilla RAG.
+2. **Benchmark coverage is still limited**
+   - The project has a controlled diagnostic benchmark, but broader validation
+     requires a larger multi-source, multi-domain temporal QA benchmark.
 
 3. **Domain coverage is uneven**
    - World-economy/Maddison-style data appears to be the strongest path.
@@ -16,9 +17,8 @@ ChronoRAG should be presented honestly as a temporal-RAG research scaffold, not 
 
 4. **Temporal extraction is partly heuristic**
    - Valid windows, entities, regions, and units depend on structured input quality or pattern detection.
-   - Temporal Contextual Chunking is documented as the intended ChronoRAG
-     chunking strategy, but it still needs full implementation and evaluation
-     before claiming measurable gains.
+   - Temporal Contextual Chunking is implemented and wired into ingestion, but
+     it still needs broader external validation before claiming general behavior.
 
 5. **Storage is not production-hardened yet**
    - A robust production path needs Postgres/pgvector migrations, tenant isolation, indexing strategy, backups, and migration tests.

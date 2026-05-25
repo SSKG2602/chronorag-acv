@@ -1,7 +1,4 @@
-# Controlled Hard 15-Case Benchmark V1
-
-This v1 benchmark is archived as a diagnostic. Temporal Eval v2 is now the main
-controlled benchmark; see `docs/BENCHMARK_TEMPORAL_EVAL_V2.md`.
+# Controlled Hard 15-Case Benchmark
 
 This benchmark is designed to test temporal retrieval behavior, not broad
 open-domain QA. It is controlled, small, and intentionally includes cases where

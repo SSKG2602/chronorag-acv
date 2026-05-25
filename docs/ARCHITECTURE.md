@@ -24,7 +24,7 @@ The service layer contains the project’s main behavioral logic.
 
 | Service | Responsibility |
 |---|---|
-| `ingest_service.py` | Loads JSONL/text, derives metadata, and is the planned home for Temporal Contextual Chunking before writing chunks into PVDB. |
+| `ingest_service.py` | Loads JSONL/text, applies Temporal Contextual Chunking, derives metadata, and writes chunks into PVDB. |
 | `retrieve_service.py` | Runs hybrid retrieval, temporal filtering, reranking, and fusion. |
 | `answer_service.py` | Orchestrates routing, retrieval, conflict detection, generation, and fallback. |
 | `policy_service.py` | Handles runtime policy configuration. |
@@ -146,8 +146,9 @@ sequenceDiagram
 
 - No production deployment layer yet.
 - No hardened database migration path yet.
-- No benchmark suite proving temporal QA gains yet.
-- Temporal Contextual Chunking is documented as an architecture layer, but still
-  needs full implementation and ablation.
+- A small controlled benchmark exists, but a larger multi-source, multi-domain
+  benchmark is still required.
+- Temporal Contextual Chunking is implemented and wired into ingestion. Broader
+  external validation and multi-domain benchmarking remain future work.
 - No UI/demo surface yet.
 - No external observability stack yet.

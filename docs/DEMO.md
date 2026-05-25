@@ -29,8 +29,8 @@ Expected behavior:
 The intended chunking architecture is Temporal Contextual Chunking: ChronoRAG's
 chunking strategy, inspired by contextual retrieval but extended for valid-time
 retrieval, transaction-time tracking, temporal fusion, ChronoSanity, and
-attribution. Demo claims should distinguish this documented architecture from
-the current smoke path and should not claim SOTA performance.
+attribution. Demo claims should distinguish this implemented architecture from
+the current smoke path and should not present broad benchmark claims.
 
 ## Commands
 
@@ -126,4 +126,4 @@ Expected behavior:
 
 ## Public README Rule
 
-Do not write “fully production-ready” until this demo folder contains real screenshots and repeatable output.
+Do not present the demo as production ready until this folder contains real screenshots and repeatable output.

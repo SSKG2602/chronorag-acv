@@ -22,3 +22,9 @@ build/
 *.egg-info
 .coverage
 .ipynb_checkpoints/
+
+# Local raw benchmark sources
+/data/raw/
+
+# Local raw benchmark sources
+/data/raw/

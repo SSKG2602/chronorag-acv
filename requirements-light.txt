@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+pyyaml
+httpx
+numpy
+rank-bm25
+pytest
+pytest-asyncio

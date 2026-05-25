@@ -26,12 +26,14 @@ presented as a temporal-RAG research scaffold, not as a production service.
 
 ## Remaining Gaps
 
-- No benchmark table or reproducible evaluation report is committed yet.
-- No ablation study is committed yet.
+- A small controlled diagnostic benchmark is committed, but it is not a
+  publication-grade external benchmark.
+- A larger multi-source, multi-domain benchmark is still required.
 - No production deployment layer, migration path, or external observability stack
   is committed yet.
 - No public hosted demo URL is documented.
-- Temporal Contextual Chunking is not fully implemented or evaluated yet.
+- Temporal Contextual Chunking is implemented and wired into ingestion. Broader
+  external validation is still required.
 - The CLI output is verbose for large ingests and should eventually support a
   concise demo mode.
 - The light-mode answer screenshot is a smoke-mode evidence digest, not a

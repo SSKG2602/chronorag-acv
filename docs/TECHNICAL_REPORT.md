@@ -6,7 +6,7 @@ ChronoRAG is a temporal retrieval-augmented generation research scaffold for
 time-sensitive question answering. It treats validity windows, transaction
 windows, provenance, and temporal alignment as first-class retrieval
 constraints. The current implementation is a reproducible prototype, not a
-production service and not a state-of-the-art claim.
+production service and not a broad external benchmark claim.
 
 ## 1. Problem Statement
 
@@ -55,8 +55,9 @@ and attribution.
 The method separates unchanged `raw_text` from `retrieval_text`. `raw_text`
 remains the quoteable evidence used for attribution and answer grounding.
 `retrieval_text` may add a short context prefix with document title, section,
-unit, entity, region, and temporal scope. This improves BM25/vector recall
-without letting generated context overwrite the source evidence.
+unit, entity, region, and temporal scope. This gives BM25/vector retrieval more
+structured context without letting generated context overwrite the source
+evidence.
 
 Temporal Contextual Chunking also separates claim-valid time from transaction
 time. A publication year can be stored as `tx_start`, but it must not become
@@ -111,41 +112,52 @@ The current ablation compares:
 - Hybrid + temporal fusion + rerank
 
 The internal `benchmarks/temporal_qa_15.jsonl` benchmark is a smoke benchmark.
-It validates that the pipeline runs over a small local dataset. It should not be
-used as the public claim benchmark.
+It validates that the pipeline runs over a small local dataset. The older v1
+hard benchmark is archived as a diagnostic because it had only 15 cases, 19
+rows/chunks, and limited source diversity.
 
-The public controlled benchmark is `benchmarks/temporal_qa_hard_15.jsonl`. It is
-designed to test temporal retrieval behavior, not broad open-domain QA. It has
-five categories:
+Temporal Eval v2 is now the main controlled retrieval benchmark. It is built
+from multiple source families under `data/raw/temporal_eval_v2/` and generated
+into `data/sample/temporal_eval_v2/`. It has six case categories:
 
-- exact valid-time lookup
-- same entity across different years
-- broad-window distractor demotion
-- conflict/ChronoSanity visibility
-- expected partial, ambiguous, or insufficient-evidence cases
+- exact valid-time retrieval
+- same entity / wrong year traps
+- broad-window distractors
+- transaction-time vs valid-time traps
+- conflict / ChronoSanity cases
+- expected partial, refusal, or ambiguous cases
 
-Expected failure cases are included deliberately. They test whether the system
-can avoid treating publication time as valid time, avoid overclaiming missing
-evidence, and surface ambiguity. These cases are not counted as ordinary
-retrieval successes in the method summary.
+Current Temporal Eval v2 light-mode result:
 
-Current hard benchmark result:
+| Method | Hit@5 Evidence | Top1 Window | Hit@5 Window | Source Family Hit@5 | Distractor Avoidance | Proxy Conflict Correct | Proxy Partial/Refusal Correct | Proxy Behavior Correct | Latency ms |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| BM25 only | 0.47 | 0.47 | 0.80 | 0.73 | 0.73 | 0.00 | 0.07 | 0.33 | 1.96 |
+| Vector only | 0.47 | 0.53 | 0.80 | 0.93 | 0.73 | 0.00 | 0.07 | 0.33 | 1.93 |
+| Hybrid without temporal filter | 0.53 | 0.47 | 0.80 | 0.80 | 0.73 | 0.07 | 0.07 | 0.27 | 1.94 |
+| Hybrid with temporal filter | 0.67 | 0.60 | 0.93 | 0.80 | 0.73 | 0.07 | 0.13 | 0.47 | 2.00 |
+| Hybrid + temporal fusion | 0.60 | 0.80 | 0.93 | 0.87 | 0.93 | 0.07 | 0.07 | 0.60 | 2.00 |
+| Hybrid + temporal fusion + rerank | 0.80 | 0.80 | 0.93 | 0.87 | 0.93 | 0.07 | 0.07 | 0.80 | 2.08 |
 
-| Method | Top1 Window | Window Hit@5 | Source Hit@5 | Unit Hit@5 | Text Hit@5 | Latency ms | Eval n |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| BM25 only | 0.54 | 1.00 | 1.00 | 1.00 | 1.00 | 0.3 | 13 |
-| Vector only | 0.38 | 1.00 | 1.00 | 0.85 | 1.00 | 0.3 | 13 |
-| Hybrid without temporal filter | 0.62 | 1.00 | 1.00 | 1.00 | 1.00 | 0.3 | 13 |
-| Hybrid with temporal filter | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.3 | 13 |
-| Hybrid + temporal fusion | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.3 | 13 |
-| Hybrid + temporal fusion + rerank | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.4 | 13 |
-
-This is a controlled benchmark, not an external benchmark and not a
-state-of-the-art claim.
+Temporal Eval v2 is a controlled benchmark, not an external benchmark and not a
+broad performance claim. It makes `Source Hit@5` more meaningful than v1 because
+it includes multiple source families, but Layer 2 generalization still requires
+at least one second domain and a larger natural benchmark.
 
 The retrieval ablation is independent of provider mode. It evaluates whether
 retrieval returns temporally correct evidence; it does not evaluate LLM writing
 quality.
+
+Current E2 validates temporal retrieval behavior. It does not fully validate
+LLM-mediated answer decisions. Conflict and refusal are system-level behaviors
+that require answer-time reasoning over retrieved evidence, evidence cards,
+ChronoSanity signals, and answer validation. These belong in Layer 1B, not Layer
+2.
+
+Layer 1B is implemented as `benchmarks/run_temporal_answer_validation_v2.py`.
+Light mode is deterministic and CI-safe. Vertex mode runs the ChronoRAG grounded
+temporal synthesis prompt through Vertex Gemini and uses hybrid lexical + BGE
+vector retrieval by default. Passing `--skip-vector` is an explicit downgrade for
+machines that cannot run local embeddings.
 
 ## 9. Metrics
 
@@ -167,7 +179,9 @@ Latency ms: wall-clock runtime for the method.
 ## 10. Limitations
 
 - The smoke benchmark is easy by design.
-- The hard benchmark has only 15 controlled cases.
+- Temporal Eval v2 has 15 controlled cases.
+- Generalization beyond historical GDP/debt style data is not yet proven.
+- Layer 2 evaluation needs at least one second domain.
 - Temporal metadata extraction is partly heuristic.
 - The strongest tested path is world-economy style data.
 - Full LLM mode depends on local or provider model availability.
@@ -191,14 +205,8 @@ python -m benchmarks.run_ablation \
   --top-k 5 \
   --candidate-k 50
 
-python -m cli.chronorag_cli purge
-python -m cli.chronorag_cli ingest data/sample/hard_temporal/*
-
-python -m benchmarks.run_ablation \
-  --cases benchmarks/temporal_qa_hard_15.jsonl \
-  --top-k 5 \
-  --candidate-k 50 \
-  --out benchmarks/results/temporal_qa_hard_15_results.json
+python benchmarks/build_temporal_eval_v2.py
+python benchmarks/run_temporal_eval_v2.py --light
 ```
 
 Optional Vertex provider smoke mode:

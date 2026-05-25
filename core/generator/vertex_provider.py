@@ -112,8 +112,13 @@ class VertexGeminiProvider:
         if not self.project:
             return VertexProviderResult(
                 text="",
-                provider_error="GOOGLE_CLOUD_PROJECT is required for Vertex provider mode.",
-                debug="Set GOOGLE_CLOUD_PROJECT or run with CHRONORAG_LIGHT=1.",
+                provider_error=(
+                    "GOOGLE_CLOUD_PROJECT is required for Vertex-backed grounded answer synthesis."
+                ),
+                debug=(
+                    "Set GOOGLE_CLOUD_PROJECT for full Vertex grounded synthesis. "
+                    "Light/mock mode is only for local testing and CI."
+                ),
             )
 
         try:
@@ -135,6 +140,61 @@ class VertexGeminiProvider:
                 generation_config=GenerationConfig(
                     max_output_tokens=max_output_tokens,
                     temperature=0.0,
+                ),
+            )
+            text = (getattr(response, "text", "") or "").strip()
+            if not text:
+                return VertexProviderResult(
+                    text="",
+                    provider_error="Vertex provider returned an empty response.",
+                    debug=f"model={self.model_id}; location={self.location}",
+                )
+            return VertexProviderResult(text=text)
+        except Exception as exc:
+            return VertexProviderResult(
+                text="",
+                provider_error=f"Vertex provider call failed: {exc}",
+                debug=f"model={self.model_id}; project={self.project}; location={self.location}",
+            )
+
+    def synthesize_grounded_answer(
+        self,
+        prompt: str,
+        *,
+        temperature: float = 0.0,
+        max_output_tokens: int = 512,
+    ) -> VertexProviderResult:
+        """Run provider-backed grounded answer synthesis for ChronoRAG prompts."""
+        if not self.project:
+            return VertexProviderResult(
+                text="",
+                provider_error=(
+                    "GOOGLE_CLOUD_PROJECT is required for Vertex-backed grounded answer synthesis."
+                ),
+                debug=(
+                    "Set GOOGLE_CLOUD_PROJECT for full Vertex grounded synthesis. "
+                    "Light/mock mode is only for local testing and CI."
+                ),
+            )
+
+        try:
+            import vertexai
+            from vertexai.generative_models import GenerationConfig, GenerativeModel
+        except Exception as exc:
+            return VertexProviderResult(
+                text="",
+                provider_error=f"Vertex SDK import failed: {exc}",
+                debug="Install optional provider dependencies with: pip install -r requirements-provider.txt",
+            )
+
+        try:
+            vertexai.init(project=self.project, location=self.location)
+            model = GenerativeModel(self.model_id)
+            response = model.generate_content(
+                prompt,
+                generation_config=GenerationConfig(
+                    max_output_tokens=max_output_tokens,
+                    temperature=temperature,
                 ),
             )
             text = (getattr(response, "text", "") or "").strip()

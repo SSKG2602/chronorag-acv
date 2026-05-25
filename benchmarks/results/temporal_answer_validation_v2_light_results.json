@@ -1,0 +1,750 @@
+{
+  "benchmark": "temporal_answer_validation_v2",
+  "mode": "light",
+  "command": "benchmarks/run_temporal_answer_validation_v2.py --mode light --top-k 5",
+  "top_k": 5,
+  "case_count": 15,
+  "corpus_row_count": 190,
+  "retrieval": "lexical_temporal",
+  "skip_vector": false,
+  "max_output_tokens": 512,
+  "temperature": 0.0,
+  "metrics": {
+    "answer_overall_pass": 0.7333333333333333,
+    "required_facts_present": 1.0,
+    "forbidden_facts_absent": 0.9333333333333333,
+    "expected_evidence_cited": 0.8666666666666667,
+    "valid_time_correct": 0.8666666666666667,
+    "transaction_time_trap_avoided": 1.0,
+    "conflict_warning_correct": 1.0,
+    "partial_refusal_correct": 1.0,
+    "clarification_correct": 1.0
+  },
+  "details": [
+    {
+      "case_id": "av2_q01_western_europe_1870_exact",
+      "category": "exact_valid_time_answer",
+      "question": "What was Western Europe GDP per capita in 1870 using exact valid-year evidence only?",
+      "expected_behavior": "answer",
+      "detected_behavior": "answer",
+      "cited_evidence_ids": [
+        "e2:oecd_pdf:western_europe_exact_1870",
+        "e2:maddison:regional:gdp_pc:western_europe:1870"
+      ],
+      "retrieved_evidence_ids": [
+        "e2:maddison:regional:gdp_pc:western_europe:1870",
+        "e2:oecd_pdf:western_europe_exact_1870",
+        "e2:maddison:regional:gdp_pc:western_europe:1950",
+        "e2:oecd_pdf:western_europe_exact_1913",
+        "e2:synthetic:conflict:western_europe:gdp_pc:1870"
+      ],
+      "answer": {
+        "answer": "Answer directly using exact 1870 valid-year evidence for Western Europe GDP per capita and cite the evidence ID. Do not use 1913 or broad-window evidence as the answer. Required terms covered: Western Europe, GDP per capita, 1870. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1870, e2:maddison:regional:gdp_pc:western_europe:1870. Evidence cards: e2:maddison:regional:gdp_pc:western_europe:1870 from maddison_project_2023 (valid_time_exact); e2:oecd_pdf:western_europe_exact_1870 from oecd_world_economy_pdf (valid_time_exact).",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "e2:oecd_pdf:western_europe_exact_1870",
+          "e2:maddison:regional:gdp_pc:western_europe:1870"
+        ],
+        "valid_time_used": [
+          "1870-01-01 to 1870-12-31",
+          "1870-01-01 to 1870-12-31"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false
+      },
+      "raw_model_response": null,
+      "parse_error": null,
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "expected_evidence_cited": true,
+        "acceptable_evidence_cited": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "overall_pass": true,
+        "failure_reason": ""
+      },
+      "latency_ms": 2.1
+    },
+    {
+      "case_id": "av2_q02_western_europe_1913_window",
+      "category": "exact_valid_time_with_window",
+      "question": "What was Western Europe GDP per capita in 1913, and which evidence window supports it?",
+      "expected_behavior": "answer",
+      "detected_behavior": "answer",
+      "cited_evidence_ids": [
+        "e2:oecd_pdf:western_europe_exact_1913",
+        "e2:oecd_pdf:table_note:western_europe:1913"
+      ],
+      "retrieved_evidence_ids": [
+        "e2:oecd_pdf:western_europe_exact_1913",
+        "e2:synthetic:conflict:western_europe:gdp_pc:1913",
+        "e2:synthetic:same_year_wrong_entity_1913",
+        "e2:oecd_pdf:table_note:western_europe:1913",
+        "e2:maddison:regional:gdp_pc:western_europe:1950"
+      ],
+      "answer": {
+        "answer": "Answer directly, cite exact 1913 evidence, and state that the supporting valid-time window is 1913-01-01 to 1913-12-31. Required terms covered: Western Europe, 1913, valid. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1913, e2:oecd_pdf:table_note:western_europe:1913. Evidence cards: e2:oecd_pdf:western_europe_exact_1913 from oecd_world_economy_pdf (valid_time_exact); e2:oecd_pdf:table_note:western_europe:1913 from oecd_world_economy_pdf (valid_time_exact).",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "e2:oecd_pdf:western_europe_exact_1913",
+          "e2:oecd_pdf:table_note:western_europe:1913"
+        ],
+        "valid_time_used": [
+          "1913-01-01 to 1913-12-31",
+          "1913-01-01 to 1913-12-31"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false
+      },
+      "raw_model_response": null,
+      "parse_error": null,
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "expected_evidence_cited": true,
+        "acceptable_evidence_cited": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "overall_pass": true,
+        "failure_reason": ""
+      },
+      "latency_ms": 3.93
+    },
+    {
+      "case_id": "av2_q03_transaction_time_avoidance",
+      "category": "transaction_time_avoidance",
+      "question": "A document was published in 2006 but contains GDP data about 1870. Should the valid time be 2006 or 1870?",
+      "expected_behavior": "answer",
+      "detected_behavior": "answer",
+      "cited_evidence_ids": [
+        "e2:oecd_pdf:data_about_1870_pub_2006"
+      ],
+      "retrieved_evidence_ids": [
+        "e2:oecd_pdf:data_about_1870_pub_2006",
+        "e2:maddison:regional:gdp_pc:africa:1870",
+        "e2:maddison:regional:gdp_pc:western_europe:1870",
+        "e2:maddison:regional:gdp_pc:world:1870",
+        "e2:maddison:regional:gdp_pc:latin_america:1870"
+      ],
+      "answer": {
+        "answer": "Say the claim-valid time is 1870. The 2006 publication year is transaction/publication time and must not be treated as the valid time of the GDP claim. Required terms covered: 1870, valid time, 2006, transaction. Cited evidence IDs: e2:oecd_pdf:data_about_1870_pub_2006. Evidence cards: e2:oecd_pdf:data_about_1870_pub_2006 from oecd_world_economy_pdf (transaction_time_only).",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "e2:oecd_pdf:data_about_1870_pub_2006"
+        ],
+        "valid_time_used": [],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false
+      },
+      "raw_model_response": null,
+      "parse_error": null,
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "expected_evidence_cited": true,
+        "acceptable_evidence_cited": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "overall_pass": true,
+        "failure_reason": ""
+      },
+      "latency_ms": 1.67
+    },
+    {
+      "case_id": "av2_q04_india_1913_wrong_year",
+      "category": "same_entity_wrong_year_trap",
+      "question": "For India, what was GDP per capita in 1913? Do not answer with the 1870 record.",
+      "expected_behavior": "answer",
+      "detected_behavior": "answer",
+      "cited_evidence_ids": [
+        "e2:maddison:country:gdp_pc:india:1913"
+      ],
+      "retrieved_evidence_ids": [
+        "e2:maddison:country:gdp_pc:india:1870",
+        "e2:maddison:country:gdp_pc:india:1913",
+        "e2:synthetic:wrong_year_india_1870_for_1913",
+        "e2:maddison:regional:gdp_pc:africa:1870",
+        "e2:maddison:country:gdp_pc:brazil:1870"
+      ],
+      "answer": {
+        "answer": "Use India 1913 GDP per capita evidence and cite it. Do not answer with an India 1870 record. Required terms covered: India, 1913, GDP per capita. Cited evidence IDs: e2:maddison:country:gdp_pc:india:1913. Evidence cards: e2:maddison:country:gdp_pc:india:1913 from maddison_project_2023 (valid_time_exact).",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "e2:maddison:country:gdp_pc:india:1913"
+        ],
+        "valid_time_used": [
+          "1913-01-01 to 1913-12-31"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false
+      },
+      "raw_model_response": null,
+      "parse_error": null,
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "expected_evidence_cited": true,
+        "acceptable_evidence_cited": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "overall_pass": true,
+        "failure_reason": ""
+      },
+      "latency_ms": 2.92
+    },
+    {
+      "case_id": "av2_q05_india_metric_confusion",
+      "category": "metric_confusion",
+      "question": "For India in 1870, should total GDP evidence answer a GDP per capita question?",
+      "expected_behavior": "prefer_exact",
+      "detected_behavior": "prefer_exact",
+      "cited_evidence_ids": [
+        "e2:maddison:country:gdp_pc:india:1870",
+        "e2:owid_gdppc:gdp_pc:india:1870"
+      ],
+      "retrieved_evidence_ids": [
+        "e2:maddison:country:gdp_pc:india:1870",
+        "e2:synthetic:wrong_year_india_1870_for_1913",
+        "e2:oecd_pdf:table_note:india:1870",
+        "e2:owid_gdppc:gdp_pc:india:1870",
+        "e2:oecd_pdf:western_europe_exact_1870"
+      ],
+      "answer": {
+        "answer": "No. Total GDP and GDP per capita are different metrics. Use India GDP per capita evidence for 1870, not total GDP evidence. Required terms covered: GDP per capita, total GDP, different metrics. Cited evidence IDs: e2:maddison:country:gdp_pc:india:1870, e2:owid_gdppc:gdp_pc:india:1870. Evidence cards: e2:maddison:country:gdp_pc:india:1870 from maddison_project_2023 (valid_time_exact); e2:owid_gdppc:gdp_pc:india:1870 from owid_maddison_gdppc (valid_time_exact).",
+        "behavior": "prefer_exact",
+        "cited_evidence_ids": [
+          "e2:maddison:country:gdp_pc:india:1870",
+          "e2:owid_gdppc:gdp_pc:india:1870"
+        ],
+        "valid_time_used": [
+          "1870-01-01 to 1870-12-31",
+          "1870-01-01 to 1870-12-31"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false
+      },
+      "raw_model_response": null,
+      "parse_error": null,
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "expected_evidence_cited": true,
+        "acceptable_evidence_cited": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "overall_pass": true,
+        "failure_reason": ""
+      },
+      "latency_ms": 4.58
+    },
+    {
+      "case_id": "av2_q06_western_europe_compare",
+      "category": "multi_year_comparison",
+      "question": "Compare Western Europe GDP per capita in 1870 and 1913 using separate exact-year evidence.",
+      "expected_behavior": "compare",
+      "detected_behavior": "compare",
+      "cited_evidence_ids": [
+        "e2:oecd_pdf:western_europe_exact_1870",
+        "e2:oecd_pdf:western_europe_exact_1913"
+      ],
+      "retrieved_evidence_ids": [
+        "e2:synthetic:same_year_wrong_entity_1913",
+        "e2:oecd_pdf:western_europe_exact_1870",
+        "e2:oecd_pdf:western_europe_exact_1913",
+        "e2:maddison:regional:gdp_pc:western_europe:1870",
+        "e2:oecd_pdf:western_europe_range_1870_1913"
+      ],
+      "answer": {
+        "answer": "Compare the two years using separate exact-year evidence for 1870 and 1913. Broad trend-only evidence can be context but cannot replace exact-year evidence. Required terms covered: 1870, 1913, separate. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1870, e2:oecd_pdf:western_europe_exact_1913. Evidence cards: e2:oecd_pdf:western_europe_exact_1870 from oecd_world_economy_pdf (valid_time_exact); e2:oecd_pdf:western_europe_exact_1913 from oecd_world_economy_pdf (valid_time_exact).",
+        "behavior": "compare",
+        "cited_evidence_ids": [
+          "e2:oecd_pdf:western_europe_exact_1870",
+          "e2:oecd_pdf:western_europe_exact_1913"
+        ],
+        "valid_time_used": [
+          "1870-01-01 to 1870-12-31",
+          "1913-01-01 to 1913-12-31"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false
+      },
+      "raw_model_response": null,
+      "parse_error": null,
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "expected_evidence_cited": true,
+        "acceptable_evidence_cited": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "overall_pass": true,
+        "failure_reason": ""
+      },
+      "latency_ms": 3.78
+    },
+    {
+      "case_id": "av2_q07_broad_1000_2006_demote",
+      "category": "broad_window_demotion",
+      "question": "A broad record covers Western Europe over 1000\u20132006. Should it outrank exact 1870 evidence for an 1870 query?",
+      "expected_behavior": "prefer_exact",
+      "detected_behavior": "prefer_exact",
+      "cited_evidence_ids": [
+        "e2:oecd_pdf:western_europe_exact_1870",
+        "e2:maddison:regional:gdp_pc:western_europe:1870",
+        "e2:oecd_pdf:table_note:western_europe:1870"
+      ],
+      "retrieved_evidence_ids": [
+        "e2:oecd_pdf:table_note:western_europe:1870",
+        "e2:oecd_pdf:western_europe_exact_1870",
+        "e2:synthetic:broad_1870_1913_no_exact",
+        "e2:oecd_pdf:western_europe_range_1870_1913",
+        "e2:maddison:regional:gdp_pc:western_europe:1870"
+      ],
+      "answer": {
+        "answer": "No. Exact valid-year evidence for 1870 should outrank a broad 1000-2006 window for an exact 1870 query. Required terms covered: No, exact, 1870, broad. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1870, e2:maddison:regional:gdp_pc:western_europe:1870, e2:oecd_pdf:table_note:western_europe:1870. Evidence cards: e2:oecd_pdf:table_note:western_europe:1870 from oecd_world_economy_pdf (valid_time_exact); e2:oecd_pdf:western_europe_exact_1870 from oecd_world_economy_pdf (valid_time_exact); e2:maddison:regional:gdp_pc:western_europe:1870 from maddison_project_2023 (valid_time_exact).",
+        "behavior": "prefer_exact",
+        "cited_evidence_ids": [
+          "e2:oecd_pdf:western_europe_exact_1870",
+          "e2:maddison:regional:gdp_pc:western_europe:1870",
+          "e2:oecd_pdf:table_note:western_europe:1870"
+        ],
+        "valid_time_used": [
+          "1870-01-01 to 1870-12-31",
+          "1870-01-01 to 1870-12-31",
+          "1870-01-01 to 1870-12-31"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false
+      },
+      "raw_model_response": null,
+      "parse_error": null,
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "expected_evidence_cited": true,
+        "acceptable_evidence_cited": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "overall_pass": true,
+        "failure_reason": ""
+      },
+      "latency_ms": 2.35
+    },
+    {
+      "case_id": "av2_q08_broad_trend_no_exact_value",
+      "category": "broad_trend_cannot_answer_exact",
+      "question": "A source says Western Europe GDP per capita increased between 1870 and 1913. Can this answer the exact 1870 value?",
+      "expected_behavior": "prefer_exact",
+      "detected_behavior": "prefer_exact",
+      "cited_evidence_ids": [
+        "e2:oecd_pdf:western_europe_exact_1870",
+        "e2:maddison:regional:gdp_pc:western_europe:1870"
+      ],
+      "retrieved_evidence_ids": [
+        "e2:oecd_pdf:western_europe_range_1870_1913",
+        "e2:maddison:regional:gdp_pc:western_europe:1870",
+        "e2:oecd_pdf:western_europe_exact_1870",
+        "e2:oecd_pdf:western_europe_exact_1913",
+        "e2:synthetic:conflict:western_europe:gdp_pc:1913"
+      ],
+      "answer": {
+        "answer": "No. A trend statement can provide context, but it does not provide the exact 1870 value. Use exact 1870 evidence for the exact value. Required terms covered: No, trend, exact 1870. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1870, e2:maddison:regional:gdp_pc:western_europe:1870. Evidence cards: e2:maddison:regional:gdp_pc:western_europe:1870 from maddison_project_2023 (valid_time_exact); e2:oecd_pdf:western_europe_exact_1870 from oecd_world_economy_pdf (valid_time_exact).",
+        "behavior": "prefer_exact",
+        "cited_evidence_ids": [
+          "e2:oecd_pdf:western_europe_exact_1870",
+          "e2:maddison:regional:gdp_pc:western_europe:1870"
+        ],
+        "valid_time_used": [
+          "1870-01-01 to 1870-12-31",
+          "1870-01-01 to 1870-12-31"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false
+      },
+      "raw_model_response": null,
+      "parse_error": null,
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "expected_evidence_cited": true,
+        "acceptable_evidence_cited": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "overall_pass": true,
+        "failure_reason": ""
+      },
+      "latency_ms": 1.71
+    },
+    {
+      "case_id": "av2_q09_conflict_warning_1913",
+      "category": "conflict_warning",
+      "question": "Two sources disagree on Western Europe GDP per capita in 1913. What should the answer do?",
+      "expected_behavior": "conflict_warning",
+      "detected_behavior": "conflict_warning",
+      "cited_evidence_ids": [
+        "e2:oecd_pdf:western_europe_exact_1913",
+        "e2:synthetic:conflict:western_europe:gdp_pc:1913"
+      ],
+      "retrieved_evidence_ids": [
+        "e2:synthetic:conflict:western_europe:gdp_pc:1913",
+        "e2:synthetic:same_year_wrong_entity_1913",
+        "e2:oecd_pdf:western_europe_exact_1913",
+        "e2:synthetic:conflict:western_europe:gdp_pc:1870",
+        "e2:oecd_pdf:table_note:western_europe:1913"
+      ],
+      "answer": {
+        "answer": "Surface both conflicting 1913 evidence cards, cite both evidence IDs, and warn that there is conflict risk rather than forcing one overconfident value. Required terms covered: conflict, Western Europe, 1913. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1913, e2:synthetic:conflict:western_europe:gdp_pc:1913. Evidence cards: e2:synthetic:conflict:western_europe:gdp_pc:1913 from synthetic_temporal_traps (conflict_claim); e2:oecd_pdf:western_europe_exact_1913 from oecd_world_economy_pdf (valid_time_exact). Conflict warning: evidence cards disagree for the same temporal claim.",
+        "behavior": "conflict_warning",
+        "cited_evidence_ids": [
+          "e2:oecd_pdf:western_europe_exact_1913",
+          "e2:synthetic:conflict:western_europe:gdp_pc:1913"
+        ],
+        "valid_time_used": [
+          "1913-01-01 to 1913-12-31",
+          "1913-01-01 to 1913-12-31"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": true,
+        "partial_or_refusal": false,
+        "clarification_requested": false
+      },
+      "raw_model_response": null,
+      "parse_error": null,
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "expected_evidence_cited": true,
+        "acceptable_evidence_cited": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "overall_pass": true,
+        "failure_reason": ""
+      },
+      "latency_ms": 1.55
+    },
+    {
+      "case_id": "av2_q10_exact_vs_broad_1913",
+      "category": "conflict_with_exact_vs_broad_preference",
+      "question": "If one source gives exact 1913 evidence and another gives a broad 1870\u20131913 range, which should be preferred and why?",
+      "expected_behavior": "prefer_exact",
+      "detected_behavior": "prefer_exact",
+      "cited_evidence_ids": [
+        "e2:oecd_pdf:western_europe_exact_1913"
+      ],
+      "retrieved_evidence_ids": [
+        "e2:synthetic:wrong_year_japan_1913_for_1950",
+        "e2:synthetic:wrong_year_india_1870_for_1913",
+        "e2:synthetic:same_year_wrong_entity_1913",
+        "e2:synthetic:same_entity_wrong_metric_india",
+        "e2:oecd_pdf:western_europe_exact_1913"
+      ],
+      "answer": {
+        "answer": "Prefer exact 1913 evidence for an exact-year query. The broad 1870-1913 range can be context but is weaker for the exact 1913 value. Required terms covered: exact 1913, broad, preferred. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1913. Evidence cards: e2:oecd_pdf:western_europe_exact_1913 from oecd_world_economy_pdf (valid_time_exact).",
+        "behavior": "prefer_exact",
+        "cited_evidence_ids": [
+          "e2:oecd_pdf:western_europe_exact_1913"
+        ],
+        "valid_time_used": [
+          "1913-01-01 to 1913-12-31"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false
+      },
+      "raw_model_response": null,
+      "parse_error": null,
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "expected_evidence_cited": true,
+        "acceptable_evidence_cited": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "overall_pass": true,
+        "failure_reason": ""
+      },
+      "latency_ms": 1.69
+    },
+    {
+      "case_id": "av2_q11_western_europe_1820_missing",
+      "category": "missing_exact_evidence",
+      "question": "What was Western Europe GDP per capita in 1820? If no exact evidence exists, should the system answer confidently?",
+      "expected_behavior": "refuse",
+      "detected_behavior": "refuse",
+      "cited_evidence_ids": [
+        "e2:maddison:regional:gdp_pc:western_europe:1950"
+      ],
+      "retrieved_evidence_ids": [
+        "e2:maddison:regional:gdp_pc:western_europe:1950",
+        "e2:maddison:regional:gdp_pc:western_europe:1870",
+        "e2:synthetic:western_europe_industrial_ambiguous",
+        "e2:oecd_pdf:western_europe_exact_1870",
+        "e2:oecd_pdf:western_europe_exact_1913"
+      ],
+      "answer": {
+        "answer": "Do not give a confident exact 1820 value. Refuse the exact answer or mark it partial using weaker broad evidence only. Required terms covered: no exact evidence, not answer confidently. Cited evidence IDs: e2:maddison:regional:gdp_pc:western_europe:1950. Evidence cards: e2:maddison:regional:gdp_pc:western_europe:1950 from maddison_project_2023 (valid_time_exact). This is partial or insufficient; no confident exact answer should be given.",
+        "behavior": "refuse",
+        "cited_evidence_ids": [
+          "e2:maddison:regional:gdp_pc:western_europe:1950"
+        ],
+        "valid_time_used": [
+          "1950-01-01 to 1950-12-31"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": true,
+        "clarification_requested": false
+      },
+      "raw_model_response": null,
+      "parse_error": null,
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": false,
+        "expected_evidence_cited": true,
+        "acceptable_evidence_cited": false,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "overall_pass": false,
+        "failure_reason": "forbidden_facts_absent, acceptable_evidence_cited"
+      },
+      "latency_ms": 1.68
+    },
+    {
+      "case_id": "av2_q12_china_1820_partial",
+      "category": "partial_evidence",
+      "question": "Retrieve evidence for China in 1820. If only broad regional/background evidence exists, how should the answer be framed?",
+      "expected_behavior": "partial",
+      "detected_behavior": "partial",
+      "cited_evidence_ids": [
+        "e2:owid_global:gdp_total:world:1820"
+      ],
+      "retrieved_evidence_ids": [
+        "e2:owid_global:gdp_total:world:1820",
+        "e2:owid_gdp:gdp_total:china:2018",
+        "e2:owid_gdp:gdp_total:china:1913",
+        "e2:owid_gdp:gdp_total:china:1973",
+        "e2:owid_gdp:gdp_total:china:1870"
+      ],
+      "answer": {
+        "answer": "Frame the answer as partial or insufficient because only broad/background China 1820 evidence is available in this corpus, not an exact China GDP per capita value. Required terms covered: partial, China, 1820. Cited evidence IDs: e2:owid_global:gdp_total:world:1820. Evidence cards: e2:owid_global:gdp_total:world:1820 from owid_global_gdp_long_run (valid_time_exact). This is partial or insufficient; no confident exact answer should be given.",
+        "behavior": "partial",
+        "cited_evidence_ids": [
+          "e2:owid_global:gdp_total:world:1820"
+        ],
+        "valid_time_used": [
+          "1820-01-01 to 1820-12-31"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": true,
+        "clarification_requested": false
+      },
+      "raw_model_response": null,
+      "parse_error": null,
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "expected_evidence_cited": true,
+        "acceptable_evidence_cited": false,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "overall_pass": false,
+        "failure_reason": "acceptable_evidence_cited"
+      },
+      "latency_ms": 1.58
+    },
+    {
+      "case_id": "av2_q13_transaction_time_only_records",
+      "category": "transaction_time_only_records",
+      "question": "Which records are transaction-time-only and should not be counted as valid-time evidence?",
+      "expected_behavior": "partial",
+      "detected_behavior": "partial",
+      "cited_evidence_ids": [
+        "e2:owid_gdppc:gdp_pc:brazil:2018"
+      ],
+      "retrieved_evidence_ids": [
+        "e2:owid_gdppc:gdp_pc:brazil:2018",
+        "e2:owid_gdppc:gdp_pc:netherlands:1973",
+        "e2:owid_gdppc:gdp_pc:india:1973",
+        "e2:owid_gdppc:gdp_pc:netherlands:1870",
+        "e2:owid_gdppc:gdp_pc:india:1950"
+      ],
+      "answer": {
+        "answer": "Identify publication/import metadata records as transaction-time-only and explain that they should not count as claim-valid GDP evidence. Required terms covered: transaction-time-only, valid-time evidence. Cited evidence IDs: e2:owid_gdppc:gdp_pc:brazil:2018. Evidence cards: e2:owid_gdppc:gdp_pc:brazil:2018 from owid_maddison_gdppc (valid_time_exact). This is partial or insufficient; no confident exact answer should be given.",
+        "behavior": "partial",
+        "cited_evidence_ids": [
+          "e2:owid_gdppc:gdp_pc:brazil:2018"
+        ],
+        "valid_time_used": [
+          "2018-01-01 to 2018-12-31"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": true,
+        "clarification_requested": false
+      },
+      "raw_model_response": null,
+      "parse_error": null,
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "expected_evidence_cited": false,
+        "acceptable_evidence_cited": false,
+        "valid_time_correct": false,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "overall_pass": false,
+        "failure_reason": "expected_evidence_cited, acceptable_evidence_cited, valid_time_correct"
+      },
+      "latency_ms": 1.41
+    },
+    {
+      "case_id": "av2_q14_ambiguous_industrial_era",
+      "category": "ambiguous_temporal_query",
+      "question": "Around the industrial era, what was Europe\u2019s GDP per capita?",
+      "expected_behavior": "clarify",
+      "detected_behavior": "clarify",
+      "cited_evidence_ids": [
+        "e2:synthetic:western_europe_industrial_ambiguous"
+      ],
+      "retrieved_evidence_ids": [
+        "e2:synthetic:western_europe_industrial_ambiguous",
+        "e2:maddison:regional:gdp_pc:western_europe:1950",
+        "e2:maddison:regional:gdp_pc:western_europe:1870",
+        "e2:maddison:regional:gdp_pc:africa:1870",
+        "e2:maddison:country:gdp_pc:india:1870"
+      ],
+      "answer": {
+        "answer": "Ask for a clearer year or valid-time window, or mark the answer as temporally ambiguous. Do not force one exact GDP per capita value. Required terms covered: ambiguous, clarify. Cited evidence IDs: e2:synthetic:western_europe_industrial_ambiguous. Evidence cards: e2:synthetic:western_europe_industrial_ambiguous from synthetic_temporal_traps (ambiguous_time). The temporal phrase is ambiguous; clarification is required.",
+        "behavior": "clarify",
+        "cited_evidence_ids": [
+          "e2:synthetic:western_europe_industrial_ambiguous"
+        ],
+        "valid_time_used": [],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": true
+      },
+      "raw_model_response": null,
+      "parse_error": null,
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "expected_evidence_cited": true,
+        "acceptable_evidence_cited": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "overall_pass": true,
+        "failure_reason": ""
+      },
+      "latency_ms": 1.84
+    },
+    {
+      "case_id": "av2_q15_source_family_grounding",
+      "category": "source_family_grounding",
+      "question": "When OWID and Maddison both contain GDP per capita records, how should the answer cite source-backed evidence?",
+      "expected_behavior": "answer",
+      "detected_behavior": "answer",
+      "cited_evidence_ids": [
+        "e2:owid_gdppc:gdp_pc:brazil:2018"
+      ],
+      "retrieved_evidence_ids": [
+        "e2:owid_gdppc:gdp_pc:brazil:2018",
+        "e2:owid_gdppc:gdp_pc:netherlands:1973",
+        "e2:owid_gdppc:gdp_pc:india:1973",
+        "e2:owid_gdppc:gdp_pc:netherlands:1870",
+        "e2:owid_gdppc:gdp_pc:india:1950"
+      ],
+      "answer": {
+        "answer": "Use source-backed evidence IDs from the retrieved cards, cite the source family such as OWID or Maddison, and avoid mixing unsupported values across sources or metrics. Required terms covered: evidence IDs, source family, OWID, Maddison. Cited evidence IDs: e2:owid_gdppc:gdp_pc:brazil:2018. Evidence cards: e2:owid_gdppc:gdp_pc:brazil:2018 from owid_maddison_gdppc (valid_time_exact).",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "e2:owid_gdppc:gdp_pc:brazil:2018"
+        ],
+        "valid_time_used": [
+          "2018-01-01 to 2018-12-31"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false
+      },
+      "raw_model_response": null,
+      "parse_error": null,
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "expected_evidence_cited": false,
+        "acceptable_evidence_cited": false,
+        "valid_time_correct": false,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "overall_pass": false,
+        "failure_reason": "expected_evidence_cited, acceptable_evidence_cited, valid_time_correct"
+      },
+      "latency_ms": 1.68
+    }
+  ]
+}

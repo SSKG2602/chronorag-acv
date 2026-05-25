@@ -1,0 +1,2962 @@
+{
+  "benchmark": "chronorag_temporal_retrieval_ablation",
+  "top_k": 5,
+  "candidate_k": 150,
+  "case_count": 3,
+  "summary": [
+    {
+      "method": "BM25 only",
+      "window_hit_at_5": 0.0,
+      "source_hit_at_5": 1.0,
+      "unit_hit_at_5": 1.0,
+      "text_hit_at_5": 1.0,
+      "latency_ms": 163.74,
+      "n": 3
+    },
+    {
+      "method": "Vector only",
+      "window_hit_at_5": 0.0,
+      "source_hit_at_5": 1.0,
+      "unit_hit_at_5": 0.6666666666666666,
+      "text_hit_at_5": 0.0,
+      "latency_ms": 240.23666666666668,
+      "n": 3
+    },
+    {
+      "method": "Hybrid without temporal filter",
+      "window_hit_at_5": 0.0,
+      "source_hit_at_5": 1.0,
+      "unit_hit_at_5": 1.0,
+      "text_hit_at_5": 0.6666666666666666,
+      "latency_ms": 163.23666666666665,
+      "n": 3
+    },
+    {
+      "method": "Hybrid with temporal filter",
+      "window_hit_at_5": 1.0,
+      "source_hit_at_5": 1.0,
+      "unit_hit_at_5": 1.0,
+      "text_hit_at_5": 1.0,
+      "latency_ms": 239.28333333333333,
+      "n": 3
+    },
+    {
+      "method": "Hybrid + temporal fusion",
+      "window_hit_at_5": 1.0,
+      "source_hit_at_5": 1.0,
+      "unit_hit_at_5": 1.0,
+      "text_hit_at_5": 1.0,
+      "latency_ms": 164.83,
+      "n": 3
+    },
+    {
+      "method": "Hybrid + temporal fusion + rerank",
+      "window_hit_at_5": 1.0,
+      "source_hit_at_5": 1.0,
+      "unit_hit_at_5": 1.0,
+      "text_hit_at_5": 1.0,
+      "latency_ms": 228.74333333333334,
+      "n": 3
+    }
+  ],
+  "details": [
+    {
+      "id": "world_economy_1870_europe_gdp_pc",
+      "query": "Europe GDP per capita in 1870 (1990 intl$)",
+      "window_hit_at_5": 0,
+      "source_hit_at_5": 1,
+      "unit_hit_at_5": 1,
+      "text_hit_at_5": 1,
+      "latency_ms": 164.66,
+      "top_results": [
+        {
+          "method": "BM25 only",
+          "chunk_id": "6f1641daaa0c4674897e9e188805c7ed",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "GDP (1990 Population Per Capita GDP (1990 Population Per Capita",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 1.0,
+          "valid_window": {
+            "from": "1990-01-01T00:00:00+00:00",
+            "to": "1991-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC",
+            "Population"
+          ]
+        },
+        {
+          "method": "BM25 only",
+          "chunk_id": "d966e22be2fd489ab6eabe398cd39584",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Per Capita GDP (1990 international $) Average E. Europe 496 548 606 683",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.7749207053917808,
+          "valid_window": {
+            "from": "1970-01-01T00:00:00+00:00",
+            "to": "1971-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Country:RUS",
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC",
+            "Region:Europe"
+          ]
+        },
+        {
+          "method": "BM25 only",
+          "chunk_id": "0bf8b4fe7ba1452c97aec0cbc221929a",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Per capita GDP (1990 int. dollars)",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.717820998294301,
+          "valid_window": {
+            "from": "1990-01-01T00:00:00+00:00",
+            "to": "1991-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ]
+        },
+        {
+          "method": "BM25 only",
+          "chunk_id": "def435279ee2474bb6425b954d7897d1",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "GDP per capita (1990 international dollars)",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.717820998294301,
+          "valid_window": {
+            "from": "1990-01-01T00:00:00+00:00",
+            "to": "1991-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ]
+        },
+        {
+          "method": "BM25 only",
+          "chunk_id": "30e9d5e3b53b4ec9a930026f2d29217e",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "GDP per capita (1990 international dollars)",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.717820998294301,
+          "valid_window": {
+            "from": "1990-01-01T00:00:00+00:00",
+            "to": "1991-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ]
+        }
+      ],
+      "method": "BM25 only"
+    },
+    {
+      "id": "world_economy_1870_europe_gdp_pc",
+      "query": "Europe GDP per capita in 1870 (1990 intl$)",
+      "window_hit_at_5": 0,
+      "source_hit_at_5": 1,
+      "unit_hit_at_5": 1,
+      "text_hit_at_5": 0,
+      "latency_ms": 250.37,
+      "top_results": [
+        {
+          "method": "Vector only",
+          "chunk_id": "55f698b1ce6c4eed82e643824949d4f8",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "93.7 per cent of world GDP in 1990 (see Table 7\u20132).",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 1.0,
+          "valid_window": {
+            "from": "1990-01-01T00:00:00+00:00",
+            "to": "1991-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "Region:World"
+          ]
+        },
+        {
+          "method": "Vector only",
+          "chunk_id": "b801040ba63b4a0ebf9dad6f1e9d8e5a",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1958 4 314 899 5 175 4 703 11 735 2 401 3 412 2 014 273 683",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.894084483001125,
+          "valid_window": {
+            "from": "1958-01-01T00:00:00+00:00",
+            "to": "1959-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON"
+          ]
+        },
+        {
+          "method": "Vector only",
+          "chunk_id": "13f5c3e81c0d4be8ba1e324f28ab744b",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "ISBN 92-64-02261-9 \u2013\u00a9 OECD 2006 52",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.7682603255332511,
+          "valid_window": {
+            "from": "2006-01-01T00:00:00+00:00",
+            "to": "2007-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON"
+          ]
+        },
+        {
+          "method": "Vector only",
+          "chunk_id": "cd68dd90023d42708fdd74db87a4646f",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1965\u201382 from J.F.",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.7284641003534279,
+          "valid_window": {
+            "from": "1965-01-01T00:00:00+00:00",
+            "to": "1966-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON"
+          ]
+        },
+        {
+          "method": "Vector only",
+          "chunk_id": "f400c3cb45484e1f9f08e28a43f434c1",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1954 5 412 2 275 12 238 3 049 7 867 3 431 6 767 3 654",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.696170182182842,
+          "valid_window": {
+            "from": "1954-01-01T00:00:00+00:00",
+            "to": "1955-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON"
+          ]
+        }
+      ],
+      "method": "Vector only"
+    },
+    {
+      "id": "world_economy_1870_europe_gdp_pc",
+      "query": "Europe GDP per capita in 1870 (1990 intl$)",
+      "window_hit_at_5": 0,
+      "source_hit_at_5": 1,
+      "unit_hit_at_5": 1,
+      "text_hit_at_5": 1,
+      "latency_ms": 159.92,
+      "top_results": [
+        {
+          "method": "Hybrid without temporal filter",
+          "chunk_id": "55f698b1ce6c4eed82e643824949d4f8",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "93.7 per cent of world GDP in 1990 (see Table 7\u20132).",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.5,
+          "valid_window": {
+            "from": "1990-01-01T00:00:00+00:00",
+            "to": "1991-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "Region:World"
+          ]
+        },
+        {
+          "method": "Hybrid without temporal filter",
+          "chunk_id": "6f1641daaa0c4674897e9e188805c7ed",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "GDP (1990 Population Per Capita GDP (1990 Population Per Capita",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.5,
+          "valid_window": {
+            "from": "1990-01-01T00:00:00+00:00",
+            "to": "1991-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC",
+            "Population"
+          ]
+        },
+        {
+          "method": "Hybrid without temporal filter",
+          "chunk_id": "b801040ba63b4a0ebf9dad6f1e9d8e5a",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1958 4 314 899 5 175 4 703 11 735 2 401 3 412 2 014 273 683",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.4470422415005625,
+          "valid_window": {
+            "from": "1958-01-01T00:00:00+00:00",
+            "to": "1959-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON"
+          ]
+        },
+        {
+          "method": "Hybrid without temporal filter",
+          "chunk_id": "d966e22be2fd489ab6eabe398cd39584",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Per Capita GDP (1990 international $) Average E. Europe 496 548 606 683",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.3874603526958904,
+          "valid_window": {
+            "from": "1970-01-01T00:00:00+00:00",
+            "to": "1971-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Country:RUS",
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC",
+            "Region:Europe"
+          ]
+        },
+        {
+          "method": "Hybrid without temporal filter",
+          "chunk_id": "13f5c3e81c0d4be8ba1e324f28ab744b",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "ISBN 92-64-02261-9 \u2013\u00a9 OECD 2006 52",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.38413016276662554,
+          "valid_window": {
+            "from": "2006-01-01T00:00:00+00:00",
+            "to": "2007-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON"
+          ]
+        }
+      ],
+      "method": "Hybrid without temporal filter"
+    },
+    {
+      "id": "world_economy_1870_europe_gdp_pc",
+      "query": "Europe GDP per capita in 1870 (1990 intl$)",
+      "window_hit_at_5": 1,
+      "source_hit_at_5": 1,
+      "unit_hit_at_5": 1,
+      "text_hit_at_5": 1,
+      "latency_ms": 252.35,
+      "top_results": [
+        {
+          "method": "Hybrid with temporal filter",
+          "chunk_id": "6566fba4bf1d4ea7a9b77748b44df09d",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1870 per capita GDP level",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.33557769040188606,
+          "valid_window": {
+            "from": "1870-01-01T00:00:00+00:00",
+            "to": "1871-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ]
+        },
+        {
+          "method": "Hybrid with temporal filter",
+          "chunk_id": "70f6bd58fcd949d39f074c70c0b95a24",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Non\u2013sample per capita GDP in 1870 is an interpolation",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.31274221515086936,
+          "valid_window": {
+            "from": "1870-01-01T00:00:00+00:00",
+            "to": "1871-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ]
+        },
+        {
+          "method": "Hybrid with temporal filter",
+          "chunk_id": "9ea96d6663c54672a909b8a82f539a22",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "piece goods exports had fallen off, and India imported both yarn and piece goods from China and",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.2901268707690209,
+          "valid_window": {
+            "from": "1000-01-01T00:00:00+00:00",
+            "to": "2006-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Country:CHN",
+            "Country:IND",
+            "Dataset:OECD_MADDISON"
+          ]
+        },
+        {
+          "method": "Hybrid with temporal filter",
+          "chunk_id": "e45e10aa54b14d1fa380c04e02c7baf3",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "per capita GDP per capita GDP per capita GDP per capita GDP nominal nominal",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.2714966240163007,
+          "valid_window": {
+            "from": "1787-01-01T00:00:00+00:00",
+            "to": "2000-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ]
+        },
+        {
+          "method": "Hybrid with temporal filter",
+          "chunk_id": "4e08b3d5a639428ab3e93b55ada98e1a",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "by population, and by a smoothed index of wheat prices in Paris.",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.2585235814665532,
+          "valid_window": {
+            "from": "1000-01-01T00:00:00+00:00",
+            "to": "1994-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "Population"
+          ]
+        }
+      ],
+      "method": "Hybrid with temporal filter"
+    },
+    {
+      "id": "world_economy_1870_europe_gdp_pc",
+      "query": "Europe GDP per capita in 1870 (1990 intl$)",
+      "window_hit_at_5": 1,
+      "source_hit_at_5": 1,
+      "unit_hit_at_5": 1,
+      "text_hit_at_5": 1,
+      "latency_ms": 164.12,
+      "top_results": [
+        {
+          "method": "Hybrid + temporal fusion",
+          "chunk_id": "6566fba4bf1d4ea7a9b77748b44df09d",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1870 per capita GDP level",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.09756772972103733,
+          "valid_window": {
+            "from": "1870-01-01T00:00:00+00:00",
+            "to": "1871-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ],
+          "time_weight": 1.0,
+          "rank_score": 0.39557769040188606
+        },
+        {
+          "method": "Hybrid + temporal fusion",
+          "chunk_id": "70f6bd58fcd949d39f074c70c0b95a24",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Non\u2013sample per capita GDP in 1870 is an interpolation",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.08500821833297811,
+          "valid_window": {
+            "from": "1870-01-01T00:00:00+00:00",
+            "to": "1871-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ],
+          "time_weight": 1.0,
+          "rank_score": 0.37274221515086936
+        },
+        {
+          "method": "Hybrid + temporal fusion",
+          "chunk_id": "e45e10aa54b14d1fa380c04e02c7baf3",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "per capita GDP per capita GDP per capita GDP per capita GDP nominal nominal",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.06232314320896537,
+          "valid_window": {
+            "from": "1787-01-01T00:00:00+00:00",
+            "to": "2000-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ],
+          "time_weight": 1.0,
+          "rank_score": 0.3314966240163007
+        },
+        {
+          "method": "Hybrid + temporal fusion",
+          "chunk_id": "c6516b63959b4e59a653a3a7e127ee35",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Per capita GDP in",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.04786856244311177,
+          "valid_window": {
+            "from": "1000-01-01T00:00:00+00:00",
+            "to": "2006-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ],
+          "time_weight": 1.0,
+          "rank_score": 0.3052155680783851
+        },
+        {
+          "method": "Hybrid + temporal fusion",
+          "chunk_id": "9ea96d6663c54672a909b8a82f539a22",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "piece goods exports had fallen off, and India imported both yarn and piece goods from China and",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.03956977892296154,
+          "valid_window": {
+            "from": "1000-01-01T00:00:00+00:00",
+            "to": "2006-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Country:CHN",
+            "Country:IND",
+            "Dataset:OECD_MADDISON"
+          ],
+          "time_weight": 1.0,
+          "rank_score": 0.2901268707690209
+        }
+      ],
+      "method": "Hybrid + temporal fusion"
+    },
+    {
+      "id": "world_economy_1870_europe_gdp_pc",
+      "query": "Europe GDP per capita in 1870 (1990 intl$)",
+      "window_hit_at_5": 1,
+      "source_hit_at_5": 1,
+      "unit_hit_at_5": 1,
+      "text_hit_at_5": 1,
+      "latency_ms": 232.17,
+      "top_results": [
+        {
+          "method": "Hybrid + temporal fusion + rerank",
+          "chunk_id": "e45e10aa54b14d1fa380c04e02c7baf3",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "per capita GDP per capita GDP per capita GDP per capita GDP nominal nominal",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.48,
+          "valid_window": {
+            "from": "1787-01-01T00:00:00+00:00",
+            "to": "2000-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ],
+          "rerank": 1.0,
+          "time_weight": 1.0
+        },
+        {
+          "method": "Hybrid + temporal fusion + rerank",
+          "chunk_id": "716d75e46cd74e66812cc87c3fabbb4b",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "From 1870 to 1913, world capita GDP rose 1.3 per cent a year compared with 0.5 per cent in",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.30500000000000005,
+          "valid_window": {
+            "from": "1870-01-01T00:00:00+00:00",
+            "to": "1913-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "Region:World"
+          ],
+          "rerank": 0.6500000000000001,
+          "time_weight": 1.0
+        },
+        {
+          "method": "Hybrid + temporal fusion + rerank",
+          "chunk_id": "aaed2de79a3a448687d579d0fe55bea6",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "From 1870 to 1913, world capita GDP rose 1.3 per cent a year compared with 0.5 per cent in",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.28060000000000007,
+          "valid_window": {
+            "from": "1870-01-01T00:00:00+00:00",
+            "to": "1871-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "Region:World"
+          ],
+          "rerank": 0.6500000000000001,
+          "time_weight": 1.0
+        },
+        {
+          "method": "Hybrid + temporal fusion + rerank",
+          "chunk_id": "70f6bd58fcd949d39f074c70c0b95a24",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Non\u2013sample per capita GDP in 1870 is an interpolation",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.26,
+          "valid_window": {
+            "from": "1870-01-01T00:00:00+00:00",
+            "to": "1871-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ],
+          "rerank": 0.56,
+          "time_weight": 1.0
+        },
+        {
+          "method": "Hybrid + temporal fusion + rerank",
+          "chunk_id": "ae968b07b7dc41cab580d3093442ae7d",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Population, GDP and GDP Per Capita in 44 Latin American",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.26,
+          "valid_window": {
+            "from": "1814-01-01T00:00:00+00:00",
+            "to": "2000-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC",
+            "Population",
+            "Region:Latin America"
+          ],
+          "rerank": 0.56,
+          "time_weight": 1.0
+        }
+      ],
+      "method": "Hybrid + temporal fusion + rerank"
+    },
+    {
+      "id": "world_economy_1913_gdp_pc",
+      "query": "Europe GDP per capita in 1913 1990 international dollars",
+      "window_hit_at_5": 0,
+      "source_hit_at_5": 1,
+      "unit_hit_at_5": 1,
+      "text_hit_at_5": 1,
+      "latency_ms": 163.31,
+      "top_results": [
+        {
+          "method": "BM25 only",
+          "chunk_id": "7feca632fac04f61ac6df1000c972e0d",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "(Conjectured per capita GDP in 1990 international $)",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 1.0,
+          "valid_window": {
+            "from": "1990-01-01T00:00:00+00:00",
+            "to": "1991-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ]
+        },
+        {
+          "method": "BM25 only",
+          "chunk_id": "3b90aeeffcba4da682aa0142e68fefde",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1990 benchmark GDP levels in 1990 international dollars from Maddison (2001), p.",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.7947250533585696,
+          "valid_window": {
+            "from": "1990-01-01T00:00:00+00:00",
+            "to": "1991-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP"
+          ]
+        },
+        {
+          "method": "BM25 only",
+          "chunk_id": "9520622f9e3b42e990976b77b53b77c9",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1990 benchmark GDP levels in 1990 international dollars from Maddison (2001), p.",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.7947250533585696,
+          "valid_window": {
+            "from": "2001-01-01T00:00:00+00:00",
+            "to": "2002-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP"
+          ]
+        },
+        {
+          "method": "BM25 only",
+          "chunk_id": "c57026beb4ff4818a5dca1796736a898",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1990 benchmark GDP levels in million 1990 international Geary\u2013Khamis dollars were derived from",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.7364163686612317,
+          "valid_window": {
+            "from": "1990-01-01T00:00:00+00:00",
+            "to": "1991-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP"
+          ]
+        },
+        {
+          "method": "BM25 only",
+          "chunk_id": "8ec9ba6ec7f546a882cf6f8cb3133b70",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "in 1990 international dollars for 1950\u201398.",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.7335632083062039,
+          "valid_window": {
+            "from": "1990-01-01T00:00:00+00:00",
+            "to": "1991-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON"
+          ]
+        }
+      ],
+      "method": "BM25 only"
+    },
+    {
+      "id": "world_economy_1913_gdp_pc",
+      "query": "Europe GDP per capita in 1913 1990 international dollars",
+      "window_hit_at_5": 0,
+      "source_hit_at_5": 1,
+      "unit_hit_at_5": 0,
+      "text_hit_at_5": 0,
+      "latency_ms": 236.57,
+      "top_results": [
+        {
+          "method": "Vector only",
+          "chunk_id": "d9e86ba8e9b94aee8d03a13dd41bf6c8",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "T , M. (1975), \u201cAux origines de la m\u00e9thode de reconstitution des familles: les Su\u00e9dois d\u2019Estonie\u201d, Population,",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 1.0,
+          "valid_window": {
+            "from": "1975-01-01T00:00:00+00:00",
+            "to": "1976-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "Population"
+          ]
+        },
+        {
+          "method": "Vector only",
+          "chunk_id": "5f04a330d3ab42a098083dba0d1c27a2",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "T , M. (1975), \u201cAux origines de la m\u00e9thode de reconstitution des familles: les Su\u00e9dois d\u2019Estonie\u201d, Population,",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 1.0,
+          "valid_window": {
+            "from": "1970-01-01T00:00:00+00:00",
+            "to": "1971-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "Population"
+          ]
+        },
+        {
+          "method": "Vector only",
+          "chunk_id": "b7f401a7a07c4d60b2715e797cc42f1f",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1974 12 704 2 375 8 459 3 365 1 443 3 511 30 351 17 463",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.8814017034789122,
+          "valid_window": {
+            "from": "1974-01-01T00:00:00+00:00",
+            "to": "1975-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON"
+          ]
+        },
+        {
+          "method": "Vector only",
+          "chunk_id": "184488c7c43f4c1dae068287643b6d03",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1973 5.1 4.7 4.1 7.4 5.7 5.3 1.0 4.5",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.7611952602613786,
+          "valid_window": {
+            "from": "1973-01-01T00:00:00+00:00",
+            "to": "1974-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON"
+          ]
+        },
+        {
+          "method": "Vector only",
+          "chunk_id": "abda3e9d3541432a977ac355a4997cc5",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1895 3 934",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.7276823197866763,
+          "valid_window": {
+            "from": "1895-01-01T00:00:00+00:00",
+            "to": "1896-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON"
+          ]
+        }
+      ],
+      "method": "Vector only"
+    },
+    {
+      "id": "world_economy_1913_gdp_pc",
+      "query": "Europe GDP per capita in 1913 1990 international dollars",
+      "window_hit_at_5": 0,
+      "source_hit_at_5": 1,
+      "unit_hit_at_5": 1,
+      "text_hit_at_5": 1,
+      "latency_ms": 163.87,
+      "top_results": [
+        {
+          "method": "Hybrid without temporal filter",
+          "chunk_id": "d9e86ba8e9b94aee8d03a13dd41bf6c8",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "T , M. (1975), \u201cAux origines de la m\u00e9thode de reconstitution des familles: les Su\u00e9dois d\u2019Estonie\u201d, Population,",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.5,
+          "valid_window": {
+            "from": "1975-01-01T00:00:00+00:00",
+            "to": "1976-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "Population"
+          ]
+        },
+        {
+          "method": "Hybrid without temporal filter",
+          "chunk_id": "5f04a330d3ab42a098083dba0d1c27a2",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "T , M. (1975), \u201cAux origines de la m\u00e9thode de reconstitution des familles: les Su\u00e9dois d\u2019Estonie\u201d, Population,",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.5,
+          "valid_window": {
+            "from": "1970-01-01T00:00:00+00:00",
+            "to": "1971-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "Population"
+          ]
+        },
+        {
+          "method": "Hybrid without temporal filter",
+          "chunk_id": "7feca632fac04f61ac6df1000c972e0d",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "(Conjectured per capita GDP in 1990 international $)",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.5,
+          "valid_window": {
+            "from": "1990-01-01T00:00:00+00:00",
+            "to": "1991-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ]
+        },
+        {
+          "method": "Hybrid without temporal filter",
+          "chunk_id": "b7f401a7a07c4d60b2715e797cc42f1f",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1974 12 704 2 375 8 459 3 365 1 443 3 511 30 351 17 463",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.4407008517394561,
+          "valid_window": {
+            "from": "1974-01-01T00:00:00+00:00",
+            "to": "1975-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON"
+          ]
+        },
+        {
+          "method": "Hybrid without temporal filter",
+          "chunk_id": "3b90aeeffcba4da682aa0142e68fefde",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1990 benchmark GDP levels in 1990 international dollars from Maddison (2001), p.",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.3973625266792848,
+          "valid_window": {
+            "from": "1990-01-01T00:00:00+00:00",
+            "to": "1991-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP"
+          ]
+        }
+      ],
+      "method": "Hybrid without temporal filter"
+    },
+    {
+      "id": "world_economy_1913_gdp_pc",
+      "query": "Europe GDP per capita in 1913 1990 international dollars",
+      "window_hit_at_5": 1,
+      "source_hit_at_5": 1,
+      "unit_hit_at_5": 1,
+      "text_hit_at_5": 1,
+      "latency_ms": 235.72,
+      "top_results": [
+        {
+          "method": "Hybrid with temporal filter",
+          "chunk_id": "fd942e94600a45ec9a7f17e1b9ac6563",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "capita GDP level in international dollars derived from OECD, A PPP Comparison for the NIS, Paris,",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.24322053025382162,
+          "valid_window": {
+            "from": "1000-01-01T00:00:00+00:00",
+            "to": "2006-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP"
+          ]
+        },
+        {
+          "method": "Hybrid with temporal filter",
+          "chunk_id": "e45e10aa54b14d1fa380c04e02c7baf3",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "per capita GDP per capita GDP per capita GDP per capita GDP nominal nominal",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.23491917059196468,
+          "valid_window": {
+            "from": "1787-01-01T00:00:00+00:00",
+            "to": "2000-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ]
+        },
+        {
+          "method": "Hybrid with temporal filter",
+          "chunk_id": "c6516b63959b4e59a653a3a7e127ee35",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Per capita GDP in",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.2061146751695213,
+          "valid_window": {
+            "from": "1000-01-01T00:00:00+00:00",
+            "to": "2006-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ]
+        },
+        {
+          "method": "Hybrid with temporal filter",
+          "chunk_id": "62897faf494048b6aaae73b334eaf146",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Source: 1870-1973 from Maddison (1995a), p.",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.20177922299076403,
+          "valid_window": {
+            "from": "1870-01-01T00:00:00+00:00",
+            "to": "1973-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON"
+          ]
+        },
+        {
+          "method": "Hybrid with temporal filter",
+          "chunk_id": "b2038a91dedf436383bb8e8df35d3b81",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Between 1820 and 1913, per capita income grew faster than at any time in the past \u2014 three times",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.1922410797689978,
+          "valid_window": {
+            "from": "1913-01-01T00:00:00+00:00",
+            "to": "1914-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON"
+          ]
+        }
+      ],
+      "method": "Hybrid with temporal filter"
+    },
+    {
+      "id": "world_economy_1913_gdp_pc",
+      "query": "Europe GDP per capita in 1913 1990 international dollars",
+      "window_hit_at_5": 1,
+      "source_hit_at_5": 1,
+      "unit_hit_at_5": 1,
+      "text_hit_at_5": 1,
+      "latency_ms": 164.02,
+      "top_results": [
+        {
+          "method": "Hybrid + temporal fusion",
+          "chunk_id": "e45e10aa54b14d1fa380c04e02c7baf3",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "per capita GDP per capita GDP per capita GDP per capita GDP nominal nominal",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.042205543825580616,
+          "valid_window": {
+            "from": "1787-01-01T00:00:00+00:00",
+            "to": "2000-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ],
+          "time_weight": 1.0,
+          "rank_score": 0.2949191705919647
+        },
+        {
+          "method": "Hybrid + temporal fusion",
+          "chunk_id": "fd942e94600a45ec9a7f17e1b9ac6563",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "capita GDP level in international dollars derived from OECD, A PPP Comparison for the NIS, Paris,",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.04127129163960186,
+          "valid_window": {
+            "from": "1000-01-01T00:00:00+00:00",
+            "to": "2006-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP"
+          ],
+          "time_weight": 1.0,
+          "rank_score": 0.2932205302538216
+        },
+        {
+          "method": "Hybrid + temporal fusion",
+          "chunk_id": "c6516b63959b4e59a653a3a7e127ee35",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Per capita GDP in",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.026363071343236677,
+          "valid_window": {
+            "from": "1000-01-01T00:00:00+00:00",
+            "to": "2006-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ],
+          "time_weight": 1.0,
+          "rank_score": 0.2661146751695213
+        },
+        {
+          "method": "Hybrid + temporal fusion",
+          "chunk_id": "e6a6024bba6c452daba7f9f6629d44bc",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "He derives nominal GDP",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.011504912783572796,
+          "valid_window": {
+            "from": "1820-01-01T00:00:00+00:00",
+            "to": "2002-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP"
+          ],
+          "time_weight": 1.0,
+          "rank_score": 0.23909984142467772
+        },
+        {
+          "method": "Hybrid + temporal fusion",
+          "chunk_id": "b2038a91dedf436383bb8e8df35d3b81",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Between 1820 and 1913, per capita income grew faster than at any time in the past \u2014 three times",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.0,
+          "valid_window": {
+            "from": "1913-01-01T00:00:00+00:00",
+            "to": "1914-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON"
+          ],
+          "time_weight": 1.0,
+          "rank_score": 0.2022410797689978
+        }
+      ],
+      "method": "Hybrid + temporal fusion"
+    },
+    {
+      "id": "world_economy_1913_gdp_pc",
+      "query": "Europe GDP per capita in 1913 1990 international dollars",
+      "window_hit_at_5": 1,
+      "source_hit_at_5": 1,
+      "unit_hit_at_5": 1,
+      "text_hit_at_5": 1,
+      "latency_ms": 229.69,
+      "top_results": [
+        {
+          "method": "Hybrid + temporal fusion + rerank",
+          "chunk_id": "e45e10aa54b14d1fa380c04e02c7baf3",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "per capita GDP per capita GDP per capita GDP per capita GDP nominal nominal",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.48,
+          "valid_window": {
+            "from": "1787-01-01T00:00:00+00:00",
+            "to": "2000-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ],
+          "rerank": 1.0,
+          "time_weight": 1.0
+        },
+        {
+          "method": "Hybrid + temporal fusion + rerank",
+          "chunk_id": "fd942e94600a45ec9a7f17e1b9ac6563",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "capita GDP level in international dollars derived from OECD, A PPP Comparison for the NIS, Paris,",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.255,
+          "valid_window": {
+            "from": "1000-01-01T00:00:00+00:00",
+            "to": "2006-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP"
+          ],
+          "rerank": 0.55,
+          "time_weight": 1.0
+        },
+        {
+          "method": "Hybrid + temporal fusion + rerank",
+          "chunk_id": "c3d0a303ba594d3386065a66e62ecbf7",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "per capita GDP levels for China and Europe are explained in Maddison (1998a), and the conjectures",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.23920000000000002,
+          "valid_window": {
+            "from": "1280-01-01T00:00:00+00:00",
+            "to": "1990-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Country:CHN",
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC",
+            "Region:Europe"
+          ],
+          "rerank": 0.56,
+          "time_weight": 1.0
+        },
+        {
+          "method": "Hybrid + temporal fusion + rerank",
+          "chunk_id": "c6516b63959b4e59a653a3a7e127ee35",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Per capita GDP in",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.20999999999999996,
+          "valid_window": {
+            "from": "1000-01-01T00:00:00+00:00",
+            "to": "2006-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ],
+          "rerank": 0.46,
+          "time_weight": 1.0
+        },
+        {
+          "method": "Hybrid + temporal fusion + rerank",
+          "chunk_id": "7405a6f8fb244049b72d241e9229cae0",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "in 1990 int. $ % of US % of US in 1990 int. $ per capita GDP per capita GDP",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.13001260806916426,
+          "valid_window": {
+            "from": "1990-01-01T00:00:00+00:00",
+            "to": "1991-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "percent",
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ],
+          "rerank": 1.0,
+          "time_weight": 3.602305475504323e-05
+        }
+      ],
+      "method": "Hybrid + temporal fusion + rerank"
+    },
+    {
+      "id": "world_economy_1820_gdp_pc",
+      "query": "Europe per capita GDP in 1820 Maddison 1990 international dollars",
+      "window_hit_at_5": 0,
+      "source_hit_at_5": 1,
+      "unit_hit_at_5": 1,
+      "text_hit_at_5": 1,
+      "latency_ms": 163.25,
+      "top_results": [
+        {
+          "method": "BM25 only",
+          "chunk_id": "d71326941d0b4fe1aa9df525f30ed389",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "in 1990 international dollars in Maddison (1995a)",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 1.0,
+          "valid_window": {
+            "from": "1990-01-01T00:00:00+00:00",
+            "to": "1991-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON"
+          ]
+        },
+        {
+          "method": "BM25 only",
+          "chunk_id": "12221ba4938347c58b5e53b3e425b9e0",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "in 1990 international dollars in Maddison (1995a)",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 1.0,
+          "valid_window": {
+            "from": "1970-01-01T00:00:00+00:00",
+            "to": "1971-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP"
+          ]
+        },
+        {
+          "method": "BM25 only",
+          "chunk_id": "3b90aeeffcba4da682aa0142e68fefde",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1990 benchmark GDP levels in 1990 international dollars from Maddison (2001), p.",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.9875429260152792,
+          "valid_window": {
+            "from": "1990-01-01T00:00:00+00:00",
+            "to": "1991-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP"
+          ]
+        },
+        {
+          "method": "BM25 only",
+          "chunk_id": "9520622f9e3b42e990976b77b53b77c9",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1990 benchmark GDP levels in 1990 international dollars from Maddison (2001), p.",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.9875429260152792,
+          "valid_window": {
+            "from": "2001-01-01T00:00:00+00:00",
+            "to": "2002-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP"
+          ]
+        },
+        {
+          "method": "BM25 only",
+          "chunk_id": "7feca632fac04f61ac6df1000c972e0d",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "(Conjectured per capita GDP in 1990 international $)",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.811179695535521,
+          "valid_window": {
+            "from": "1990-01-01T00:00:00+00:00",
+            "to": "1991-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ]
+        }
+      ],
+      "method": "BM25 only"
+    },
+    {
+      "id": "world_economy_1820_gdp_pc",
+      "query": "Europe per capita GDP in 1820 Maddison 1990 international dollars",
+      "window_hit_at_5": 0,
+      "source_hit_at_5": 1,
+      "unit_hit_at_5": 1,
+      "text_hit_at_5": 0,
+      "latency_ms": 233.77,
+      "top_results": [
+        {
+          "method": "Vector only",
+          "chunk_id": "6564fe0a8622425b969050ad9cb3370d",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Africa has nearly 13 per cent of world population, but only 3 per cent of world GDP. It is the world\u2019s poorest region, with a 1998 per capita income only 5 per cent of that in the richest region, less than half of that in Asia (excluding Japan). It has the lowest life expectation (52 years compared with 78 in Western Europe). It has the most rapid demographic expansion \u2014 about nine times as fast as in Western Europe. As a result of rapid population growth, age structure is very different from that in Western Europe. In Europe more than two thirds are of working age, in Africa little more than half. 43 per cent of Africans are below 15 years old and 3 per cent 65 or over. In Western Europe 18 per cent are under 15 and 15 per cent 65 or older. Almost half the adult population of Africa are illiterate. They have a high incidence of infectious and parasitic disease (malaria, sleeping sickness, hookworm, river blindness, yellow fever). Over two thirds of HIV infected people live in Africa. As a result the quantity and quality of labour input per head of population is much lower than in other parts of the world. African economies are more volatile than most others, because their export earnings are concentrated on a few primary commodities, and extremes of weather (droughts and floods) are more severe and have a heavy impact. Although African levels of performance are low in comparative terms, there has been economic growth in the capitalist epoch. Per",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 1.0,
+          "valid_window": {
+            "from": "1970-01-01T00:00:00+00:00",
+            "to": "1971-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Country:JPN",
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "Population",
+            "Region:Africa",
+            "Region:Asia",
+            "Region:Europe",
+            "Region:Western Europe",
+            "Region:World"
+          ]
+        },
+        {
+          "method": "Vector only",
+          "chunk_id": "7333fbc42977468c9618520433249c73",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1948 6 956 8 557 4 190 3 912 41 110 67 295 46 381",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.9422254199441744,
+          "valid_window": {
+            "from": "1948-01-01T00:00:00+00:00",
+            "to": "1949-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON"
+          ]
+        },
+        {
+          "method": "Vector only",
+          "chunk_id": "ead7f4adc2e74b28bf3b4c25592b1f14",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1960 5 516 3 389 21 908 4 209 10 106 4 553 8 992 3 926",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.7860387207931434,
+          "valid_window": {
+            "from": "1960-01-01T00:00:00+00:00",
+            "to": "1961-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON"
+          ]
+        },
+        {
+          "method": "Vector only",
+          "chunk_id": "027e338652574920a4f1619a9ee9d82f",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1961 329 208 214 864 100 112 218 150 224 038 1 703 159 289 201 3 078 732",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.706408185432644,
+          "valid_window": {
+            "from": "1961-01-01T00:00:00+00:00",
+            "to": "1962-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON"
+          ]
+        },
+        {
+          "method": "Vector only",
+          "chunk_id": "19a62ee73fa6456bbf2434ed1700cfb0",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "United Kingdom in 1913\u201350, though to a lesser degree than in the United States (see Maddison 1995a,",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.6675898346703227,
+          "valid_window": {
+            "from": "1913-01-01T00:00:00+00:00",
+            "to": "1914-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Country:GBR",
+            "Country:USA",
+            "Dataset:OECD_MADDISON"
+          ]
+        }
+      ],
+      "method": "Vector only"
+    },
+    {
+      "id": "world_economy_1820_gdp_pc",
+      "query": "Europe per capita GDP in 1820 Maddison 1990 international dollars",
+      "window_hit_at_5": 0,
+      "source_hit_at_5": 1,
+      "unit_hit_at_5": 1,
+      "text_hit_at_5": 0,
+      "latency_ms": 165.92,
+      "top_results": [
+        {
+          "method": "Hybrid without temporal filter",
+          "chunk_id": "6564fe0a8622425b969050ad9cb3370d",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Africa has nearly 13 per cent of world population, but only 3 per cent of world GDP. It is the world\u2019s poorest region, with a 1998 per capita income only 5 per cent of that in the richest region, less than half of that in Asia (excluding Japan). It has the lowest life expectation (52 years compared with 78 in Western Europe). It has the most rapid demographic expansion \u2014 about nine times as fast as in Western Europe. As a result of rapid population growth, age structure is very different from that in Western Europe. In Europe more than two thirds are of working age, in Africa little more than half. 43 per cent of Africans are below 15 years old and 3 per cent 65 or over. In Western Europe 18 per cent are under 15 and 15 per cent 65 or older. Almost half the adult population of Africa are illiterate. They have a high incidence of infectious and parasitic disease (malaria, sleeping sickness, hookworm, river blindness, yellow fever). Over two thirds of HIV infected people live in Africa. As a result the quantity and quality of labour input per head of population is much lower than in other parts of the world. African economies are more volatile than most others, because their export earnings are concentrated on a few primary commodities, and extremes of weather (droughts and floods) are more severe and have a heavy impact. Although African levels of performance are low in comparative terms, there has been economic growth in the capitalist epoch. Per",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.5,
+          "valid_window": {
+            "from": "1970-01-01T00:00:00+00:00",
+            "to": "1971-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Country:JPN",
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "Population",
+            "Region:Africa",
+            "Region:Asia",
+            "Region:Europe",
+            "Region:Western Europe",
+            "Region:World"
+          ]
+        },
+        {
+          "method": "Hybrid without temporal filter",
+          "chunk_id": "12221ba4938347c58b5e53b3e425b9e0",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "in 1990 international dollars in Maddison (1995a)",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.5,
+          "valid_window": {
+            "from": "1970-01-01T00:00:00+00:00",
+            "to": "1971-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP"
+          ]
+        },
+        {
+          "method": "Hybrid without temporal filter",
+          "chunk_id": "d71326941d0b4fe1aa9df525f30ed389",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "in 1990 international dollars in Maddison (1995a)",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.5,
+          "valid_window": {
+            "from": "1990-01-01T00:00:00+00:00",
+            "to": "1991-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON"
+          ]
+        },
+        {
+          "method": "Hybrid without temporal filter",
+          "chunk_id": "3b90aeeffcba4da682aa0142e68fefde",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1990 benchmark GDP levels in 1990 international dollars from Maddison (2001), p.",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.4937714630076396,
+          "valid_window": {
+            "from": "1990-01-01T00:00:00+00:00",
+            "to": "1991-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP"
+          ]
+        },
+        {
+          "method": "Hybrid without temporal filter",
+          "chunk_id": "9520622f9e3b42e990976b77b53b77c9",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "1990 benchmark GDP levels in 1990 international dollars from Maddison (2001), p.",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.4937714630076396,
+          "valid_window": {
+            "from": "2001-01-01T00:00:00+00:00",
+            "to": "2002-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP"
+          ]
+        }
+      ],
+      "method": "Hybrid without temporal filter"
+    },
+    {
+      "id": "world_economy_1820_gdp_pc",
+      "query": "Europe per capita GDP in 1820 Maddison 1990 international dollars",
+      "window_hit_at_5": 1,
+      "source_hit_at_5": 1,
+      "unit_hit_at_5": 1,
+      "text_hit_at_5": 1,
+      "latency_ms": 229.78,
+      "top_results": [
+        {
+          "method": "Hybrid with temporal filter",
+          "chunk_id": "c3d0a303ba594d3386065a66e62ecbf7",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "per capita GDP levels for China and Europe are explained in Maddison (1998a), and the conjectures",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.258419280364672,
+          "valid_window": {
+            "from": "1280-01-01T00:00:00+00:00",
+            "to": "1990-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Country:CHN",
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC",
+            "Region:Europe"
+          ]
+        },
+        {
+          "method": "Hybrid with temporal filter",
+          "chunk_id": "7d3ec223a85b44c586fc2947b8be6cf4",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Western Europe: Per capita GDP growth rates prior to 1820 in Maddison (2001) are unchanged for",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.21600001006971484,
+          "valid_window": {
+            "from": "1820-01-01T00:00:00+00:00",
+            "to": "1821-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC",
+            "Region:Europe",
+            "Region:Western Europe"
+          ]
+        },
+        {
+          "method": "Hybrid with temporal filter",
+          "chunk_id": "494cc58d65e046e2a27894515f234aad",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Assuming the indigenous population had a",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.1933781459610057,
+          "valid_window": {
+            "from": "1168-01-01T00:00:00+00:00",
+            "to": "2006-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "n/a"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "Population"
+          ]
+        },
+        {
+          "method": "Hybrid with temporal filter",
+          "chunk_id": "d22988c473de4eb2958aed824128a202",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "infer differences in per capita progress between China and Europe in Maddison (1998a), and such",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.1927988521169318,
+          "valid_window": {
+            "from": "1000-01-01T00:00:00+00:00",
+            "to": "2002-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Country:CHN",
+            "Dataset:OECD_MADDISON",
+            "Region:Europe"
+          ]
+        },
+        {
+          "method": "Hybrid with temporal filter",
+          "chunk_id": "fd942e94600a45ec9a7f17e1b9ac6563",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "capita GDP level in international dollars derived from OECD, A PPP Comparison for the NIS, Paris,",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.18709185874060635,
+          "valid_window": {
+            "from": "1000-01-01T00:00:00+00:00",
+            "to": "2006-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP"
+          ]
+        }
+      ],
+      "method": "Hybrid with temporal filter"
+    },
+    {
+      "id": "world_economy_1820_gdp_pc",
+      "query": "Europe per capita GDP in 1820 Maddison 1990 international dollars",
+      "window_hit_at_5": 1,
+      "source_hit_at_5": 1,
+      "unit_hit_at_5": 1,
+      "text_hit_at_5": 1,
+      "latency_ms": 166.35,
+      "top_results": [
+        {
+          "method": "Hybrid + temporal fusion",
+          "chunk_id": "c3d0a303ba594d3386065a66e62ecbf7",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "per capita GDP levels for China and Europe are explained in Maddison (1998a), and the conjectures",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.05513060420056959,
+          "valid_window": {
+            "from": "1280-01-01T00:00:00+00:00",
+            "to": "1990-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Country:CHN",
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC",
+            "Region:Europe"
+          ],
+          "time_weight": 1.0,
+          "rank_score": 0.318419280364672
+        },
+        {
+          "method": "Hybrid + temporal fusion",
+          "chunk_id": "7d3ec223a85b44c586fc2947b8be6cf4",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Western Europe: Per capita GDP growth rates prior to 1820 in Maddison (2001) are unchanged for",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.03180000553834317,
+          "valid_window": {
+            "from": "1820-01-01T00:00:00+00:00",
+            "to": "1821-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC",
+            "Region:Europe",
+            "Region:Western Europe"
+          ],
+          "time_weight": 1.0,
+          "rank_score": 0.27600001006971486
+        },
+        {
+          "method": "Hybrid + temporal fusion",
+          "chunk_id": "e45e10aa54b14d1fa380c04e02c7baf3",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "per capita GDP per capita GDP per capita GDP per capita GDP nominal nominal",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.012015450355300494,
+          "valid_window": {
+            "from": "1787-01-01T00:00:00+00:00",
+            "to": "2000-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ],
+          "time_weight": 1.0,
+          "rank_score": 0.24002809155509183
+        },
+        {
+          "method": "Hybrid + temporal fusion",
+          "chunk_id": "fd942e94600a45ec9a7f17e1b9ac6563",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "capita GDP level in international dollars derived from OECD, A PPP Comparison for the NIS, Paris,",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.01040052230733346,
+          "valid_window": {
+            "from": "1000-01-01T00:00:00+00:00",
+            "to": "2006-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP"
+          ],
+          "time_weight": 1.0,
+          "rank_score": 0.23709185874060634
+        },
+        {
+          "method": "Hybrid + temporal fusion",
+          "chunk_id": "18d501b6077c4e4aa335660fd9598c9e",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "demise of the VOC, and became a much greater share of Indonesian GDP.",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.00018953725024273282,
+          "valid_window": {
+            "from": "1700-01-01T00:00:00+00:00",
+            "to": "1930-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP"
+          ],
+          "time_weight": 1.0,
+          "rank_score": 0.21852643136407762
+        }
+      ],
+      "method": "Hybrid + temporal fusion"
+    },
+    {
+      "id": "world_economy_1820_gdp_pc",
+      "query": "Europe per capita GDP in 1820 Maddison 1990 international dollars",
+      "window_hit_at_5": 1,
+      "source_hit_at_5": 1,
+      "unit_hit_at_5": 1,
+      "text_hit_at_5": 1,
+      "latency_ms": 224.37,
+      "top_results": [
+        {
+          "method": "Hybrid + temporal fusion + rerank",
+          "chunk_id": "e45e10aa54b14d1fa380c04e02c7baf3",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "per capita GDP per capita GDP per capita GDP per capita GDP nominal nominal",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.48,
+          "valid_window": {
+            "from": "1787-01-01T00:00:00+00:00",
+            "to": "2000-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ],
+          "rerank": 1.0,
+          "time_weight": 1.0
+        },
+        {
+          "method": "Hybrid + temporal fusion + rerank",
+          "chunk_id": "c3d0a303ba594d3386065a66e62ecbf7",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "per capita GDP levels for China and Europe are explained in Maddison (1998a), and the conjectures",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.31000000000000005,
+          "valid_window": {
+            "from": "1280-01-01T00:00:00+00:00",
+            "to": "1990-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Country:CHN",
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC",
+            "Region:Europe"
+          ],
+          "rerank": 0.6600000000000001,
+          "time_weight": 1.0
+        },
+        {
+          "method": "Hybrid + temporal fusion + rerank",
+          "chunk_id": "7d3ec223a85b44c586fc2947b8be6cf4",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Western Europe: Per capita GDP growth rates prior to 1820 in Maddison (2001) are unchanged for",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.2604,
+          "valid_window": {
+            "from": "1820-01-01T00:00:00+00:00",
+            "to": "1821-01-01T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC",
+            "Region:Europe",
+            "Region:Western Europe"
+          ],
+          "rerank": 0.6600000000000001,
+          "time_weight": 1.0
+        },
+        {
+          "method": "Hybrid + temporal fusion + rerank",
+          "chunk_id": "fd942e94600a45ec9a7f17e1b9ac6563",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "capita GDP level in international dollars derived from OECD, A PPP Comparison for the NIS, Paris,",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.255,
+          "valid_window": {
+            "from": "1000-01-01T00:00:00+00:00",
+            "to": "2006-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP"
+          ],
+          "rerank": 0.55,
+          "time_weight": 1.0
+        },
+        {
+          "method": "Hybrid + temporal fusion + rerank",
+          "chunk_id": "c6516b63959b4e59a653a3a7e127ee35",
+          "doc_id": "oecd-maddison:world_economy:v2006",
+          "text": "Per capita GDP in",
+          "uri": "file:///mnt/data/world_economy.pdf",
+          "score": 0.20999999999999996,
+          "valid_window": {
+            "from": "1000-01-01T00:00:00+00:00",
+            "to": "2006-12-31T00:00:00+00:00"
+          },
+          "authority": 0.2,
+          "units_detected": [
+            "intl_1990_usd",
+            "ratio"
+          ],
+          "facets": {
+            "tenant": "lab",
+            "domain": "world-economy",
+            "locale": "en",
+            "source": "oecd-maddison",
+            "license": "\u00a9 OECD 2006 (short summaries only)",
+            "fiscal_year_start": "JAN"
+          },
+          "entities": [
+            "Dataset:OECD_MADDISON",
+            "GDP",
+            "GDP_PC"
+          ],
+          "rerank": 0.46,
+          "time_weight": 1.0
+        }
+      ],
+      "method": "Hybrid + temporal fusion + rerank"
+    }
+  ]
+}

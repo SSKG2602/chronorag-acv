@@ -111,9 +111,11 @@ chronorag/
 
 - This is not a deployed production service.
 - No public hosted demo URL is currently documented.
-- No benchmark table is included yet.
+- A controlled diagnostic benchmark is included, but a larger multi-source,
+  multi-domain benchmark is still required.
 - Demo screenshots are committed under `assets/demo/`.
-- No reproducible evaluation report is committed yet.
+- The current evaluation report is internal/diagnostic, not a publication-grade
+  external benchmark.
 - No Dockerfile or production deployment manifest is visible in the repo root.
 - Storage currently appears oriented around local persisted state and experimental PVDB abstractions, not a hardened multi-tenant Postgres/pgvector deployment.
 - Authentication, authorization, rate limiting, and tenant isolation are not yet production-grade.
@@ -304,8 +306,7 @@ Minimum screenshots to commit:
 
 `benchmarks/temporal_qa_15.jsonl` is an internal smoke benchmark. It validates
 that the light-mode pipeline runs over the small smoke dataset. It is not the
-public benchmark claim and should not be used to imply broad retrieval
-superiority.
+public benchmark and should not be used as broad validation evidence.
 
 ```bash
 CHRONORAG_LIGHT=1 python -m benchmarks.run_ablation \
@@ -314,36 +315,53 @@ CHRONORAG_LIGHT=1 python -m benchmarks.run_ablation \
   --candidate-k 50
 ```
 
-## Controlled Hard 15-Case Benchmark
+## Temporal Eval v2
 
-The public controlled benchmark is `benchmarks/temporal_qa_hard_15.jsonl` over
-`data/sample/hard_temporal/*`. It is designed to test temporal retrieval
-behavior, not broad open-domain QA. It includes exact-year lookups, same-entity
-different-year disambiguation, broad-window distractors, conflict cases, and
-expected failure/partial-answer cases. It is not an external benchmark and not a
-SOTA claim. See `docs/BENCHMARK_HARD_15.md`.
+Temporal Eval v2 is the main controlled retrieval benchmark. It is built from
+multiple source families under `data/raw/temporal_eval_v2/` and generated into
+`data/sample/temporal_eval_v2/`. It tests whether ChronoRAG can prefer exact
+valid-time evidence over wrong-year, broad-window, transaction-time-only,
+metric-confused, and conflict-prone distractors.
+
+The older v1 hard benchmark is archived as a diagnostic benchmark. Temporal Eval
+v2 makes `Source Hit@5` more meaningful because it includes multiple source
+families. It is still not a broad performance claim, not a publication-grade
+benchmark, and not proof of external generalization. Layer 2 generalization
+across a second domain remains future work. See
+`docs/BENCHMARK_TEMPORAL_EVAL_V2.md`.
+
+Temporal Eval v2 is not a full answer-validation benchmark. Conflict/refusal
+behavior requires the next Layer 1B benchmark, which will evaluate retrieved
+evidence, TCC-enriched chunks, evidence cards, LLM synthesis, an answer
+validator, and ChronoSanity conflict logic. Layer 2 generalization comes later.
+
+Layer 1B now has a separate answer-validation runner with light and Vertex modes:
+
+```bash
+python benchmarks/run_temporal_answer_validation_v2.py --mode light --top-k 5
+python benchmarks/run_temporal_answer_validation_v2.py --mode vertex --top-k 5
+```
+
+Light mode is a deterministic CI harness. Vertex mode is the full answer
+synthesis benchmark and uses BGE/vector retrieval by default unless
+`--skip-vector` is explicitly passed.
 
 Current light-mode result:
 
-| Method | Top1 Window | Window Hit@5 | Source Hit@5 | Unit Hit@5 | Text Hit@5 | Latency ms | Eval n |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| BM25 only | 0.54 | 1.00 | 1.00 | 1.00 | 1.00 | 0.3 | 13 |
-| Vector only | 0.38 | 1.00 | 1.00 | 0.85 | 1.00 | 0.3 | 13 |
-| Hybrid without temporal filter | 0.62 | 1.00 | 1.00 | 1.00 | 1.00 | 0.3 | 13 |
-| Hybrid with temporal filter | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.3 | 13 |
-| Hybrid + temporal fusion | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.3 | 13 |
-| Hybrid + temporal fusion + rerank | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.4 | 13 |
+| Method | Hit@5 Evidence | Top1 Window | Hit@5 Window | Source Family Hit@5 | Distractor Avoidance | Proxy Conflict Correct | Proxy Partial/Refusal Correct | Proxy Behavior Correct | Latency ms |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| BM25 only | 0.47 | 0.47 | 0.80 | 0.73 | 0.73 | 0.00 | 0.07 | 0.33 | 1.96 |
+| Vector only | 0.47 | 0.53 | 0.80 | 0.93 | 0.73 | 0.00 | 0.07 | 0.33 | 1.93 |
+| Hybrid without temporal filter | 0.53 | 0.47 | 0.80 | 0.80 | 0.73 | 0.07 | 0.07 | 0.27 | 1.94 |
+| Hybrid with temporal filter | 0.67 | 0.60 | 0.93 | 0.80 | 0.73 | 0.07 | 0.13 | 0.47 | 2.00 |
+| Hybrid + temporal fusion | 0.60 | 0.80 | 0.93 | 0.87 | 0.93 | 0.07 | 0.07 | 0.60 | 2.00 |
+| Hybrid + temporal fusion + rerank | 0.80 | 0.80 | 0.93 | 0.87 | 0.93 | 0.07 | 0.07 | 0.80 | 2.08 |
 
 Run:
 
 ```bash
-CHRONORAG_LIGHT=1 python -m cli.chronorag_cli purge
-CHRONORAG_LIGHT=1 python -m cli.chronorag_cli ingest data/sample/hard_temporal/*
-CHRONORAG_LIGHT=1 python -m benchmarks.run_ablation \
-  --cases benchmarks/temporal_qa_hard_15.jsonl \
-  --top-k 5 \
-  --candidate-k 50 \
-  --out benchmarks/results/temporal_qa_hard_15_results.json
+python benchmarks/build_temporal_eval_v2.py
+python benchmarks/run_temporal_eval_v2.py --light
 ```
 
 ## Technical Limitations
@@ -369,7 +387,7 @@ CHRONORAG_LIGHT=1 python -m benchmarks.run_ablation \
 
 3. **ChronoSanity reliability study**
    - Measure false positives and false negatives for conflict detection.
-   - Evaluate when evidence-only degradation improves answer trust.
+   - Evaluate when evidence-only degradation changes answer trust.
 
 4. **Policy-set expansion**
    - Add domains beyond world economy: regulations, company filings, research papers, medical guidelines, and financial reports.
