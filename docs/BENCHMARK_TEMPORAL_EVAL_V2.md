@@ -33,9 +33,15 @@ avoidance.
 
 Layer 1B: Evidence-Grounded Answer Validation Benchmark.
 
-This is future work. It will test final answer quality using retrieved evidence,
-Temporal Contextual Chunking-enriched chunks, LLM answer synthesis, answer
-validation, refusal handling, and ChronoSanity conflict warnings.
+This is implemented separately in
+`benchmarks/run_temporal_answer_validation_v2.py`. It tests final answer
+behavior using retrieved evidence, Temporal Contextual Chunking-enriched
+evidence cards, Vertex Gemini synthesis in full mode, answer validation,
+refusal handling, and ChronoSanity-style conflict warnings.
+
+Layer 1B has its own result files under `benchmarks/results/`. Temporal Eval v2
+retrieval metrics should not be mixed with answer-completeness or provider JSON
+contract failures.
 
 Layer 2: Generalization Benchmark.
 
@@ -107,7 +113,10 @@ The benchmark has exactly 15 cases:
 - Proxy Partial/Refusal Correctness.
 
 The proxy behavior metrics are light-runner checks only. They are not final
-answer-validation scores. Final conflict/refusal evaluation belongs in Layer 1B.
+answer-validation scores. Final conflict/refusal evaluation belongs in the
+separate Layer 1B answer-validation benchmark. Layer 1B keeps default top-k at
+5, has optional dynamic top-k for complex-case experiments, and scores provider
+JSON contract failures separately from answer reasoning failures.
 
 ## Reproduction
 

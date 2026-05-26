@@ -544,6 +544,25 @@ def build_synthetic_rows() -> List[Dict[str, Any]]:
                 expected_use=use,
             )
         )
+    rows.append(
+        make_row(
+            row_id="e2:synthetic:source_family_grounding_policy",
+            source_family="synthetic_temporal_traps",
+            source_file=path,
+            source_kind="synthetic_trap",
+            entity="India",
+            region="India",
+            metric="GDP per capita",
+            unit="2011 international dollars",
+            temporal_granularity="unknown",
+            temporal_type="ambiguous_time",
+            raw_text=(
+                "Source-family grounding policy: when OWID and Maddison both provide GDP per capita records, "
+                "cite source-backed evidence IDs and source family names separately, and avoid unsupported value mixing."
+            ),
+            expected_use="answer_evidence",
+        )
+    )
     return rows
 
 

@@ -2,12 +2,12 @@
 
 Temporal Eval v2 has been implemented as the Layer 1A controlled multi-source
 temporal retrieval benchmark. This document records what v2 addresses, what
-Layer 1B should validate next, and what remains for Layer 2.
+Layer 1B validates, and what remains for Layer 2.
 
 ## Benchmark Roadmap
 
 - Layer 1A: Temporal Eval v2 retrieval benchmark. Implemented.
-- Layer 1B: Evidence-grounded answer-validation benchmark. Next.
+- Layer 1B: Evidence-grounded answer-validation benchmark. Implemented.
 - Layer 2: Cross-domain generalization benchmark. Later.
 
 ## Why V1 Was Insufficient
@@ -37,6 +37,10 @@ controlled benchmark.
 
 Status: implemented in `benchmarks/build_temporal_eval_v2.py`,
 `benchmarks/run_temporal_eval_v2.py`, and `benchmarks/temporal_eval_v2_15.jsonl`.
+Layer 1B answer validation is implemented separately and has been repaired after
+a full Vertex run to simplify the prompt, normalize harmless provider schema
+shape drift, preserve usable initial output across failed retries, and improve
+behavior-aware validation without changing Layer 1A retrieval claims.
 
 ## Required Corpus Properties
 
@@ -47,7 +51,7 @@ Status: implemented in `benchmarks/build_temporal_eval_v2.py`,
 - Expected behavior labels.
 - Human-readable expected answers.
 - Clear valid-time and transaction-time metadata.
-- Answer-quality checks later, after retrieval metrics are stable.
+- Answer-quality checks are handled by Layer 1B after retrieval metrics are stable.
 
 ## Required Metrics
 

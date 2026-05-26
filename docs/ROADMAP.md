@@ -2,8 +2,8 @@
 
 ChronoRAG is a research scaffold for temporal RAG. It implements bitemporal
 retrieval concepts and validates them with Temporal Eval v2, a controlled
-multi-source retrieval diagnostic. The next step is Layer 1B answer validation,
-followed by a Layer 2 multi-domain benchmark.
+multi-source retrieval diagnostic. Layer 1B answer validation is implemented;
+the next major benchmark step is a Layer 2 multi-domain benchmark.
 
 ## P0: Credibility Cleanup
 
@@ -29,6 +29,18 @@ followed by a Layer 2 multi-domain benchmark.
 - Score conflict warnings, refusals, partial answers, and clarification behavior.
 - Keep this separate from retrieval-only metrics.
 - Use light mode for CI and Vertex mode for full answer synthesis.
+- Treat Provider JSON Parse Failure as a provider-output contract failure, not
+  a temporal reasoning failure.
+- Normalize harmless schema shape drift before scoring.
+- Retry only provider-contract failures once; do not retry away grounding or
+  temporal-rule failures, and do not let a failed retry overwrite a usable
+  initial response.
+- Maintain behavior-aware validation for answer completeness, refusal, partial
+  answers, clarification, and source-family grounding.
+- Keep default top-k at 5; use optional dynamic top-k only for complex-case
+  experiments.
+- Use `--result-suffix` for comparative result files without overwriting the
+  default benchmark outputs.
 
 ## P3: Layer 2 Generalization
 

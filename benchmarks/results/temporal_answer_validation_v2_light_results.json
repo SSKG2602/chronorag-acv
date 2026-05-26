@@ -3,22 +3,28 @@
   "mode": "light",
   "command": "benchmarks/run_temporal_answer_validation_v2.py --mode light --top-k 5",
   "top_k": 5,
+  "dynamic_top_k": false,
+  "result_suffix": null,
   "case_count": 15,
-  "corpus_row_count": 190,
+  "corpus_row_count": 191,
   "retrieval": "lexical_temporal",
   "skip_vector": false,
   "max_output_tokens": 512,
   "temperature": 0.0,
   "metrics": {
-    "answer_overall_pass": 0.7333333333333333,
+    "answer_overall_pass": 1.0,
     "required_facts_present": 1.0,
-    "forbidden_facts_absent": 0.9333333333333333,
-    "expected_evidence_cited": 0.8666666666666667,
-    "valid_time_correct": 0.8666666666666667,
+    "forbidden_facts_absent": 1.0,
+    "expected_evidence_cited": 1.0,
+    "valid_time_correct": 1.0,
     "transaction_time_trap_avoided": 1.0,
     "conflict_warning_correct": 1.0,
     "partial_refusal_correct": 1.0,
-    "clarification_correct": 1.0
+    "clarification_correct": 1.0,
+    "confidence_correct": 1.0,
+    "grounding_validation_pass": 1.0,
+    "temporal_rule_validation_pass": 1.0,
+    "provider_contract_pass": 1.0
   },
   "details": [
     {
@@ -34,12 +40,14 @@
       "retrieved_evidence_ids": [
         "e2:maddison:regional:gdp_pc:western_europe:1870",
         "e2:oecd_pdf:western_europe_exact_1870",
-        "e2:maddison:regional:gdp_pc:western_europe:1950",
         "e2:oecd_pdf:western_europe_exact_1913",
+        "e2:maddison:regional:gdp_pc:western_europe:1950",
         "e2:synthetic:conflict:western_europe:gdp_pc:1870"
       ],
+      "top_k": 5,
+      "effective_top_k": 5,
       "answer": {
-        "answer": "Answer directly using exact 1870 valid-year evidence for Western Europe GDP per capita and cite the evidence ID. Do not use 1913 or broad-window evidence as the answer. Required terms covered: Western Europe, GDP per capita, 1870. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1870, e2:maddison:regional:gdp_pc:western_europe:1870. Evidence cards: e2:maddison:regional:gdp_pc:western_europe:1870 from maddison_project_2023 (valid_time_exact); e2:oecd_pdf:western_europe_exact_1870 from oecd_world_economy_pdf (valid_time_exact).",
+        "answer": "Answer directly using exact 1870 valid-year evidence for Western Europe GDP per capita and cite the evidence ID. Do not use 1913 or broad-window evidence as the answer. Required terms covered: Western Europe, GDP per capita, 1870. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1870, e2:maddison:regional:gdp_pc:western_europe:1870. Evidence cards: e2:maddison:regional:gdp_pc:western_europe:1870 from maddison_project_2023 (valid_time_exact, value=3287.760602333366); e2:oecd_pdf:western_europe_exact_1870 from oecd_world_economy_pdf (valid_time_exact, value=1,960).",
         "behavior": "answer",
         "cited_evidence_ids": [
           "e2:oecd_pdf:western_europe_exact_1870",
@@ -52,10 +60,37 @@
         "transaction_time_used_as_valid_time": false,
         "conflict_warning": false,
         "partial_or_refusal": false,
-        "clarification_requested": false
+        "clarification_requested": false,
+        "confidence": "high"
       },
-      "raw_model_response": null,
+      "prompt_contract_valid": true,
+      "prompt_contract_failure": null,
+      "provider_json_parse_failure": false,
+      "schema_validation_failure": false,
+      "grounding_validation_failure": false,
+      "temporal_rule_failure": false,
+      "json_repair_retry_used": false,
+      "retry_attempted": false,
+      "initial_parse_succeeded": true,
+      "retry_parse_succeeded": false,
+      "fallback_to_initial_response": false,
+      "schema_normalization_applied": false,
+      "schema_normalization_notes": [],
+      "failure_type": null,
       "parse_error": null,
+      "schema_error": null,
+      "raw_response_preview": null,
+      "initial_raw_response_preview": null,
+      "retry_raw_response_preview": null,
+      "final_raw_response_preview": null,
+      "parsed_response_available": true,
+      "allowed_evidence_ids": [
+        "e2:maddison:regional:gdp_pc:western_europe:1870",
+        "e2:maddison:regional:gdp_pc:western_europe:1950",
+        "e2:oecd_pdf:western_europe_exact_1870",
+        "e2:oecd_pdf:western_europe_exact_1913",
+        "e2:synthetic:conflict:western_europe:gdp_pc:1870"
+      ],
       "validation": {
         "required_facts_present": true,
         "forbidden_facts_absent": true,
@@ -66,10 +101,22 @@
         "conflict_warning_correct": true,
         "partial_refusal_correct": true,
         "clarification_correct": true,
+        "confidence_correct": true,
+        "grounding_validation_failure": false,
+        "temporal_rule_failure": false,
+        "allowed_evidence_ids": [
+          "e2:maddison:regional:gdp_pc:western_europe:1870",
+          "e2:maddison:regional:gdp_pc:western_europe:1950",
+          "e2:oecd_pdf:western_europe_exact_1870",
+          "e2:oecd_pdf:western_europe_exact_1913",
+          "e2:synthetic:conflict:western_europe:gdp_pc:1870"
+        ],
+        "unknown_evidence_ids": [],
+        "temporal_rule_failure_reasons": [],
         "overall_pass": true,
         "failure_reason": ""
       },
-      "latency_ms": 2.1
+      "latency_ms": 6.53
     },
     {
       "case_id": "av2_q02_western_europe_1913_window",
@@ -84,12 +131,14 @@
       "retrieved_evidence_ids": [
         "e2:oecd_pdf:western_europe_exact_1913",
         "e2:synthetic:conflict:western_europe:gdp_pc:1913",
-        "e2:synthetic:same_year_wrong_entity_1913",
         "e2:oecd_pdf:table_note:western_europe:1913",
-        "e2:maddison:regional:gdp_pc:western_europe:1950"
+        "e2:synthetic:same_year_wrong_entity_1913",
+        "e2:maddison:regional:gdp_pc:western_europe:1870"
       ],
+      "top_k": 5,
+      "effective_top_k": 5,
       "answer": {
-        "answer": "Answer directly, cite exact 1913 evidence, and state that the supporting valid-time window is 1913-01-01 to 1913-12-31. Required terms covered: Western Europe, 1913, valid. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1913, e2:oecd_pdf:table_note:western_europe:1913. Evidence cards: e2:oecd_pdf:western_europe_exact_1913 from oecd_world_economy_pdf (valid_time_exact); e2:oecd_pdf:table_note:western_europe:1913 from oecd_world_economy_pdf (valid_time_exact).",
+        "answer": "Answer directly, cite exact 1913 evidence, and state that the supporting valid-time window is 1913-01-01 to 1913-12-31. Required terms covered: Western Europe, 1913, valid. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1913, e2:oecd_pdf:table_note:western_europe:1913. Evidence cards: e2:oecd_pdf:western_europe_exact_1913 from oecd_world_economy_pdf (valid_time_exact, value=3,473); e2:oecd_pdf:table_note:western_europe:1913 from oecd_world_economy_pdf (valid_time_exact, value=unknown).",
         "behavior": "answer",
         "cited_evidence_ids": [
           "e2:oecd_pdf:western_europe_exact_1913",
@@ -102,10 +151,37 @@
         "transaction_time_used_as_valid_time": false,
         "conflict_warning": false,
         "partial_or_refusal": false,
-        "clarification_requested": false
+        "clarification_requested": false,
+        "confidence": "high"
       },
-      "raw_model_response": null,
+      "prompt_contract_valid": true,
+      "prompt_contract_failure": null,
+      "provider_json_parse_failure": false,
+      "schema_validation_failure": false,
+      "grounding_validation_failure": false,
+      "temporal_rule_failure": false,
+      "json_repair_retry_used": false,
+      "retry_attempted": false,
+      "initial_parse_succeeded": true,
+      "retry_parse_succeeded": false,
+      "fallback_to_initial_response": false,
+      "schema_normalization_applied": false,
+      "schema_normalization_notes": [],
+      "failure_type": null,
       "parse_error": null,
+      "schema_error": null,
+      "raw_response_preview": null,
+      "initial_raw_response_preview": null,
+      "retry_raw_response_preview": null,
+      "final_raw_response_preview": null,
+      "parsed_response_available": true,
+      "allowed_evidence_ids": [
+        "e2:maddison:regional:gdp_pc:western_europe:1870",
+        "e2:oecd_pdf:table_note:western_europe:1913",
+        "e2:oecd_pdf:western_europe_exact_1913",
+        "e2:synthetic:conflict:western_europe:gdp_pc:1913",
+        "e2:synthetic:same_year_wrong_entity_1913"
+      ],
       "validation": {
         "required_facts_present": true,
         "forbidden_facts_absent": true,
@@ -116,10 +192,22 @@
         "conflict_warning_correct": true,
         "partial_refusal_correct": true,
         "clarification_correct": true,
+        "confidence_correct": true,
+        "grounding_validation_failure": false,
+        "temporal_rule_failure": false,
+        "allowed_evidence_ids": [
+          "e2:maddison:regional:gdp_pc:western_europe:1870",
+          "e2:oecd_pdf:table_note:western_europe:1913",
+          "e2:oecd_pdf:western_europe_exact_1913",
+          "e2:synthetic:conflict:western_europe:gdp_pc:1913",
+          "e2:synthetic:same_year_wrong_entity_1913"
+        ],
+        "unknown_evidence_ids": [],
+        "temporal_rule_failure_reasons": [],
         "overall_pass": true,
         "failure_reason": ""
       },
-      "latency_ms": 3.93
+      "latency_ms": 4.35
     },
     {
       "case_id": "av2_q03_transaction_time_avoidance",
@@ -132,13 +220,15 @@
       ],
       "retrieved_evidence_ids": [
         "e2:oecd_pdf:data_about_1870_pub_2006",
-        "e2:maddison:regional:gdp_pc:africa:1870",
+        "e2:synthetic:publication_year_trap_2006",
+        "e2:maddison:regional:gdp_pc:latin_america:1870",
         "e2:maddison:regional:gdp_pc:western_europe:1870",
-        "e2:maddison:regional:gdp_pc:world:1870",
-        "e2:maddison:regional:gdp_pc:latin_america:1870"
+        "e2:maddison:regional:gdp_pc:africa:1870"
       ],
+      "top_k": 5,
+      "effective_top_k": 5,
       "answer": {
-        "answer": "Say the claim-valid time is 1870. The 2006 publication year is transaction/publication time and must not be treated as the valid time of the GDP claim. Required terms covered: 1870, valid time, 2006, transaction. Cited evidence IDs: e2:oecd_pdf:data_about_1870_pub_2006. Evidence cards: e2:oecd_pdf:data_about_1870_pub_2006 from oecd_world_economy_pdf (transaction_time_only).",
+        "answer": "Say the claim-valid time is 1870. The 2006 publication year is transaction/publication time and must not be treated as the valid time of the GDP claim. Required terms covered: 1870, valid time, 2006, transaction. Cited evidence IDs: e2:oecd_pdf:data_about_1870_pub_2006. Evidence cards: e2:oecd_pdf:data_about_1870_pub_2006 from oecd_world_economy_pdf (transaction_time_only, value=unknown).",
         "behavior": "answer",
         "cited_evidence_ids": [
           "e2:oecd_pdf:data_about_1870_pub_2006"
@@ -147,10 +237,37 @@
         "transaction_time_used_as_valid_time": false,
         "conflict_warning": false,
         "partial_or_refusal": false,
-        "clarification_requested": false
+        "clarification_requested": false,
+        "confidence": "high"
       },
-      "raw_model_response": null,
+      "prompt_contract_valid": true,
+      "prompt_contract_failure": null,
+      "provider_json_parse_failure": false,
+      "schema_validation_failure": false,
+      "grounding_validation_failure": false,
+      "temporal_rule_failure": false,
+      "json_repair_retry_used": false,
+      "retry_attempted": false,
+      "initial_parse_succeeded": true,
+      "retry_parse_succeeded": false,
+      "fallback_to_initial_response": false,
+      "schema_normalization_applied": false,
+      "schema_normalization_notes": [],
+      "failure_type": null,
       "parse_error": null,
+      "schema_error": null,
+      "raw_response_preview": null,
+      "initial_raw_response_preview": null,
+      "retry_raw_response_preview": null,
+      "final_raw_response_preview": null,
+      "parsed_response_available": true,
+      "allowed_evidence_ids": [
+        "e2:maddison:regional:gdp_pc:africa:1870",
+        "e2:maddison:regional:gdp_pc:latin_america:1870",
+        "e2:maddison:regional:gdp_pc:western_europe:1870",
+        "e2:oecd_pdf:data_about_1870_pub_2006",
+        "e2:synthetic:publication_year_trap_2006"
+      ],
       "validation": {
         "required_facts_present": true,
         "forbidden_facts_absent": true,
@@ -161,10 +278,22 @@
         "conflict_warning_correct": true,
         "partial_refusal_correct": true,
         "clarification_correct": true,
+        "confidence_correct": true,
+        "grounding_validation_failure": false,
+        "temporal_rule_failure": false,
+        "allowed_evidence_ids": [
+          "e2:maddison:regional:gdp_pc:africa:1870",
+          "e2:maddison:regional:gdp_pc:latin_america:1870",
+          "e2:maddison:regional:gdp_pc:western_europe:1870",
+          "e2:oecd_pdf:data_about_1870_pub_2006",
+          "e2:synthetic:publication_year_trap_2006"
+        ],
+        "unknown_evidence_ids": [],
+        "temporal_rule_failure_reasons": [],
         "overall_pass": true,
         "failure_reason": ""
       },
-      "latency_ms": 1.67
+      "latency_ms": 5.21
     },
     {
       "case_id": "av2_q04_india_1913_wrong_year",
@@ -176,14 +305,16 @@
         "e2:maddison:country:gdp_pc:india:1913"
       ],
       "retrieved_evidence_ids": [
-        "e2:maddison:country:gdp_pc:india:1870",
         "e2:maddison:country:gdp_pc:india:1913",
+        "e2:maddison:country:gdp_pc:india:1870",
         "e2:synthetic:wrong_year_india_1870_for_1913",
-        "e2:maddison:regional:gdp_pc:africa:1870",
-        "e2:maddison:country:gdp_pc:brazil:1870"
+        "e2:maddison:regional:gdp_pc:latin_america:1870",
+        "e2:maddison:country:gdp_pc:netherlands:1870"
       ],
+      "top_k": 5,
+      "effective_top_k": 5,
       "answer": {
-        "answer": "Use India 1913 GDP per capita evidence and cite it. Do not answer with an India 1870 record. Required terms covered: India, 1913, GDP per capita. Cited evidence IDs: e2:maddison:country:gdp_pc:india:1913. Evidence cards: e2:maddison:country:gdp_pc:india:1913 from maddison_project_2023 (valid_time_exact).",
+        "answer": "Use India 1913 GDP per capita evidence and cite it. Do not answer with an India 1870 record. Required terms covered: India, 1913, GDP per capita. Cited evidence IDs: e2:maddison:country:gdp_pc:india:1913. Evidence cards: e2:maddison:country:gdp_pc:india:1913 from maddison_project_2023 (valid_time_exact, value=1073.0).",
         "behavior": "answer",
         "cited_evidence_ids": [
           "e2:maddison:country:gdp_pc:india:1913"
@@ -194,10 +325,37 @@
         "transaction_time_used_as_valid_time": false,
         "conflict_warning": false,
         "partial_or_refusal": false,
-        "clarification_requested": false
+        "clarification_requested": false,
+        "confidence": "high"
       },
-      "raw_model_response": null,
+      "prompt_contract_valid": true,
+      "prompt_contract_failure": null,
+      "provider_json_parse_failure": false,
+      "schema_validation_failure": false,
+      "grounding_validation_failure": false,
+      "temporal_rule_failure": false,
+      "json_repair_retry_used": false,
+      "retry_attempted": false,
+      "initial_parse_succeeded": true,
+      "retry_parse_succeeded": false,
+      "fallback_to_initial_response": false,
+      "schema_normalization_applied": false,
+      "schema_normalization_notes": [],
+      "failure_type": null,
       "parse_error": null,
+      "schema_error": null,
+      "raw_response_preview": null,
+      "initial_raw_response_preview": null,
+      "retry_raw_response_preview": null,
+      "final_raw_response_preview": null,
+      "parsed_response_available": true,
+      "allowed_evidence_ids": [
+        "e2:maddison:country:gdp_pc:india:1870",
+        "e2:maddison:country:gdp_pc:india:1913",
+        "e2:maddison:country:gdp_pc:netherlands:1870",
+        "e2:maddison:regional:gdp_pc:latin_america:1870",
+        "e2:synthetic:wrong_year_india_1870_for_1913"
+      ],
       "validation": {
         "required_facts_present": true,
         "forbidden_facts_absent": true,
@@ -208,10 +366,22 @@
         "conflict_warning_correct": true,
         "partial_refusal_correct": true,
         "clarification_correct": true,
+        "confidence_correct": true,
+        "grounding_validation_failure": false,
+        "temporal_rule_failure": false,
+        "allowed_evidence_ids": [
+          "e2:maddison:country:gdp_pc:india:1870",
+          "e2:maddison:country:gdp_pc:india:1913",
+          "e2:maddison:country:gdp_pc:netherlands:1870",
+          "e2:maddison:regional:gdp_pc:latin_america:1870",
+          "e2:synthetic:wrong_year_india_1870_for_1913"
+        ],
+        "unknown_evidence_ids": [],
+        "temporal_rule_failure_reasons": [],
         "overall_pass": true,
         "failure_reason": ""
       },
-      "latency_ms": 2.92
+      "latency_ms": 8.68
     },
     {
       "case_id": "av2_q05_india_metric_confusion",
@@ -230,8 +400,10 @@
         "e2:owid_gdppc:gdp_pc:india:1870",
         "e2:oecd_pdf:western_europe_exact_1870"
       ],
+      "top_k": 5,
+      "effective_top_k": 5,
       "answer": {
-        "answer": "No. Total GDP and GDP per capita are different metrics. Use India GDP per capita evidence for 1870, not total GDP evidence. Required terms covered: GDP per capita, total GDP, different metrics. Cited evidence IDs: e2:maddison:country:gdp_pc:india:1870, e2:owid_gdppc:gdp_pc:india:1870. Evidence cards: e2:maddison:country:gdp_pc:india:1870 from maddison_project_2023 (valid_time_exact); e2:owid_gdppc:gdp_pc:india:1870 from owid_maddison_gdppc (valid_time_exact).",
+        "answer": "No. Total GDP and GDP per capita are different metrics. Use India GDP per capita evidence for 1870, not total GDP evidence. Required terms covered: GDP per capita, total GDP, different metrics. Cited evidence IDs: e2:maddison:country:gdp_pc:india:1870, e2:owid_gdppc:gdp_pc:india:1870. Evidence cards: e2:maddison:country:gdp_pc:india:1870 from maddison_project_2023 (valid_time_exact, value=850.0); e2:owid_gdppc:gdp_pc:india:1870 from owid_maddison_gdppc (valid_time_exact, value=850.0).",
         "behavior": "prefer_exact",
         "cited_evidence_ids": [
           "e2:maddison:country:gdp_pc:india:1870",
@@ -244,10 +416,37 @@
         "transaction_time_used_as_valid_time": false,
         "conflict_warning": false,
         "partial_or_refusal": false,
-        "clarification_requested": false
+        "clarification_requested": false,
+        "confidence": "high"
       },
-      "raw_model_response": null,
+      "prompt_contract_valid": true,
+      "prompt_contract_failure": null,
+      "provider_json_parse_failure": false,
+      "schema_validation_failure": false,
+      "grounding_validation_failure": false,
+      "temporal_rule_failure": false,
+      "json_repair_retry_used": false,
+      "retry_attempted": false,
+      "initial_parse_succeeded": true,
+      "retry_parse_succeeded": false,
+      "fallback_to_initial_response": false,
+      "schema_normalization_applied": false,
+      "schema_normalization_notes": [],
+      "failure_type": null,
       "parse_error": null,
+      "schema_error": null,
+      "raw_response_preview": null,
+      "initial_raw_response_preview": null,
+      "retry_raw_response_preview": null,
+      "final_raw_response_preview": null,
+      "parsed_response_available": true,
+      "allowed_evidence_ids": [
+        "e2:maddison:country:gdp_pc:india:1870",
+        "e2:oecd_pdf:table_note:india:1870",
+        "e2:oecd_pdf:western_europe_exact_1870",
+        "e2:owid_gdppc:gdp_pc:india:1870",
+        "e2:synthetic:wrong_year_india_1870_for_1913"
+      ],
       "validation": {
         "required_facts_present": true,
         "forbidden_facts_absent": true,
@@ -258,10 +457,22 @@
         "conflict_warning_correct": true,
         "partial_refusal_correct": true,
         "clarification_correct": true,
+        "confidence_correct": true,
+        "grounding_validation_failure": false,
+        "temporal_rule_failure": false,
+        "allowed_evidence_ids": [
+          "e2:maddison:country:gdp_pc:india:1870",
+          "e2:oecd_pdf:table_note:india:1870",
+          "e2:oecd_pdf:western_europe_exact_1870",
+          "e2:owid_gdppc:gdp_pc:india:1870",
+          "e2:synthetic:wrong_year_india_1870_for_1913"
+        ],
+        "unknown_evidence_ids": [],
+        "temporal_rule_failure_reasons": [],
         "overall_pass": true,
         "failure_reason": ""
       },
-      "latency_ms": 4.58
+      "latency_ms": 4.05
     },
     {
       "case_id": "av2_q06_western_europe_compare",
@@ -280,8 +491,10 @@
         "e2:maddison:regional:gdp_pc:western_europe:1870",
         "e2:oecd_pdf:western_europe_range_1870_1913"
       ],
+      "top_k": 5,
+      "effective_top_k": 5,
       "answer": {
-        "answer": "Compare the two years using separate exact-year evidence for 1870 and 1913. Broad trend-only evidence can be context but cannot replace exact-year evidence. Required terms covered: 1870, 1913, separate. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1870, e2:oecd_pdf:western_europe_exact_1913. Evidence cards: e2:oecd_pdf:western_europe_exact_1870 from oecd_world_economy_pdf (valid_time_exact); e2:oecd_pdf:western_europe_exact_1913 from oecd_world_economy_pdf (valid_time_exact).",
+        "answer": "Compare the two years using separate exact-year evidence for 1870 and 1913. Broad trend-only evidence can be context but cannot replace exact-year evidence. Required terms covered: 1870, 1913, separate. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1870, e2:oecd_pdf:western_europe_exact_1913. Evidence cards: e2:oecd_pdf:western_europe_exact_1870 from oecd_world_economy_pdf (valid_time_exact, value=1,960); e2:oecd_pdf:western_europe_exact_1913 from oecd_world_economy_pdf (valid_time_exact, value=3,473).",
         "behavior": "compare",
         "cited_evidence_ids": [
           "e2:oecd_pdf:western_europe_exact_1870",
@@ -294,10 +507,37 @@
         "transaction_time_used_as_valid_time": false,
         "conflict_warning": false,
         "partial_or_refusal": false,
-        "clarification_requested": false
+        "clarification_requested": false,
+        "confidence": "high"
       },
-      "raw_model_response": null,
+      "prompt_contract_valid": true,
+      "prompt_contract_failure": null,
+      "provider_json_parse_failure": false,
+      "schema_validation_failure": false,
+      "grounding_validation_failure": false,
+      "temporal_rule_failure": false,
+      "json_repair_retry_used": false,
+      "retry_attempted": false,
+      "initial_parse_succeeded": true,
+      "retry_parse_succeeded": false,
+      "fallback_to_initial_response": false,
+      "schema_normalization_applied": false,
+      "schema_normalization_notes": [],
+      "failure_type": null,
       "parse_error": null,
+      "schema_error": null,
+      "raw_response_preview": null,
+      "initial_raw_response_preview": null,
+      "retry_raw_response_preview": null,
+      "final_raw_response_preview": null,
+      "parsed_response_available": true,
+      "allowed_evidence_ids": [
+        "e2:maddison:regional:gdp_pc:western_europe:1870",
+        "e2:oecd_pdf:western_europe_exact_1870",
+        "e2:oecd_pdf:western_europe_exact_1913",
+        "e2:oecd_pdf:western_europe_range_1870_1913",
+        "e2:synthetic:same_year_wrong_entity_1913"
+      ],
       "validation": {
         "required_facts_present": true,
         "forbidden_facts_absent": true,
@@ -308,10 +548,22 @@
         "conflict_warning_correct": true,
         "partial_refusal_correct": true,
         "clarification_correct": true,
+        "confidence_correct": true,
+        "grounding_validation_failure": false,
+        "temporal_rule_failure": false,
+        "allowed_evidence_ids": [
+          "e2:maddison:regional:gdp_pc:western_europe:1870",
+          "e2:oecd_pdf:western_europe_exact_1870",
+          "e2:oecd_pdf:western_europe_exact_1913",
+          "e2:oecd_pdf:western_europe_range_1870_1913",
+          "e2:synthetic:same_year_wrong_entity_1913"
+        ],
+        "unknown_evidence_ids": [],
+        "temporal_rule_failure_reasons": [],
         "overall_pass": true,
         "failure_reason": ""
       },
-      "latency_ms": 3.78
+      "latency_ms": 8.8
     },
     {
       "case_id": "av2_q07_broad_1000_2006_demote",
@@ -331,8 +583,10 @@
         "e2:oecd_pdf:western_europe_range_1870_1913",
         "e2:maddison:regional:gdp_pc:western_europe:1870"
       ],
+      "top_k": 5,
+      "effective_top_k": 5,
       "answer": {
-        "answer": "No. Exact valid-year evidence for 1870 should outrank a broad 1000-2006 window for an exact 1870 query. Required terms covered: No, exact, 1870, broad. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1870, e2:maddison:regional:gdp_pc:western_europe:1870, e2:oecd_pdf:table_note:western_europe:1870. Evidence cards: e2:oecd_pdf:table_note:western_europe:1870 from oecd_world_economy_pdf (valid_time_exact); e2:oecd_pdf:western_europe_exact_1870 from oecd_world_economy_pdf (valid_time_exact); e2:maddison:regional:gdp_pc:western_europe:1870 from maddison_project_2023 (valid_time_exact).",
+        "answer": "No. Exact valid-year evidence for 1870 should outrank a broad 1000-2006 window for an exact 1870 query. Required terms covered: No, exact, 1870, broad. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1870, e2:maddison:regional:gdp_pc:western_europe:1870, e2:oecd_pdf:table_note:western_europe:1870. Evidence cards: e2:oecd_pdf:table_note:western_europe:1870 from oecd_world_economy_pdf (valid_time_exact, value=unknown); e2:oecd_pdf:western_europe_exact_1870 from oecd_world_economy_pdf (valid_time_exact, value=1,960); e2:maddison:regional:gdp_pc:western_europe:1870 from maddison_project_2023 (valid_time_exact, value=3287.760602333366).",
         "behavior": "prefer_exact",
         "cited_evidence_ids": [
           "e2:oecd_pdf:western_europe_exact_1870",
@@ -347,10 +601,37 @@
         "transaction_time_used_as_valid_time": false,
         "conflict_warning": false,
         "partial_or_refusal": false,
-        "clarification_requested": false
+        "clarification_requested": false,
+        "confidence": "high"
       },
-      "raw_model_response": null,
+      "prompt_contract_valid": true,
+      "prompt_contract_failure": null,
+      "provider_json_parse_failure": false,
+      "schema_validation_failure": false,
+      "grounding_validation_failure": false,
+      "temporal_rule_failure": false,
+      "json_repair_retry_used": false,
+      "retry_attempted": false,
+      "initial_parse_succeeded": true,
+      "retry_parse_succeeded": false,
+      "fallback_to_initial_response": false,
+      "schema_normalization_applied": false,
+      "schema_normalization_notes": [],
+      "failure_type": null,
       "parse_error": null,
+      "schema_error": null,
+      "raw_response_preview": null,
+      "initial_raw_response_preview": null,
+      "retry_raw_response_preview": null,
+      "final_raw_response_preview": null,
+      "parsed_response_available": true,
+      "allowed_evidence_ids": [
+        "e2:maddison:regional:gdp_pc:western_europe:1870",
+        "e2:oecd_pdf:table_note:western_europe:1870",
+        "e2:oecd_pdf:western_europe_exact_1870",
+        "e2:oecd_pdf:western_europe_range_1870_1913",
+        "e2:synthetic:broad_1870_1913_no_exact"
+      ],
       "validation": {
         "required_facts_present": true,
         "forbidden_facts_absent": true,
@@ -361,10 +642,22 @@
         "conflict_warning_correct": true,
         "partial_refusal_correct": true,
         "clarification_correct": true,
+        "confidence_correct": true,
+        "grounding_validation_failure": false,
+        "temporal_rule_failure": false,
+        "allowed_evidence_ids": [
+          "e2:maddison:regional:gdp_pc:western_europe:1870",
+          "e2:oecd_pdf:table_note:western_europe:1870",
+          "e2:oecd_pdf:western_europe_exact_1870",
+          "e2:oecd_pdf:western_europe_range_1870_1913",
+          "e2:synthetic:broad_1870_1913_no_exact"
+        ],
+        "unknown_evidence_ids": [],
+        "temporal_rule_failure_reasons": [],
         "overall_pass": true,
         "failure_reason": ""
       },
-      "latency_ms": 2.35
+      "latency_ms": 1.86
     },
     {
       "case_id": "av2_q08_broad_trend_no_exact_value",
@@ -383,8 +676,10 @@
         "e2:oecd_pdf:western_europe_exact_1913",
         "e2:synthetic:conflict:western_europe:gdp_pc:1913"
       ],
+      "top_k": 5,
+      "effective_top_k": 5,
       "answer": {
-        "answer": "No. A trend statement can provide context, but it does not provide the exact 1870 value. Use exact 1870 evidence for the exact value. Required terms covered: No, trend, exact 1870. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1870, e2:maddison:regional:gdp_pc:western_europe:1870. Evidence cards: e2:maddison:regional:gdp_pc:western_europe:1870 from maddison_project_2023 (valid_time_exact); e2:oecd_pdf:western_europe_exact_1870 from oecd_world_economy_pdf (valid_time_exact).",
+        "answer": "No. A trend statement can provide context, but it does not provide the exact 1870 value. Use exact 1870 evidence for the exact value. Required terms covered: No, trend, exact 1870. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1870, e2:maddison:regional:gdp_pc:western_europe:1870. Evidence cards: e2:maddison:regional:gdp_pc:western_europe:1870 from maddison_project_2023 (valid_time_exact, value=3287.760602333366); e2:oecd_pdf:western_europe_exact_1870 from oecd_world_economy_pdf (valid_time_exact, value=1,960).",
         "behavior": "prefer_exact",
         "cited_evidence_ids": [
           "e2:oecd_pdf:western_europe_exact_1870",
@@ -397,10 +692,37 @@
         "transaction_time_used_as_valid_time": false,
         "conflict_warning": false,
         "partial_or_refusal": false,
-        "clarification_requested": false
+        "clarification_requested": false,
+        "confidence": "high"
       },
-      "raw_model_response": null,
+      "prompt_contract_valid": true,
+      "prompt_contract_failure": null,
+      "provider_json_parse_failure": false,
+      "schema_validation_failure": false,
+      "grounding_validation_failure": false,
+      "temporal_rule_failure": false,
+      "json_repair_retry_used": false,
+      "retry_attempted": false,
+      "initial_parse_succeeded": true,
+      "retry_parse_succeeded": false,
+      "fallback_to_initial_response": false,
+      "schema_normalization_applied": false,
+      "schema_normalization_notes": [],
+      "failure_type": null,
       "parse_error": null,
+      "schema_error": null,
+      "raw_response_preview": null,
+      "initial_raw_response_preview": null,
+      "retry_raw_response_preview": null,
+      "final_raw_response_preview": null,
+      "parsed_response_available": true,
+      "allowed_evidence_ids": [
+        "e2:maddison:regional:gdp_pc:western_europe:1870",
+        "e2:oecd_pdf:western_europe_exact_1870",
+        "e2:oecd_pdf:western_europe_exact_1913",
+        "e2:oecd_pdf:western_europe_range_1870_1913",
+        "e2:synthetic:conflict:western_europe:gdp_pc:1913"
+      ],
       "validation": {
         "required_facts_present": true,
         "forbidden_facts_absent": true,
@@ -411,10 +733,22 @@
         "conflict_warning_correct": true,
         "partial_refusal_correct": true,
         "clarification_correct": true,
+        "confidence_correct": true,
+        "grounding_validation_failure": false,
+        "temporal_rule_failure": false,
+        "allowed_evidence_ids": [
+          "e2:maddison:regional:gdp_pc:western_europe:1870",
+          "e2:oecd_pdf:western_europe_exact_1870",
+          "e2:oecd_pdf:western_europe_exact_1913",
+          "e2:oecd_pdf:western_europe_range_1870_1913",
+          "e2:synthetic:conflict:western_europe:gdp_pc:1913"
+        ],
+        "unknown_evidence_ids": [],
+        "temporal_rule_failure_reasons": [],
         "overall_pass": true,
         "failure_reason": ""
       },
-      "latency_ms": 1.71
+      "latency_ms": 8.66
     },
     {
       "case_id": "av2_q09_conflict_warning_1913",
@@ -433,8 +767,10 @@
         "e2:synthetic:conflict:western_europe:gdp_pc:1870",
         "e2:oecd_pdf:table_note:western_europe:1913"
       ],
+      "top_k": 5,
+      "effective_top_k": 5,
       "answer": {
-        "answer": "Surface both conflicting 1913 evidence cards, cite both evidence IDs, and warn that there is conflict risk rather than forcing one overconfident value. Required terms covered: conflict, Western Europe, 1913. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1913, e2:synthetic:conflict:western_europe:gdp_pc:1913. Evidence cards: e2:synthetic:conflict:western_europe:gdp_pc:1913 from synthetic_temporal_traps (conflict_claim); e2:oecd_pdf:western_europe_exact_1913 from oecd_world_economy_pdf (valid_time_exact). Conflict warning: evidence cards disagree for the same temporal claim.",
+        "answer": "Surface both conflicting 1913 evidence cards, cite both evidence IDs, and warn that there is conflict risk rather than forcing one overconfident value. Required terms covered: conflict, Western Europe, 1913. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1913, e2:synthetic:conflict:western_europe:gdp_pc:1913. Evidence cards: e2:synthetic:conflict:western_europe:gdp_pc:1913 from synthetic_temporal_traps (conflict_claim, value=3200.0); e2:oecd_pdf:western_europe_exact_1913 from oecd_world_economy_pdf (valid_time_exact, value=3,473). Conflict warning: evidence cards disagree for the same temporal claim.",
         "behavior": "conflict_warning",
         "cited_evidence_ids": [
           "e2:oecd_pdf:western_europe_exact_1913",
@@ -447,10 +783,37 @@
         "transaction_time_used_as_valid_time": false,
         "conflict_warning": true,
         "partial_or_refusal": false,
-        "clarification_requested": false
+        "clarification_requested": false,
+        "confidence": "medium"
       },
-      "raw_model_response": null,
+      "prompt_contract_valid": true,
+      "prompt_contract_failure": null,
+      "provider_json_parse_failure": false,
+      "schema_validation_failure": false,
+      "grounding_validation_failure": false,
+      "temporal_rule_failure": false,
+      "json_repair_retry_used": false,
+      "retry_attempted": false,
+      "initial_parse_succeeded": true,
+      "retry_parse_succeeded": false,
+      "fallback_to_initial_response": false,
+      "schema_normalization_applied": false,
+      "schema_normalization_notes": [],
+      "failure_type": null,
       "parse_error": null,
+      "schema_error": null,
+      "raw_response_preview": null,
+      "initial_raw_response_preview": null,
+      "retry_raw_response_preview": null,
+      "final_raw_response_preview": null,
+      "parsed_response_available": true,
+      "allowed_evidence_ids": [
+        "e2:oecd_pdf:table_note:western_europe:1913",
+        "e2:oecd_pdf:western_europe_exact_1913",
+        "e2:synthetic:conflict:western_europe:gdp_pc:1870",
+        "e2:synthetic:conflict:western_europe:gdp_pc:1913",
+        "e2:synthetic:same_year_wrong_entity_1913"
+      ],
       "validation": {
         "required_facts_present": true,
         "forbidden_facts_absent": true,
@@ -461,10 +824,22 @@
         "conflict_warning_correct": true,
         "partial_refusal_correct": true,
         "clarification_correct": true,
+        "confidence_correct": true,
+        "grounding_validation_failure": false,
+        "temporal_rule_failure": false,
+        "allowed_evidence_ids": [
+          "e2:oecd_pdf:table_note:western_europe:1913",
+          "e2:oecd_pdf:western_europe_exact_1913",
+          "e2:synthetic:conflict:western_europe:gdp_pc:1870",
+          "e2:synthetic:conflict:western_europe:gdp_pc:1913",
+          "e2:synthetic:same_year_wrong_entity_1913"
+        ],
+        "unknown_evidence_ids": [],
+        "temporal_rule_failure_reasons": [],
         "overall_pass": true,
         "failure_reason": ""
       },
-      "latency_ms": 1.55
+      "latency_ms": 13.19
     },
     {
       "case_id": "av2_q10_exact_vs_broad_1913",
@@ -476,14 +851,16 @@
         "e2:oecd_pdf:western_europe_exact_1913"
       ],
       "retrieved_evidence_ids": [
-        "e2:synthetic:wrong_year_japan_1913_for_1950",
         "e2:synthetic:wrong_year_india_1870_for_1913",
-        "e2:synthetic:same_year_wrong_entity_1913",
         "e2:synthetic:same_entity_wrong_metric_india",
+        "e2:synthetic:same_year_wrong_entity_1913",
+        "e2:synthetic:wrong_year_japan_1913_for_1950",
         "e2:oecd_pdf:western_europe_exact_1913"
       ],
+      "top_k": 5,
+      "effective_top_k": 5,
       "answer": {
-        "answer": "Prefer exact 1913 evidence for an exact-year query. The broad 1870-1913 range can be context but is weaker for the exact 1913 value. Required terms covered: exact 1913, broad, preferred. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1913. Evidence cards: e2:oecd_pdf:western_europe_exact_1913 from oecd_world_economy_pdf (valid_time_exact).",
+        "answer": "Prefer exact 1913 evidence for an exact-year query. The broad 1870-1913 range can be context but is weaker for the exact 1913 value. Required terms covered: exact 1913, broad, preferred. Cited evidence IDs: e2:oecd_pdf:western_europe_exact_1913. Evidence cards: e2:oecd_pdf:western_europe_exact_1913 from oecd_world_economy_pdf (valid_time_exact, value=3,473).",
         "behavior": "prefer_exact",
         "cited_evidence_ids": [
           "e2:oecd_pdf:western_europe_exact_1913"
@@ -494,10 +871,37 @@
         "transaction_time_used_as_valid_time": false,
         "conflict_warning": false,
         "partial_or_refusal": false,
-        "clarification_requested": false
+        "clarification_requested": false,
+        "confidence": "high"
       },
-      "raw_model_response": null,
+      "prompt_contract_valid": true,
+      "prompt_contract_failure": null,
+      "provider_json_parse_failure": false,
+      "schema_validation_failure": false,
+      "grounding_validation_failure": false,
+      "temporal_rule_failure": false,
+      "json_repair_retry_used": false,
+      "retry_attempted": false,
+      "initial_parse_succeeded": true,
+      "retry_parse_succeeded": false,
+      "fallback_to_initial_response": false,
+      "schema_normalization_applied": false,
+      "schema_normalization_notes": [],
+      "failure_type": null,
       "parse_error": null,
+      "schema_error": null,
+      "raw_response_preview": null,
+      "initial_raw_response_preview": null,
+      "retry_raw_response_preview": null,
+      "final_raw_response_preview": null,
+      "parsed_response_available": true,
+      "allowed_evidence_ids": [
+        "e2:oecd_pdf:western_europe_exact_1913",
+        "e2:synthetic:same_entity_wrong_metric_india",
+        "e2:synthetic:same_year_wrong_entity_1913",
+        "e2:synthetic:wrong_year_india_1870_for_1913",
+        "e2:synthetic:wrong_year_japan_1913_for_1950"
+      ],
       "validation": {
         "required_facts_present": true,
         "forbidden_facts_absent": true,
@@ -508,10 +912,22 @@
         "conflict_warning_correct": true,
         "partial_refusal_correct": true,
         "clarification_correct": true,
+        "confidence_correct": true,
+        "grounding_validation_failure": false,
+        "temporal_rule_failure": false,
+        "allowed_evidence_ids": [
+          "e2:oecd_pdf:western_europe_exact_1913",
+          "e2:synthetic:same_entity_wrong_metric_india",
+          "e2:synthetic:same_year_wrong_entity_1913",
+          "e2:synthetic:wrong_year_india_1870_for_1913",
+          "e2:synthetic:wrong_year_japan_1913_for_1950"
+        ],
+        "unknown_evidence_ids": [],
+        "temporal_rule_failure_reasons": [],
         "overall_pass": true,
         "failure_reason": ""
       },
-      "latency_ms": 1.69
+      "latency_ms": 4.34
     },
     {
       "case_id": "av2_q11_western_europe_1820_missing",
@@ -519,46 +935,81 @@
       "question": "What was Western Europe GDP per capita in 1820? If no exact evidence exists, should the system answer confidently?",
       "expected_behavior": "refuse",
       "detected_behavior": "refuse",
-      "cited_evidence_ids": [
-        "e2:maddison:regional:gdp_pc:western_europe:1950"
-      ],
+      "cited_evidence_ids": [],
       "retrieved_evidence_ids": [
-        "e2:maddison:regional:gdp_pc:western_europe:1950",
         "e2:maddison:regional:gdp_pc:western_europe:1870",
         "e2:synthetic:western_europe_industrial_ambiguous",
         "e2:oecd_pdf:western_europe_exact_1870",
-        "e2:oecd_pdf:western_europe_exact_1913"
+        "e2:oecd_pdf:western_europe_exact_1913",
+        "e2:maddison:regional:gdp_pc:western_europe:1950"
       ],
+      "top_k": 5,
+      "effective_top_k": 5,
       "answer": {
-        "answer": "Do not give a confident exact 1820 value. Refuse the exact answer or mark it partial using weaker broad evidence only. Required terms covered: no exact evidence, not answer confidently. Cited evidence IDs: e2:maddison:regional:gdp_pc:western_europe:1950. Evidence cards: e2:maddison:regional:gdp_pc:western_europe:1950 from maddison_project_2023 (valid_time_exact). This is partial or insufficient; no confident exact answer should be given.",
+        "answer": "Do not give a confident exact 1820 value. Refuse the exact answer or mark it partial using weaker broad evidence only. Required terms covered: no exact evidence, not answer confidently. Cited evidence IDs: . Evidence cards: . This is partial or insufficient; no confident exact answer should be given.",
         "behavior": "refuse",
-        "cited_evidence_ids": [
-          "e2:maddison:regional:gdp_pc:western_europe:1950"
-        ],
-        "valid_time_used": [
-          "1950-01-01 to 1950-12-31"
-        ],
+        "cited_evidence_ids": [],
+        "valid_time_used": [],
         "transaction_time_used_as_valid_time": false,
         "conflict_warning": false,
         "partial_or_refusal": true,
-        "clarification_requested": false
+        "clarification_requested": false,
+        "confidence": "low"
       },
-      "raw_model_response": null,
+      "prompt_contract_valid": true,
+      "prompt_contract_failure": null,
+      "provider_json_parse_failure": false,
+      "schema_validation_failure": false,
+      "grounding_validation_failure": false,
+      "temporal_rule_failure": false,
+      "json_repair_retry_used": false,
+      "retry_attempted": false,
+      "initial_parse_succeeded": true,
+      "retry_parse_succeeded": false,
+      "fallback_to_initial_response": false,
+      "schema_normalization_applied": false,
+      "schema_normalization_notes": [],
+      "failure_type": null,
       "parse_error": null,
+      "schema_error": null,
+      "raw_response_preview": null,
+      "initial_raw_response_preview": null,
+      "retry_raw_response_preview": null,
+      "final_raw_response_preview": null,
+      "parsed_response_available": true,
+      "allowed_evidence_ids": [
+        "e2:maddison:regional:gdp_pc:western_europe:1870",
+        "e2:maddison:regional:gdp_pc:western_europe:1950",
+        "e2:oecd_pdf:western_europe_exact_1870",
+        "e2:oecd_pdf:western_europe_exact_1913",
+        "e2:synthetic:western_europe_industrial_ambiguous"
+      ],
       "validation": {
         "required_facts_present": true,
-        "forbidden_facts_absent": false,
+        "forbidden_facts_absent": true,
         "expected_evidence_cited": true,
-        "acceptable_evidence_cited": false,
+        "acceptable_evidence_cited": true,
         "valid_time_correct": true,
         "transaction_time_not_misused": true,
         "conflict_warning_correct": true,
         "partial_refusal_correct": true,
         "clarification_correct": true,
-        "overall_pass": false,
-        "failure_reason": "forbidden_facts_absent, acceptable_evidence_cited"
+        "confidence_correct": true,
+        "grounding_validation_failure": false,
+        "temporal_rule_failure": false,
+        "allowed_evidence_ids": [
+          "e2:maddison:regional:gdp_pc:western_europe:1870",
+          "e2:maddison:regional:gdp_pc:western_europe:1950",
+          "e2:oecd_pdf:western_europe_exact_1870",
+          "e2:oecd_pdf:western_europe_exact_1913",
+          "e2:synthetic:western_europe_industrial_ambiguous"
+        ],
+        "unknown_evidence_ids": [],
+        "temporal_rule_failure_reasons": [],
+        "overall_pass": true,
+        "failure_reason": ""
       },
-      "latency_ms": 1.68
+      "latency_ms": 19.01
     },
     {
       "case_id": "av2_q12_china_1820_partial",
@@ -567,45 +1018,88 @@
       "expected_behavior": "partial",
       "detected_behavior": "partial",
       "cited_evidence_ids": [
-        "e2:owid_global:gdp_total:world:1820"
+        "e2:oecd_pdf:china_background_1820",
+        "e2:synthetic:china_partial_background"
       ],
       "retrieved_evidence_ids": [
+        "e2:oecd_pdf:china_background_1820",
         "e2:owid_global:gdp_total:world:1820",
-        "e2:owid_gdp:gdp_total:china:2018",
+        "e2:synthetic:china_partial_background",
         "e2:owid_gdp:gdp_total:china:1913",
-        "e2:owid_gdp:gdp_total:china:1973",
         "e2:owid_gdp:gdp_total:china:1870"
       ],
+      "top_k": 5,
+      "effective_top_k": 5,
       "answer": {
-        "answer": "Frame the answer as partial or insufficient because only broad/background China 1820 evidence is available in this corpus, not an exact China GDP per capita value. Required terms covered: partial, China, 1820. Cited evidence IDs: e2:owid_global:gdp_total:world:1820. Evidence cards: e2:owid_global:gdp_total:world:1820 from owid_global_gdp_long_run (valid_time_exact). This is partial or insufficient; no confident exact answer should be given.",
+        "answer": "Frame the answer as partial or insufficient because only broad/background China 1820 evidence is available in this corpus, not an exact China GDP per capita value. Required terms covered: partial, China, 1820. Cited evidence IDs: e2:oecd_pdf:china_background_1820, e2:synthetic:china_partial_background. Evidence cards: e2:oecd_pdf:china_background_1820 from oecd_world_economy_pdf (valid_time_range, value=unknown); e2:synthetic:china_partial_background from synthetic_temporal_traps (ambiguous_time, value=unknown). This is partial or insufficient; no confident exact answer should be given.",
         "behavior": "partial",
         "cited_evidence_ids": [
-          "e2:owid_global:gdp_total:world:1820"
+          "e2:oecd_pdf:china_background_1820",
+          "e2:synthetic:china_partial_background"
         ],
         "valid_time_used": [
-          "1820-01-01 to 1820-12-31"
+          "1800-01-01 to 1850-12-31"
         ],
         "transaction_time_used_as_valid_time": false,
         "conflict_warning": false,
         "partial_or_refusal": true,
-        "clarification_requested": false
+        "clarification_requested": false,
+        "confidence": "low"
       },
-      "raw_model_response": null,
+      "prompt_contract_valid": true,
+      "prompt_contract_failure": null,
+      "provider_json_parse_failure": false,
+      "schema_validation_failure": false,
+      "grounding_validation_failure": false,
+      "temporal_rule_failure": false,
+      "json_repair_retry_used": false,
+      "retry_attempted": false,
+      "initial_parse_succeeded": true,
+      "retry_parse_succeeded": false,
+      "fallback_to_initial_response": false,
+      "schema_normalization_applied": false,
+      "schema_normalization_notes": [],
+      "failure_type": null,
       "parse_error": null,
+      "schema_error": null,
+      "raw_response_preview": null,
+      "initial_raw_response_preview": null,
+      "retry_raw_response_preview": null,
+      "final_raw_response_preview": null,
+      "parsed_response_available": true,
+      "allowed_evidence_ids": [
+        "e2:oecd_pdf:china_background_1820",
+        "e2:owid_gdp:gdp_total:china:1870",
+        "e2:owid_gdp:gdp_total:china:1913",
+        "e2:owid_global:gdp_total:world:1820",
+        "e2:synthetic:china_partial_background"
+      ],
       "validation": {
         "required_facts_present": true,
         "forbidden_facts_absent": true,
         "expected_evidence_cited": true,
-        "acceptable_evidence_cited": false,
+        "acceptable_evidence_cited": true,
         "valid_time_correct": true,
         "transaction_time_not_misused": true,
         "conflict_warning_correct": true,
         "partial_refusal_correct": true,
         "clarification_correct": true,
-        "overall_pass": false,
-        "failure_reason": "acceptable_evidence_cited"
+        "confidence_correct": true,
+        "grounding_validation_failure": false,
+        "temporal_rule_failure": false,
+        "allowed_evidence_ids": [
+          "e2:oecd_pdf:china_background_1820",
+          "e2:owid_gdp:gdp_total:china:1870",
+          "e2:owid_gdp:gdp_total:china:1913",
+          "e2:owid_global:gdp_total:world:1820",
+          "e2:synthetic:china_partial_background"
+        ],
+        "unknown_evidence_ids": [],
+        "temporal_rule_failure_reasons": [],
+        "overall_pass": true,
+        "failure_reason": ""
       },
-      "latency_ms": 1.58
+      "latency_ms": 4.59
     },
     {
       "case_id": "av2_q13_transaction_time_only_records",
@@ -614,45 +1108,86 @@
       "expected_behavior": "partial",
       "detected_behavior": "partial",
       "cited_evidence_ids": [
-        "e2:owid_gdppc:gdp_pc:brazil:2018"
+        "e2:oecd_pdf:publication_2006",
+        "e2:oecd_pdf:data_about_1870_pub_2006"
       ],
       "retrieved_evidence_ids": [
-        "e2:owid_gdppc:gdp_pc:brazil:2018",
-        "e2:owid_gdppc:gdp_pc:netherlands:1973",
-        "e2:owid_gdppc:gdp_pc:india:1973",
-        "e2:owid_gdppc:gdp_pc:netherlands:1870",
-        "e2:owid_gdppc:gdp_pc:india:1950"
+        "e2:oecd_pdf:publication_2006",
+        "e2:oecd_pdf:data_about_1870_pub_2006",
+        "e2:owid_gdppc:gdp_pc:france:1998",
+        "e2:owid_gdppc:gdp_pc:netherlands:1998",
+        "e2:owid_gdppc:gdp_pc:india:2018"
       ],
+      "top_k": 5,
+      "effective_top_k": 5,
       "answer": {
-        "answer": "Identify publication/import metadata records as transaction-time-only and explain that they should not count as claim-valid GDP evidence. Required terms covered: transaction-time-only, valid-time evidence. Cited evidence IDs: e2:owid_gdppc:gdp_pc:brazil:2018. Evidence cards: e2:owid_gdppc:gdp_pc:brazil:2018 from owid_maddison_gdppc (valid_time_exact). This is partial or insufficient; no confident exact answer should be given.",
+        "answer": "Identify publication/import metadata records as transaction-time-only and explain that they should not count as claim-valid GDP evidence. Required terms covered: transaction-time-only, valid-time evidence. Cited evidence IDs: e2:oecd_pdf:publication_2006, e2:oecd_pdf:data_about_1870_pub_2006. Evidence cards: e2:oecd_pdf:publication_2006 from oecd_world_economy_pdf (transaction_time_only, value=unknown); e2:oecd_pdf:data_about_1870_pub_2006 from oecd_world_economy_pdf (transaction_time_only, value=unknown). This is partial or insufficient; no confident exact answer should be given.",
         "behavior": "partial",
         "cited_evidence_ids": [
-          "e2:owid_gdppc:gdp_pc:brazil:2018"
+          "e2:oecd_pdf:publication_2006",
+          "e2:oecd_pdf:data_about_1870_pub_2006"
         ],
-        "valid_time_used": [
-          "2018-01-01 to 2018-12-31"
-        ],
+        "valid_time_used": [],
         "transaction_time_used_as_valid_time": false,
         "conflict_warning": false,
         "partial_or_refusal": true,
-        "clarification_requested": false
+        "clarification_requested": false,
+        "confidence": "low"
       },
-      "raw_model_response": null,
+      "prompt_contract_valid": true,
+      "prompt_contract_failure": null,
+      "provider_json_parse_failure": false,
+      "schema_validation_failure": false,
+      "grounding_validation_failure": false,
+      "temporal_rule_failure": false,
+      "json_repair_retry_used": false,
+      "retry_attempted": false,
+      "initial_parse_succeeded": true,
+      "retry_parse_succeeded": false,
+      "fallback_to_initial_response": false,
+      "schema_normalization_applied": false,
+      "schema_normalization_notes": [],
+      "failure_type": null,
       "parse_error": null,
+      "schema_error": null,
+      "raw_response_preview": null,
+      "initial_raw_response_preview": null,
+      "retry_raw_response_preview": null,
+      "final_raw_response_preview": null,
+      "parsed_response_available": true,
+      "allowed_evidence_ids": [
+        "e2:oecd_pdf:data_about_1870_pub_2006",
+        "e2:oecd_pdf:publication_2006",
+        "e2:owid_gdppc:gdp_pc:france:1998",
+        "e2:owid_gdppc:gdp_pc:india:2018",
+        "e2:owid_gdppc:gdp_pc:netherlands:1998"
+      ],
       "validation": {
         "required_facts_present": true,
         "forbidden_facts_absent": true,
-        "expected_evidence_cited": false,
-        "acceptable_evidence_cited": false,
-        "valid_time_correct": false,
+        "expected_evidence_cited": true,
+        "acceptable_evidence_cited": true,
+        "valid_time_correct": true,
         "transaction_time_not_misused": true,
         "conflict_warning_correct": true,
         "partial_refusal_correct": true,
         "clarification_correct": true,
-        "overall_pass": false,
-        "failure_reason": "expected_evidence_cited, acceptable_evidence_cited, valid_time_correct"
+        "confidence_correct": true,
+        "grounding_validation_failure": false,
+        "temporal_rule_failure": false,
+        "allowed_evidence_ids": [
+          "e2:oecd_pdf:data_about_1870_pub_2006",
+          "e2:oecd_pdf:publication_2006",
+          "e2:owid_gdppc:gdp_pc:france:1998",
+          "e2:owid_gdppc:gdp_pc:india:2018",
+          "e2:owid_gdppc:gdp_pc:netherlands:1998"
+        ],
+        "unknown_evidence_ids": [],
+        "temporal_rule_failure_reasons": [],
+        "overall_pass": true,
+        "failure_reason": ""
       },
-      "latency_ms": 1.41
+      "latency_ms": 1.83
     },
     {
       "case_id": "av2_q14_ambiguous_industrial_era",
@@ -665,13 +1200,15 @@
       ],
       "retrieved_evidence_ids": [
         "e2:synthetic:western_europe_industrial_ambiguous",
-        "e2:maddison:regional:gdp_pc:western_europe:1950",
         "e2:maddison:regional:gdp_pc:western_europe:1870",
-        "e2:maddison:regional:gdp_pc:africa:1870",
-        "e2:maddison:country:gdp_pc:india:1870"
+        "e2:maddison:regional:gdp_pc:western_europe:1950",
+        "e2:maddison:country:gdp_pc:japan:2018",
+        "e2:maddison:country:gdp_pc:japan:1998"
       ],
+      "top_k": 5,
+      "effective_top_k": 5,
       "answer": {
-        "answer": "Ask for a clearer year or valid-time window, or mark the answer as temporally ambiguous. Do not force one exact GDP per capita value. Required terms covered: ambiguous, clarify. Cited evidence IDs: e2:synthetic:western_europe_industrial_ambiguous. Evidence cards: e2:synthetic:western_europe_industrial_ambiguous from synthetic_temporal_traps (ambiguous_time). The temporal phrase is ambiguous; clarification is required.",
+        "answer": "Ask for a clearer year or valid-time window, or mark the answer as temporally ambiguous. Do not force one exact GDP per capita value. Required terms covered: ambiguous, clarify. Cited evidence IDs: e2:synthetic:western_europe_industrial_ambiguous. Evidence cards: e2:synthetic:western_europe_industrial_ambiguous from synthetic_temporal_traps (ambiguous_time, value=unknown). The temporal phrase is ambiguous; clarification is required.",
         "behavior": "clarify",
         "cited_evidence_ids": [
           "e2:synthetic:western_europe_industrial_ambiguous"
@@ -680,10 +1217,37 @@
         "transaction_time_used_as_valid_time": false,
         "conflict_warning": false,
         "partial_or_refusal": false,
-        "clarification_requested": true
+        "clarification_requested": true,
+        "confidence": "low"
       },
-      "raw_model_response": null,
+      "prompt_contract_valid": true,
+      "prompt_contract_failure": null,
+      "provider_json_parse_failure": false,
+      "schema_validation_failure": false,
+      "grounding_validation_failure": false,
+      "temporal_rule_failure": false,
+      "json_repair_retry_used": false,
+      "retry_attempted": false,
+      "initial_parse_succeeded": true,
+      "retry_parse_succeeded": false,
+      "fallback_to_initial_response": false,
+      "schema_normalization_applied": false,
+      "schema_normalization_notes": [],
+      "failure_type": null,
       "parse_error": null,
+      "schema_error": null,
+      "raw_response_preview": null,
+      "initial_raw_response_preview": null,
+      "retry_raw_response_preview": null,
+      "final_raw_response_preview": null,
+      "parsed_response_available": true,
+      "allowed_evidence_ids": [
+        "e2:maddison:country:gdp_pc:japan:1998",
+        "e2:maddison:country:gdp_pc:japan:2018",
+        "e2:maddison:regional:gdp_pc:western_europe:1870",
+        "e2:maddison:regional:gdp_pc:western_europe:1950",
+        "e2:synthetic:western_europe_industrial_ambiguous"
+      ],
       "validation": {
         "required_facts_present": true,
         "forbidden_facts_absent": true,
@@ -694,10 +1258,22 @@
         "conflict_warning_correct": true,
         "partial_refusal_correct": true,
         "clarification_correct": true,
+        "confidence_correct": true,
+        "grounding_validation_failure": false,
+        "temporal_rule_failure": false,
+        "allowed_evidence_ids": [
+          "e2:maddison:country:gdp_pc:japan:1998",
+          "e2:maddison:country:gdp_pc:japan:2018",
+          "e2:maddison:regional:gdp_pc:western_europe:1870",
+          "e2:maddison:regional:gdp_pc:western_europe:1950",
+          "e2:synthetic:western_europe_industrial_ambiguous"
+        ],
+        "unknown_evidence_ids": [],
+        "temporal_rule_failure_reasons": [],
         "overall_pass": true,
         "failure_reason": ""
       },
-      "latency_ms": 1.84
+      "latency_ms": 3.9
     },
     {
       "case_id": "av2_q15_source_family_grounding",
@@ -706,45 +1282,84 @@
       "expected_behavior": "answer",
       "detected_behavior": "answer",
       "cited_evidence_ids": [
-        "e2:owid_gdppc:gdp_pc:brazil:2018"
+        "e2:synthetic:source_family_grounding_policy"
       ],
       "retrieved_evidence_ids": [
-        "e2:owid_gdppc:gdp_pc:brazil:2018",
-        "e2:owid_gdppc:gdp_pc:netherlands:1973",
-        "e2:owid_gdppc:gdp_pc:india:1973",
-        "e2:owid_gdppc:gdp_pc:netherlands:1870",
-        "e2:owid_gdppc:gdp_pc:india:1950"
+        "e2:synthetic:source_family_grounding_policy",
+        "e2:owid_gdppc:gdp_pc:france:1998",
+        "e2:owid_gdppc:gdp_pc:netherlands:1998",
+        "e2:owid_gdppc:gdp_pc:india:2018",
+        "e2:owid_gdppc:gdp_pc:united_kingdom:2018"
       ],
+      "top_k": 5,
+      "effective_top_k": 5,
       "answer": {
-        "answer": "Use source-backed evidence IDs from the retrieved cards, cite the source family such as OWID or Maddison, and avoid mixing unsupported values across sources or metrics. Required terms covered: evidence IDs, source family, OWID, Maddison. Cited evidence IDs: e2:owid_gdppc:gdp_pc:brazil:2018. Evidence cards: e2:owid_gdppc:gdp_pc:brazil:2018 from owid_maddison_gdppc (valid_time_exact).",
+        "answer": "Use source-backed evidence IDs from the retrieved cards, cite the source family such as OWID or Maddison, and avoid mixing unsupported values across sources or metrics. Required terms covered: evidence IDs, source family, OWID, Maddison. Cited evidence IDs: e2:synthetic:source_family_grounding_policy. Evidence cards: e2:synthetic:source_family_grounding_policy from synthetic_temporal_traps (ambiguous_time, value=unknown).",
         "behavior": "answer",
         "cited_evidence_ids": [
-          "e2:owid_gdppc:gdp_pc:brazil:2018"
+          "e2:synthetic:source_family_grounding_policy"
         ],
-        "valid_time_used": [
-          "2018-01-01 to 2018-12-31"
-        ],
+        "valid_time_used": [],
         "transaction_time_used_as_valid_time": false,
         "conflict_warning": false,
         "partial_or_refusal": false,
-        "clarification_requested": false
+        "clarification_requested": false,
+        "confidence": "high"
       },
-      "raw_model_response": null,
+      "prompt_contract_valid": true,
+      "prompt_contract_failure": null,
+      "provider_json_parse_failure": false,
+      "schema_validation_failure": false,
+      "grounding_validation_failure": false,
+      "temporal_rule_failure": false,
+      "json_repair_retry_used": false,
+      "retry_attempted": false,
+      "initial_parse_succeeded": true,
+      "retry_parse_succeeded": false,
+      "fallback_to_initial_response": false,
+      "schema_normalization_applied": false,
+      "schema_normalization_notes": [],
+      "failure_type": null,
       "parse_error": null,
+      "schema_error": null,
+      "raw_response_preview": null,
+      "initial_raw_response_preview": null,
+      "retry_raw_response_preview": null,
+      "final_raw_response_preview": null,
+      "parsed_response_available": true,
+      "allowed_evidence_ids": [
+        "e2:owid_gdppc:gdp_pc:france:1998",
+        "e2:owid_gdppc:gdp_pc:india:2018",
+        "e2:owid_gdppc:gdp_pc:netherlands:1998",
+        "e2:owid_gdppc:gdp_pc:united_kingdom:2018",
+        "e2:synthetic:source_family_grounding_policy"
+      ],
       "validation": {
         "required_facts_present": true,
         "forbidden_facts_absent": true,
-        "expected_evidence_cited": false,
-        "acceptable_evidence_cited": false,
-        "valid_time_correct": false,
+        "expected_evidence_cited": true,
+        "acceptable_evidence_cited": true,
+        "valid_time_correct": true,
         "transaction_time_not_misused": true,
         "conflict_warning_correct": true,
         "partial_refusal_correct": true,
         "clarification_correct": true,
-        "overall_pass": false,
-        "failure_reason": "expected_evidence_cited, acceptable_evidence_cited, valid_time_correct"
+        "confidence_correct": true,
+        "grounding_validation_failure": false,
+        "temporal_rule_failure": false,
+        "allowed_evidence_ids": [
+          "e2:owid_gdppc:gdp_pc:france:1998",
+          "e2:owid_gdppc:gdp_pc:india:2018",
+          "e2:owid_gdppc:gdp_pc:netherlands:1998",
+          "e2:owid_gdppc:gdp_pc:united_kingdom:2018",
+          "e2:synthetic:source_family_grounding_policy"
+        ],
+        "unknown_evidence_ids": [],
+        "temporal_rule_failure_reasons": [],
+        "overall_pass": true,
+        "failure_reason": ""
       },
-      "latency_ms": 1.68
+      "latency_ms": 14.35
     }
   ]
 }

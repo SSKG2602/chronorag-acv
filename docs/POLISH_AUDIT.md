@@ -3,8 +3,10 @@
 ## Current Status
 
 ChronoRAG now has a consistent public quickstart, verified light-mode demo path,
-and committed demo assets under `assets/demo/`. The repository should still be
-presented as a temporal-RAG research scaffold, not as a production service.
+committed demo assets under `assets/demo/`, Temporal Eval v2 retrieval results,
+and Layer 1B answer-validation results. The repository should still be
+presented as a temporal-RAG research-demo scaffold, not as a production service
+or publication-grade proof.
 
 ## Completed Polish Items
 
@@ -23,17 +25,26 @@ presented as a temporal-RAG research scaffold, not as a production service.
 - Temporal Contextual Chunking is documented as ChronoRAG's intended chunking
   strategy for separating raw evidence from retrieval context and temporal
   metadata.
+- Temporal Contextual Chunking is implemented and wired into ingestion.
+- Temporal Eval v2 is implemented as the Layer 1A controlled retrieval
+  benchmark.
+- Layer 1B Temporal Answer Validation v2 is implemented with light and Vertex
+  modes.
+- The primary stored Vertex result is
+  `benchmarks/results/temporal_answer_validation_v2_vertex_topk5_results.md`.
+- The dynamic top-k result is stored separately as a diagnostic at
+  `benchmarks/results/temporal_answer_validation_v2_vertex_dynamic_topk_results.md`.
 
 ## Remaining Gaps
 
-- A small controlled diagnostic benchmark is committed, but it is not a
-  publication-grade external benchmark.
-- A larger multi-source, multi-domain benchmark is still required.
+- The current benchmark is controlled and useful for a research-demo checkpoint,
+  but it is not a publication-grade external benchmark.
+- Layer 2 cross-domain evaluation is still required.
+- External baseline comparisons against other time-aware RAG or temporal
+  retrieval systems are still future work.
 - No production deployment layer, migration path, or external observability stack
   is committed yet.
 - No public hosted demo URL is documented.
-- Temporal Contextual Chunking is implemented and wired into ingestion. Broader
-  external validation is still required.
 - The CLI output is verbose for large ingests and should eventually support a
   concise demo mode.
 - The light-mode answer screenshot is a smoke-mode evidence digest, not a
@@ -41,34 +52,19 @@ presented as a temporal-RAG research scaffold, not as a production service.
 
 ## Next Priority
 
-### P1: Benchmark Proof
+### P1: Layer 2 Benchmark
 
-Add a small sanity benchmark for temporal retrieval correctness:
+Build a second-domain temporal benchmark beyond historical GDP-style data. Good
+candidate domains include policy revisions, software documentation versions,
+company filings, or scientific guideline updates.
 
-```text
-benchmarks/
-├── temporal_qa_sample.jsonl
-├── run_benchmark.py
-└── results/
-    └── light_mode_baseline.json
-```
+### P2: External Baselines
 
-Minimum reported metrics:
+Compare ChronoRAG against vanilla vector RAG, hybrid BM25/vector RAG, and at
+least one temporal/time-aware retrieval baseline. Do not claim SOTA until this
+external comparison exists.
 
-- `temporal_window_hit_rate`
-- `source_hit_rate`
-- `unit_hit_rate`
-- `evidence_recall_at_5`
-- `fallback_rate`
-- `latency_ms`
+### P3: ChronoSanity Evaluation
 
-### P2: Ablation Study
-
-Add an ablation script comparing:
-
-- BM25 only
-- Vector only
-- Hybrid without temporal filter
-- Hybrid with temporal filter
-- Hybrid plus temporal fusion
-- Hybrid plus temporal fusion plus rerank
+Measure semantic conflict detection, refusal quality, and evidence-only
+degradation behavior against manually labeled cases.

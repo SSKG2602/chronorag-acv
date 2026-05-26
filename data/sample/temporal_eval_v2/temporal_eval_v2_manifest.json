@@ -1,14 +1,14 @@
 {
   "benchmark": "temporal_eval_v2",
   "description": "Controlled multi-source temporal retrieval and grounding benchmark.",
-  "row_count": 190,
+  "row_count": 191,
   "source_family_counts": {
     "maddison_project_2023": 68,
     "oecd_world_economy_pdf": 30,
     "owid_global_gdp_long_run": 10,
     "owid_maddison_gdp": 28,
     "owid_maddison_gdppc": 42,
-    "synthetic_temporal_traps": 12
+    "synthetic_temporal_traps": 13
   },
   "raw_root": "data/raw/temporal_eval_v2",
   "generated_files": [

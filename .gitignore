@@ -28,3 +28,28 @@ build/
 
 # Local raw benchmark sources
 /data/raw/
+
+# Local secrets and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*credentials*
+*secret*
+*token*
+service-account*.json
+*gcloud*.json
+application_default_credentials.json
+
+# Python/cache/local runtime junk
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.DS_Store
+
+# Local environments
+.venv/
+venv/

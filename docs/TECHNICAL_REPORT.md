@@ -159,6 +159,34 @@ temporal synthesis prompt through Vertex Gemini and uses hybrid lexical + BGE
 vector retrieval by default. Passing `--skip-vector` is an explicit downgrade for
 machines that cannot run local embeddings.
 
+The Layer 1B Vertex path validates the prompt contract, extracts raw/fenced or
+short prose-wrapped JSON, normalizes harmless schema shape drift, validates
+response schema, checks cited evidence IDs, and applies deterministic
+temporal-rule validation. Provider JSON Parse Failure is treated as a
+provider-output contract failure, not as temporal reasoning failure. One retry
+is allowed only for provider-contract failures; grounding and temporal-rule
+failures are not retried away. A failed retry cannot overwrite a usable initial
+response.
+
+A full Vertex 15-case run has been executed. Its failure analysis showed
+answer-completeness and provider-output contract issues rather than grounding or
+temporal-rule failures. The follow-up repair simplified the prompt, added
+schema normalization, preserved usable initial output across failed retries, and
+kept default `--top-k 5` and the embedding model unchanged while preserving the
+controlled benchmark framing. Comparative runs can be stored with
+`--result-suffix` without changing default result paths. The final cleanup
+accepts correct q02/q11/q13 behavior via deterministic validation while keeping
+grounding, valid-time, and transaction-time checks strict.
+
+The stored primary Layer 1B result is
+`benchmarks/results/temporal_answer_validation_v2_vertex_topk5_results.md`.
+It uses top-k 5 and reports 0.80 answer overall pass, 1.00 expected evidence
+citation, 1.00 valid-time correctness, 1.00 transaction-time trap avoidance,
+1.00 provider-contract pass, 1.00 grounding validation pass, and 0.93 temporal
+rule validation pass. The failed cases are q08, q11, and q14. The dynamic top-k
+run is stored separately as a diagnostic result and is not the primary
+benchmark claim.
+
 ## 9. Metrics
 
 Window Hit@5: whether the top five results contain evidence from the expected
@@ -214,7 +242,7 @@ Optional Vertex provider smoke mode:
 ```bash
 export CHRONORAG_LIGHT=0
 export CHRONORAG_PROVIDER=vertex
-export GOOGLE_CLOUD_PROJECT=ginkgo-2026
+export GOOGLE_CLOUD_PROJECT=your-gcp-project-id
 export GOOGLE_CLOUD_LOCATION=us-central1
 export VERTEX_MODEL_ID=gemini-2.5-flash
 python -m benchmarks.run_provider_smoke

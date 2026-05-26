@@ -1,0 +1,124 @@
+{
+  "benchmark": "temporal_answer_validation_v2",
+  "legacy_note": "Superseded single-case Vertex smoke result. Use temporal_answer_validation_v2_vertex_topk5_results.json as the primary Layer 1B result and temporal_answer_validation_v2_vertex_dynamic_topk_results.json as the diagnostic dynamic-top-k result.",
+  "superseded_by": "benchmarks/results/temporal_answer_validation_v2_vertex_topk5_results.json",
+  "diagnostic_dynamic_topk_result": "benchmarks/results/temporal_answer_validation_v2_vertex_dynamic_topk_results.json",
+  "mode": "vertex",
+  "command": "benchmarks/run_temporal_answer_validation_v2.py --mode vertex --top-k 5 --case-id av2_q02_western_europe_1913_window --max-output-tokens 2048",
+  "top_k": 5,
+  "dynamic_top_k": false,
+  "result_suffix": null,
+  "case_count": 1,
+  "corpus_row_count": 191,
+  "retrieval": "hybrid_lexical_bge_temporal",
+  "skip_vector": false,
+  "max_output_tokens": 2048,
+  "temperature": 0.0,
+  "metrics": {
+    "answer_overall_pass": 1.0,
+    "required_facts_present": 1.0,
+    "forbidden_facts_absent": 1.0,
+    "expected_evidence_cited": 1.0,
+    "valid_time_correct": 1.0,
+    "transaction_time_trap_avoided": 1.0,
+    "conflict_warning_correct": 1.0,
+    "partial_refusal_correct": 1.0,
+    "clarification_correct": 1.0,
+    "confidence_correct": 1.0,
+    "grounding_validation_pass": 1.0,
+    "temporal_rule_validation_pass": 1.0,
+    "provider_contract_pass": 1.0
+  },
+  "details": [
+    {
+      "case_id": "av2_q02_western_europe_1913_window",
+      "category": "exact_valid_time_with_window",
+      "question": "What was Western Europe GDP per capita in 1913, and which evidence window supports it?",
+      "expected_behavior": "answer",
+      "detected_behavior": "conflict_warning",
+      "cited_evidence_ids": [
+        "e2:oecd_pdf:western_europe_exact_1913",
+        "e2:synthetic:conflict:western_europe:gdp_pc:1913"
+      ],
+      "retrieved_evidence_ids": [
+        "e2:oecd_pdf:western_europe_exact_1913",
+        "e2:synthetic:conflict:western_europe:gdp_pc:1913",
+        "e2:oecd_pdf:western_europe_range_1870_1913",
+        "e2:oecd_pdf:table_note:western_europe:1913",
+        "e2:oecd_pdf:western_europe_exact_1870"
+      ],
+      "top_k": 5,
+      "effective_top_k": 5,
+      "answer": {
+        "answer": "Western Europe's GDP per capita in 1913 was 3,473 in 1990 international dollars. There is a conflicting report stating it was 3,200 in 2011 international dollars for the same period.",
+        "behavior": "conflict_warning",
+        "cited_evidence_ids": [
+          "e2:oecd_pdf:western_europe_exact_1913",
+          "e2:synthetic:conflict:western_europe:gdp_pc:1913"
+        ],
+        "valid_time_used": [
+          "1913-01-01 to 1913-12-31"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": true,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "medium"
+      },
+      "prompt_contract_valid": true,
+      "prompt_contract_failure": null,
+      "provider_json_parse_failure": false,
+      "schema_validation_failure": false,
+      "grounding_validation_failure": false,
+      "temporal_rule_failure": false,
+      "json_repair_retry_used": false,
+      "retry_attempted": false,
+      "initial_parse_succeeded": true,
+      "retry_parse_succeeded": false,
+      "fallback_to_initial_response": false,
+      "schema_normalization_applied": false,
+      "schema_normalization_notes": [],
+      "failure_type": null,
+      "parse_error": null,
+      "schema_error": null,
+      "raw_response_preview": "```json\n{\n  \"answer\": \"Western Europe's GDP per capita in 1913 was 3,473 in 1990 international dollars. There is a conflicting report stating it was 3,200 in 2011 international dollars for the same period.\",\n  \"behavior\": \"conflict_warning\",\n  \"cited_evidence_ids\": [\n    \"e2:oecd_pdf:western_europe_exact_1913\",\n    \"e2:synthetic:conflict:western_europe:gdp_pc:1913\"\n  ],\n  \"valid_time_used\": [\n    \"1913-01-01 to 1913-12-31\"\n  ],\n  \"transaction_time_used_as_valid_time\": false,\n  \"conflict_warning\": true,\n  \"partial_or_refusal\": false,\n  \"clarification_requested\": false,\n  \"confidence\": \"medium\"\n}\n```",
+      "initial_raw_response_preview": "```json\n{\n  \"answer\": \"Western Europe's GDP per capita in 1913 was 3,473 in 1990 international dollars. There is a conflicting report stating it was 3,200 in 2011 international dollars for the same period.\",\n  \"behavior\": \"conflict_warning\",\n  \"cited_evidence_ids\": [\n    \"e2:oecd_pdf:western_europe_exact_1913\",\n    \"e2:synthetic:conflict:western_europe:gdp_pc:1913\"\n  ],\n  \"valid_time_used\": [\n    \"1913-01-01 to 1913-12-31\"\n  ],\n  \"transaction_time_used_as_valid_time\": false,\n  \"conflict_warning\": true,\n  \"partial_or_refusal\": false,\n  \"clarification_requested\": false,\n  \"confidence\": \"medium\"\n}\n```",
+      "retry_raw_response_preview": null,
+      "final_raw_response_preview": "```json\n{\n  \"answer\": \"Western Europe's GDP per capita in 1913 was 3,473 in 1990 international dollars. There is a conflicting report stating it was 3,200 in 2011 international dollars for the same period.\",\n  \"behavior\": \"conflict_warning\",\n  \"cited_evidence_ids\": [\n    \"e2:oecd_pdf:western_europe_exact_1913\",\n    \"e2:synthetic:conflict:western_europe:gdp_pc:1913\"\n  ],\n  \"valid_time_used\": [\n    \"1913-01-01 to 1913-12-31\"\n  ],\n  \"transaction_time_used_as_valid_time\": false,\n  \"conflict_warning\": true,\n  \"partial_or_refusal\": false,\n  \"clarification_requested\": false,\n  \"confidence\": \"medium\"\n}\n```",
+      "parsed_response_available": true,
+      "allowed_evidence_ids": [
+        "e2:oecd_pdf:table_note:western_europe:1913",
+        "e2:oecd_pdf:western_europe_exact_1870",
+        "e2:oecd_pdf:western_europe_exact_1913",
+        "e2:oecd_pdf:western_europe_range_1870_1913",
+        "e2:synthetic:conflict:western_europe:gdp_pc:1913"
+      ],
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "expected_evidence_cited": true,
+        "acceptable_evidence_cited": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "grounding_validation_failure": false,
+        "temporal_rule_failure": false,
+        "allowed_evidence_ids": [
+          "e2:oecd_pdf:table_note:western_europe:1913",
+          "e2:oecd_pdf:western_europe_exact_1870",
+          "e2:oecd_pdf:western_europe_exact_1913",
+          "e2:oecd_pdf:western_europe_range_1870_1913",
+          "e2:synthetic:conflict:western_europe:gdp_pc:1913"
+        ],
+        "unknown_evidence_ids": [],
+        "temporal_rule_failure_reasons": [],
+        "overall_pass": true,
+        "failure_reason": ""
+      },
+      "latency_ms": 29698.29
+    }
+  ]
+}

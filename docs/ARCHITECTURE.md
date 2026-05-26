@@ -3,7 +3,7 @@
 ChronoRAG is organized around one core pipeline:
 
 ```text
-ingest -> Temporal Contextual Chunking -> PVDB/BM25/vector index -> route query -> retrieve -> temporal filter -> temporal fusion -> ChronoSanity -> attribution/answer
+ingest -> Temporal Contextual Chunking -> PVDB/BM25/vector index -> route query -> retrieve -> temporal filter -> temporal fusion -> ChronoSanity -> grounded synthesis -> schema/grounding/temporal validation -> attribution/answer
 ```
 
 ## Main Layers
@@ -111,7 +111,8 @@ sequenceDiagram
     participant Retriever as Retrieve Service
     participant Reranker as CE / LLM Reranker
     participant Reducer as Chrono Reducer
-    participant Generator as Answer Generator
+    participant Generator as Answer Generator / Vertex Provider
+    participant Validator as Answer Validator
 
     U->>Chunker: ingest documents / JSONL / text
     Chunker->>PVDB: raw_text + retrieval_text + temporal metadata
@@ -128,8 +129,10 @@ sequenceDiagram
     alt conflict risk high
         Reducer-->>U: evidence-only fallback + attribution
     else evidence acceptable
-        Reducer->>Generator: grounded passages
-        Generator-->>U: answer + attribution + telemetry
+        Reducer->>Generator: TCC evidence cards + grounded prompt
+        Generator->>Validator: provider JSON / light harness output
+        Validator->>Validator: schema normalization + grounding + temporal rules
+        Validator-->>U: answer + attribution + telemetry
     end
 ```
 
@@ -140,6 +143,8 @@ sequenceDiagram
 - Retrieval uses lexical and vector channels instead of only embeddings.
 - Ranking includes authority, temporal alignment, age penalty, and unit/domain biases.
 - The answer path includes conflict detection and degradation logic.
+- Provider-backed answer validation separates provider-output contract failures
+  from grounding and temporal-rule failures.
 - The response envelope exposes telemetry that can become an evaluation/observability layer.
 
 ## Architecture Gaps

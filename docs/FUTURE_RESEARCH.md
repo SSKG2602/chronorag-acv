@@ -1,8 +1,14 @@
 # Future Research Direction
 
-## 1. Temporal QA Benchmark
+ChronoRAG currently has Layer 1A retrieval evaluation and Layer 1B
+answer-validation evaluation over a controlled temporal corpus. The next work
+should broaden evidence, domains, and baselines without claiming SOTA or
+publication-grade proof prematurely.
 
-Build a benchmark with questions that require correct valid-time and transaction-time reasoning.
+## 1. Layer 2 Cross-Domain Benchmark
+
+Build a second-domain benchmark with questions that require correct valid-time
+and transaction-time reasoning outside the current historical GDP-style corpus.
 
 Minimum dataset fields:
 
@@ -17,6 +23,20 @@ answer_unit
 domain
 ```
 
+Candidate domains:
+
+- policy and regulation updates
+- versioned software documentation
+- company filings and earnings-call revisions
+- scientific literature revisions
+- medical guideline changes
+- legal case history
+
+Each domain needs a metadata schema, source-family disclosure, sample corpus,
+expected evidence IDs, expected behavior labels, and readable expected answers.
+
+## 2. External Baseline Comparison
+
 Compare:
 
 - vanilla vector RAG
@@ -24,8 +44,12 @@ Compare:
 - ChronoRAG without temporal pre-mask
 - ChronoRAG with temporal pre-mask
 - ChronoRAG with ChronoSanity fallback
+- at least one existing temporal retrieval or time-aware RAG baseline, if a
+  comparable implementation is available
 
-## 2. Ablation Study
+Do not claim SOTA until this external comparison exists.
+
+## 3. Ablation Study
 
 Measure the effect of each major component:
 
@@ -39,7 +63,7 @@ Measure the effect of each major component:
 | Region diversity | Does retrieval avoid over-concentrated evidence? |
 | ChronoSanity | Does conflict fallback reduce hallucination? |
 
-## 3. ChronoSanity Reliability
+## 4. ChronoSanity Reliability
 
 Evaluate conflict detection against manually labeled evidence pairs.
 
@@ -50,25 +74,6 @@ Metrics:
 - false degradation rate
 - missed conflict rate
 - answer correctness after fallback
-
-## 4. Domain Expansion
-
-Candidate domains:
-
-- policy and regulation updates
-- company filings and earnings calls
-- scientific literature revisions
-- medical guideline changes
-- macroeconomic datasets
-- legal case history
-
-Each domain needs:
-
-- metadata schema
-- policy set
-- sample corpus
-- temporal benchmark
-- failure cases
 
 ## 5. Storage Research
 

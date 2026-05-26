@@ -2,7 +2,12 @@
 
 Temporal retrieval-augmented generation for questions where **when** a source was valid is as important as **what** the source says.
 
-ChronoRAG is a research-grade Python RAG scaffold for time-sensitive knowledge bases. It ingests documents with validity windows, transaction windows, provenance, authority signals, entities, regions, and units; retrieves evidence through hybrid lexical/vector search; applies temporal routing and monotone time-aware fusion; then generates an answer with attribution, conflict checks, and controller telemetry.
+ChronoRAG is a research-demo Python RAG scaffold for time-sensitive knowledge
+bases. It ingests documents with validity windows, transaction windows,
+provenance, authority signals, entities, regions, and units; retrieves evidence
+through hybrid lexical/vector search; applies temporal routing and monotone
+time-aware fusion; then generates grounded answers with attribution, conflict
+checks, and controller telemetry.
 
 The project is not a generic chatbot. It is a temporal reasoning layer for RAG systems that need auditable answers over changing evidence.
 
@@ -54,10 +59,11 @@ flowchart TD
     Z --> AA[Chrono Reducer]
     AA --> AB[ChronoSanity Conflict Detection]
     AB --> AC{Conflict Risk}
-    AC -->|Acceptable| AD[LLM Answer Generator]
+    AC -->|Acceptable| AD[LLM / Vertex Answer Generator]
     AC -->|High Risk| AE[Evidence-Only Degradation]
 
-    AD --> AF[Attribution Card]
+    AD --> AH[Schema Normalization + Grounding / Temporal Validation]
+    AH --> AF[Attribution Card]
     AE --> AF
     AF --> AG[Answer + Audit Trail + Controller Stats]
 ```
@@ -152,7 +158,7 @@ conda activate chronorag
 ```bash
 export CHRONORAG_LIGHT=1        # 1 for lightweight smoke mode; 0 for full model execution
 export CHRONORAG_PROVIDER=vertex # optional provider when CHRONORAG_LIGHT=0
-export GOOGLE_CLOUD_PROJECT=ginkgo-2026
+export GOOGLE_CLOUD_PROJECT=your-gcp-project-id
 export GOOGLE_CLOUD_LOCATION=us-central1
 export VERTEX_MODEL_ID=gemini-2.5-flash
 export CHRONORAG_EMBED_FP16=0   # optional experimental local embedding fp16 mode
@@ -176,12 +182,12 @@ Provider mode is optional and runs only after retrieval has selected evidence:
 pip install -r requirements-provider.txt
 
 gcloud auth application-default login
-gcloud config set project ginkgo-2026
+gcloud config set project your-gcp-project-id
 gcloud services enable aiplatform.googleapis.com
 
 export CHRONORAG_LIGHT=0
 export CHRONORAG_PROVIDER=vertex
-export GOOGLE_CLOUD_PROJECT=ginkgo-2026
+export GOOGLE_CLOUD_PROJECT=your-gcp-project-id
 export GOOGLE_CLOUD_LOCATION=us-central1
 export VERTEX_MODEL_ID=gemini-2.5-flash
 python -m benchmarks.run_provider_smoke
@@ -330,23 +336,91 @@ benchmark, and not proof of external generalization. Layer 2 generalization
 across a second domain remains future work. See
 `docs/BENCHMARK_TEMPORAL_EVAL_V2.md`.
 
-Temporal Eval v2 is not a full answer-validation benchmark. Conflict/refusal
-behavior requires the next Layer 1B benchmark, which will evaluate retrieved
-evidence, TCC-enriched chunks, evidence cards, LLM synthesis, an answer
-validator, and ChronoSanity conflict logic. Layer 2 generalization comes later.
+Temporal Eval v2 is not a full answer-validation benchmark. Layer 1B now
+evaluates answer behavior separately using retrieved evidence, TCC-enriched
+evidence cards, Vertex Gemini synthesis in full mode, and deterministic
+validation. Layer 2 generalization comes later.
 
 Layer 1B now has a separate answer-validation runner with light and Vertex modes:
 
 ```bash
 python benchmarks/run_temporal_answer_validation_v2.py --mode light --top-k 5
-python benchmarks/run_temporal_answer_validation_v2.py --mode vertex --top-k 5
+python benchmarks/run_temporal_answer_validation_v2.py \
+  --mode vertex \
+  --top-k 5 \
+  --case-id av2_q01_western_europe_1870_exact \
+  --max-output-tokens 2048
+```
+
+Optional dynamic top-k for complex cases:
+
+```bash
+python benchmarks/run_temporal_answer_validation_v2.py \
+  --mode vertex \
+  --top-k 5 \
+  --dynamic-top-k \
+  --max-output-tokens 2048
+```
+
+Comparative Vertex runs can be stored without overwriting the default result
+files:
+
+```bash
+python benchmarks/run_temporal_answer_validation_v2.py \
+  --mode vertex \
+  --top-k 5 \
+  --max-output-tokens 2048 \
+  --result-suffix topk5
 ```
 
 Light mode is a deterministic CI harness. Vertex mode is the full answer
 synthesis benchmark and uses BGE/vector retrieval by default unless
 `--skip-vector` is explicitly passed.
 
-Current light-mode result:
+Layer 1B validates the provider contract before calling Vertex, extracts fenced
+or prose-wrapped JSON, normalizes harmless schema shape drift, validates cited
+evidence IDs, applies deterministic temporal-rule checks, and allows one retry
+only for provider-output contract failures. A failed retry cannot overwrite a
+usable initial response. Provider JSON parse failures are infrastructure/provider
+contract failures, not temporal reasoning failures.
+
+The primary full 15-case Vertex result is stored at
+`benchmarks/results/temporal_answer_validation_v2_vertex_topk5_results.md`.
+It uses `--top-k 5`, which remains the default. A diagnostic dynamic-top-k run
+is stored at
+`benchmarks/results/temporal_answer_validation_v2_vertex_dynamic_topk_results.md`.
+The light harness and dry-run prompt artifacts are stored at
+`benchmarks/results/temporal_answer_validation_v2_light_results.md` and
+`benchmarks/results/temporal_answer_validation_v2_dry_run_prompts.md`.
+The older `temporal_answer_validation_v2_vertex_results.*` files are legacy
+single-case smoke output and should not be treated as the main benchmark.
+
+Primary top-k 5 Vertex result:
+
+| Metric | Score |
+|---|---:|
+| Answer Overall Pass | 0.80 |
+| Required Facts Present | 0.80 |
+| Expected Evidence Cited | 1.00 |
+| Valid-Time Correct | 1.00 |
+| Transaction-Time Trap Avoided | 1.00 |
+| Provider Contract Pass | 1.00 |
+| Grounding Validation Pass | 1.00 |
+| Temporal Rule Validation Pass | 0.93 |
+
+The failed top-k 5 cases are q08, q11, and q14. They remain documented as real
+answer-behavior limitations. The diagnostic dynamic-top-k run also scores 0.80
+overall, but it is exploratory and not the primary result.
+
+The current repair simplified the prompt, added schema normalization, preserved
+usable initial provider JSON when repair fails, kept default `--top-k 5`, and
+left the embedding model unchanged. Optional `--dynamic-top-k` can expand only
+complex cases for experiments. The final cleanup also made q02/q11/q13
+validation more behavior-aware: correct valid-time windows, true refusals, and
+provider flag shape drift are accepted without weakening grounding or temporal
+checks. Latest generated results are stored in `benchmarks/results/`.
+
+Current Layer 1A light-mode retrieval result:
 
 | Method | Hit@5 Evidence | Top1 Window | Hit@5 Window | Source Family Hit@5 | Distractor Avoidance | Proxy Conflict Correct | Proxy Partial/Refusal Correct | Proxy Behavior Correct | Latency ms |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|

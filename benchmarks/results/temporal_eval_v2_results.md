@@ -10,7 +10,7 @@ benchmarks/run_temporal_eval_v2.py --light
 
 ## Corpus
 
-- Rows: 190
+- Rows: 191
 - Source families: 6
 
 - `maddison_project_2023`: 68
@@ -18,7 +18,7 @@ benchmarks/run_temporal_eval_v2.py --light
 - `owid_global_gdp_long_run`: 10
 - `owid_maddison_gdp`: 28
 - `owid_maddison_gdppc`: 42
-- `synthetic_temporal_traps`: 12
+- `synthetic_temporal_traps`: 13
 
 ## Category Breakdown
 
@@ -33,12 +33,12 @@ benchmarks/run_temporal_eval_v2.py --light
 
 | Method | Hit@5 Evidence | Top1 Window | Hit@5 Window | Source Family Hit@5 | Distractor Avoidance | Proxy Conflict Correct | Proxy Partial/Refusal Correct | Proxy Behavior Correct | Latency ms |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| BM25 only | 0.33 | 0.40 | 0.87 | 0.87 | 0.80 | 0.00 | 0.07 | 0.20 | 2.99 |
-| Vector only | 0.47 | 0.53 | 0.80 | 0.93 | 0.73 | 0.00 | 0.07 | 0.33 | 2.98 |
-| Hybrid without temporal filter | 0.40 | 0.53 | 0.87 | 1.00 | 0.67 | 0.00 | 0.07 | 0.20 | 2.99 |
-| Hybrid with temporal filter | 0.60 | 0.60 | 0.93 | 0.93 | 0.67 | 0.00 | 0.20 | 0.40 | 3.03 |
-| Hybrid + temporal fusion | 0.60 | 0.80 | 0.87 | 1.00 | 0.87 | 0.07 | 0.13 | 0.60 | 3.03 |
-| Hybrid + temporal fusion + rerank | 0.73 | 0.80 | 0.87 | 0.93 | 0.93 | 0.07 | 0.07 | 0.73 | 3.13 |
+| BM25 only | 0.33 | 0.40 | 0.87 | 0.80 | 0.80 | 0.00 | 0.07 | 0.20 | 3.04 |
+| Vector only | 0.47 | 0.47 | 0.80 | 0.93 | 0.73 | 0.00 | 0.07 | 0.33 | 3.03 |
+| Hybrid without temporal filter | 0.40 | 0.47 | 0.87 | 0.93 | 0.67 | 0.00 | 0.07 | 0.20 | 3.04 |
+| Hybrid with temporal filter | 0.60 | 0.47 | 0.93 | 0.93 | 0.73 | 0.00 | 0.20 | 0.33 | 3.06 |
+| Hybrid + temporal fusion | 0.60 | 0.80 | 0.87 | 1.00 | 0.87 | 0.07 | 0.13 | 0.60 | 3.10 |
+| Hybrid + temporal fusion + rerank | 0.73 | 0.80 | 0.87 | 0.93 | 1.00 | 0.07 | 0.07 | 0.73 | 3.17 |
 
 ## Metric Scope
 
@@ -64,10 +64,10 @@ Full conflict/refusal evaluation requires a separate evidence-grounded answer-va
 | e2_q08_broad_1000_2006_demote | C | prefer_exact | e2:oecd_pdf:table_note:western_europe:1870 | 1 | 1 | 1 |
 | e2_q09_china_1820_partial | D | partial | e2:maddison:regional:gdp_pc:world:1820 | 0 | 1 | 0 |
 | e2_q10_publication_2006_not_valid_1870 | D | answer | e2:maddison:regional:gdp_pc:world:1870 | 0 | 1 | 0 |
-| e2_q11_transaction_time_only_records | E | partial | e2:oecd_pdf:western_europe_exact_1870 | 0 | 0 | 0 |
+| e2_q11_transaction_time_only_records | E | partial | e2:synthetic:source_family_grounding_policy | 0 | 0 | 0 |
 | e2_q12_conflict_western_europe_1913 | E | conflict_warning | e2:synthetic:conflict:western_europe:gdp_pc:1913 | 1 | 1 | 1 |
-| e2_q13_exact_vs_broad_1913 | F | prefer_exact | e2:synthetic:same_entity_wrong_metric_india | 1 | 1 | 1 |
-| e2_q14_western_europe_1820_missing_exact | F | refuse | e2:synthetic:conflict:western_europe:gdp_pc:1913 | 0 | 0 | 0 |
+| e2_q13_exact_vs_broad_1913 | F | prefer_exact | e2:oecd_pdf:western_europe_exact_1913 | 1 | 1 | 1 |
+| e2_q14_western_europe_1820_missing_exact | F | refuse | e2:synthetic:conflict:western_europe:gdp_pc:1870 | 0 | 0 | 0 |
 | e2_q15_ambiguous_industrial_era_europe | F | clarify | e2:synthetic:western_europe_industrial_ambiguous | 1 | 0 | 1 |
 
 ## Limitations

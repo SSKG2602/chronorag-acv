@@ -2,8 +2,8 @@
 
 ## Purpose
 
-Layer 1B will evaluate ChronoRAG's final evidence-grounded answer behavior. It
-will test whether the system can synthesize answers from retrieved evidence,
+Layer 1B evaluates ChronoRAG's final evidence-grounded answer behavior. It
+tests whether the system can synthesize answers from retrieved evidence,
 cite the right evidence, warn on conflicts, refuse unsupported exact answers,
 and ask for clarification when temporal queries are ambiguous.
 
@@ -60,3 +60,23 @@ Layer 1B is implemented in `benchmarks/run_temporal_answer_validation_v2.py`.
 ChronoRAG may claim that it has a controlled answer-validation benchmark for
 evidence-grounded temporal answers over the Temporal Eval v2 corpus. It still
 should not claim external generalization without Layer 2.
+
+## Provider Reliability Guardrails
+
+The implemented benchmark validates the Vertex prompt contract before provider
+calls, extracts raw/fenced/prose-wrapped JSON, normalizes harmless schema shape
+drift, validates response schema, checks cited evidence IDs against retrieved
+cards, and applies deterministic temporal-rule validation. Provider JSON Parse
+Failure is treated as a provider-output contract failure, not a reasoning
+failure. One retry is allowed only for parse or non-normalizable schema contract
+failures; temporal reasoning and grounding failures are not retried away. A
+failed retry cannot overwrite a usable initial response.
+
+After a full 15-case Vertex run, the reliability repair simplified the prompt,
+moved behavior-specific checks into deterministic validation, added schema
+normalization, and preserved usable initial provider output when repair fails.
+Default `--top-k` remains 5, the embedding model is unchanged, and optional
+`--dynamic-top-k` exists only for complex-case experiments. Comparative runs can
+be stored with `--result-suffix` without overwriting default outputs. The final
+cleanup makes q02/q11/q13 validation behavior-aware without weakening grounding,
+valid-time, or transaction-time checks.

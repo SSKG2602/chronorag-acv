@@ -6,27 +6,28 @@ benchmarks/run_temporal_answer_validation_v2.py --mode light --dry-run-prompts -
 
 ## av2_q01_western_europe_1870_exact
 
+Top-k: 5 (effective: 5)
+
 Evidence IDs: e2:oecd_pdf:western_europe_exact_1870, e2:maddison:regional:gdp_pc:western_europe:1870, e2:maddison:regional:gdp_pc:western_europe:1950, e2:oecd_pdf:western_europe_exact_1913, e2:synthetic:conflict:western_europe:gdp_pc:1870
 
 ```text
 You are ChronoRAG's grounded temporal answer synthesizer.
-Use only the TCC-enriched evidence cards.
-Do not use outside knowledge.
-Do not invent values.
-Do not treat transaction_time as valid_time.
-Prefer exact valid-time evidence over broad-window evidence.
-Use broad-window evidence only as context unless no exact evidence exists.
-If exact valid-time evidence is missing, answer partial/insufficient or refuse exact answer.
-If evidence cards disagree for same entity + metric + valid time, return conflict_warning.
-If the question has ambiguous temporal phrase, return clarify.
-Always cite evidence IDs.
-Return one compact strict JSON object only.
-Do not wrap the JSON in markdown and do not include literal newlines inside string values.
 
-Question: What was Western Europe GDP per capita in 1870 using exact valid-year evidence only?
+Rules:
+- Use only the provided evidence cards.
+- Do not use outside knowledge.
+- Cite only evidence IDs from the provided evidence cards.
+- Do not invent evidence IDs.
+- valid_time means the time the claim or data is about.
+- Do not treat publication year, ingestion time, observation time, or transaction_time as valid_time.
+- Prefer exact valid-time evidence over broad-window evidence when exact time is requested.
+- If evidence is conflicting, partial, missing, or ambiguous, say that clearly.
+- Return one JSON object with the required fields.
+
+Original benchmark question: What was Western Europe GDP per capita in 1870 using exact valid-year evidence only?
 Expected behavior label for evaluation: answer
 
-TCC-enriched evidence cards:
+TCC evidence cards:
 Evidence ID: e2:oecd_pdf:western_europe_exact_1870
 Source family: oecd_world_economy_pdf
 Source file: data/raw/temporal_eval_v2/oecd/oecd3.pdf
@@ -110,46 +111,48 @@ Raw evidence: Synthetic conflict trap reports Western Europe GDP per capita as 1
 Retrieval context: Document: Temporal Eval v2 synthetic_temporal_traps. Section: GDP per capita. Entity: Western Europe. Unit: 2011 international dollars. Temporal scope: 1870. Original chunk: Synthetic conflict trap reports Western Europe GDP per capita as 1,800 in 1870, conflicting with source-backed records.
 TCC context: evidence_id=e2:synthetic:conflict:western_europe:gdp_pc:1870; source_family=synthetic_temporal_traps; valid_time=1870-01-01 to 1870-12-31; transaction_time=None; temporal_type=conflict_claim; source_kind=synthetic_trap; raw_evidence=Synthetic conflict trap reports Western Europe GDP per capita as 1,800 in 1870, conflicting with source-backed records.; retrieval_context=Document: Temporal Eval v2 synthetic_temporal_traps. Section: GDP per capita. Entity: Western Europe. Unit: 2011 international dollars. Temporal scope: 1870. Original chunk: Synthetic conflict trap reports Western Europe GDP per capita as 1,800 in 1870, conflicting with source-backed records.
 
-Required JSON output schema:
+Required JSON fields:
 {
-  "answer": "...",
+  "answer": "answer using only supplied evidence",
   "behavior": "answer | compare | prefer_exact | partial | refuse | conflict_warning | clarify",
   "cited_evidence_ids": [
-    "..."
+    "evidence IDs from the provided cards only"
   ],
   "valid_time_used": [
-    "..."
+    "YYYY-MM-DD to YYYY-MM-DD, or empty if no valid-time evidence is used"
   ],
   "transaction_time_used_as_valid_time": false,
   "conflict_warning": false,
   "partial_or_refusal": false,
-  "clarification_requested": false
+  "clarification_requested": false,
+  "confidence": "high | medium | low"
 }
 ```
 
 ## av2_q02_western_europe_1913_window
 
-Evidence IDs: e2:oecd_pdf:western_europe_exact_1913, e2:synthetic:conflict:western_europe:gdp_pc:1913, e2:synthetic:same_year_wrong_entity_1913, e2:oecd_pdf:table_note:western_europe:1913, e2:maddison:regional:gdp_pc:western_europe:1950
+Top-k: 5 (effective: 5)
+
+Evidence IDs: e2:oecd_pdf:western_europe_exact_1913, e2:synthetic:conflict:western_europe:gdp_pc:1913, e2:synthetic:same_year_wrong_entity_1913, e2:oecd_pdf:table_note:western_europe:1913, e2:oecd_pdf:western_europe_exact_1870
 
 ```text
 You are ChronoRAG's grounded temporal answer synthesizer.
-Use only the TCC-enriched evidence cards.
-Do not use outside knowledge.
-Do not invent values.
-Do not treat transaction_time as valid_time.
-Prefer exact valid-time evidence over broad-window evidence.
-Use broad-window evidence only as context unless no exact evidence exists.
-If exact valid-time evidence is missing, answer partial/insufficient or refuse exact answer.
-If evidence cards disagree for same entity + metric + valid time, return conflict_warning.
-If the question has ambiguous temporal phrase, return clarify.
-Always cite evidence IDs.
-Return one compact strict JSON object only.
-Do not wrap the JSON in markdown and do not include literal newlines inside string values.
 
-Question: What was Western Europe GDP per capita in 1913, and which evidence window supports it?
+Rules:
+- Use only the provided evidence cards.
+- Do not use outside knowledge.
+- Cite only evidence IDs from the provided evidence cards.
+- Do not invent evidence IDs.
+- valid_time means the time the claim or data is about.
+- Do not treat publication year, ingestion time, observation time, or transaction_time as valid_time.
+- Prefer exact valid-time evidence over broad-window evidence when exact time is requested.
+- If evidence is conflicting, partial, missing, or ambiguous, say that clearly.
+- Return one JSON object with the required fields.
+
+Original benchmark question: What was Western Europe GDP per capita in 1913, and which evidence window supports it?
 Expected behavior label for evaluation: answer
 
-TCC-enriched evidence cards:
+TCC evidence cards:
 Evidence ID: e2:oecd_pdf:western_europe_exact_1913
 Source family: oecd_world_economy_pdf
 Source file: data/raw/temporal_eval_v2/oecd/oecd3.pdf
@@ -218,34 +221,35 @@ TCC context: evidence_id=e2:oecd_pdf:table_note:western_europe:1913; source_fami
 
 ---
 
-Evidence ID: e2:maddison:regional:gdp_pc:western_europe:1950
-Source family: maddison_project_2023
-Source file: data/raw/temporal_eval_v2/maddison/mpd2023_web.xlsx
+Evidence ID: e2:oecd_pdf:western_europe_exact_1870
+Source family: oecd_world_economy_pdf
+Source file: data/raw/temporal_eval_v2/oecd/oecd3.pdf
 Entity: Western Europe
 Metric: GDP per capita
-Value: 7239.914295569185
-Unit: 2011 international dollars
-Valid time: 1950-01-01 to 1950-12-31
-Transaction time: None
+Value: None
+Unit: 1990 international dollars
+Valid time: 1870-01-01 to 1870-12-31
+Transaction time: 2006
 Temporal type: valid_time_exact
-Source kind: structured_excel
-Raw evidence: Western Europe GDP per capita was 7,240 in 1950, measured in 2011 international dollars in Maddison Project 2023 regional data.
-Retrieval context: Document: Temporal Eval v2 maddison_project_2023. Section: Regional data GDPpc. Entity: Western Europe. Unit: 2011 international dollars. Temporal scope: 1950. Original chunk: Western Europe GDP per capita was 7,240 in 1950, measured in 2011 international dollars in Maddison Project 2023 regional data.
-TCC context: evidence_id=e2:maddison:regional:gdp_pc:western_europe:1950; source_family=maddison_project_2023; valid_time=1950-01-01 to 1950-12-31; transaction_time=None; temporal_type=valid_time_exact; source_kind=structured_excel; raw_evidence=Western Europe GDP per capita was 7,240 in 1950, measured in 2011 international dollars in Maddison Project 2023 regional data.; retrieval_context=Document: Temporal Eval v2 maddison_project_2023. Section: Regional data GDPpc. Entity: Western Europe. Unit: 2011 international dollars. Temporal scope: 1950. Original chunk: Western Europe GDP per capita was 7,240 in 1950, measured in 2011 international dollars in Maddison Project 2023 regional data.
+Source kind: pdf_derived_passage
+Raw evidence: OECD table-derived evidence reports Western Europe GDP per capita as 1,960 in 1870, measured in 1990 international dollars.
+Retrieval context: Document: Temporal Eval v2 oecd_world_economy_pdf. Section: Derived short passage. Entity: Western Europe. Unit: 1990 international dollars. Temporal scope: 1870-1870. Original chunk: OECD table-derived evidence reports Western Europe GDP per capita as 1,960 in 1870, measured in 1990 international dollars.
+TCC context: evidence_id=e2:oecd_pdf:western_europe_exact_1870; source_family=oecd_world_economy_pdf; valid_time=1870-01-01 to 1870-12-31; transaction_time=2006; temporal_type=valid_time_exact; source_kind=pdf_derived_passage; raw_evidence=OECD table-derived evidence reports Western Europe GDP per capita as 1,960 in 1870, measured in 1990 international dollars.; retrieval_context=Document: Temporal Eval v2 oecd_world_economy_pdf. Section: Derived short passage. Entity: Western Europe. Unit: 1990 international dollars. Temporal scope: 1870-1870. Original chunk: OECD table-derived evidence reports Western Europe GDP per capita as 1,960 in 1870, measured in 1990 international dollars.
 
-Required JSON output schema:
+Required JSON fields:
 {
-  "answer": "...",
+  "answer": "answer using only supplied evidence",
   "behavior": "answer | compare | prefer_exact | partial | refuse | conflict_warning | clarify",
   "cited_evidence_ids": [
-    "..."
+    "evidence IDs from the provided cards only"
   ],
   "valid_time_used": [
-    "..."
+    "YYYY-MM-DD to YYYY-MM-DD, or empty if no valid-time evidence is used"
   ],
   "transaction_time_used_as_valid_time": false,
   "conflict_warning": false,
   "partial_or_refusal": false,
-  "clarification_requested": false
+  "clarification_requested": false,
+  "confidence": "high | medium | low"
 }
 ```

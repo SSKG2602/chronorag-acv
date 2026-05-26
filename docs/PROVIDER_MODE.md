@@ -35,7 +35,7 @@ Authenticate and select the project:
 
 ```bash
 gcloud auth application-default login
-gcloud config set project ginkgo-2026
+gcloud config set project your-gcp-project-id
 gcloud services enable aiplatform.googleapis.com
 ```
 
@@ -44,7 +44,7 @@ Set provider environment variables:
 ```bash
 export CHRONORAG_LIGHT=0
 export CHRONORAG_PROVIDER=vertex
-export GOOGLE_CLOUD_PROJECT=ginkgo-2026
+export GOOGLE_CLOUD_PROJECT=your-gcp-project-id
 export GOOGLE_CLOUD_LOCATION=us-central1
 export VERTEX_MODEL_ID=gemini-2.5-flash
 ```
@@ -91,9 +91,33 @@ benchmark or broad performance claim.
 The Layer 1B answer-validation benchmark has a full Vertex mode:
 
 ```bash
-python benchmarks/run_temporal_answer_validation_v2.py --mode vertex --top-k 5
+python benchmarks/run_temporal_answer_validation_v2.py \
+  --mode vertex \
+  --top-k 5 \
+  --case-id av2_q01_western_europe_1870_exact \
+  --max-output-tokens 2048
 ```
 
 Vertex mode is explicit and does not silently fall back to the light harness. It
 uses BGE/vector retrieval by default; pass `--skip-vector` only when intentionally
 downgrading retrieval for a constrained local machine.
+
+The answer-validation runner hardens provider behavior with prompt-contract
+validation, robust JSON extraction, schema normalization, cited-evidence
+validation, deterministic temporal-rule validation, and one retry only for
+provider-output contract failures. Provider JSON Parse Failure is an
+infrastructure/provider-contract failure, not a temporal reasoning failure. A
+failed retry cannot overwrite a usable initial response.
+
+The Vertex answer-validation prompt is intentionally simple after full-run
+testing showed that over-prescriptive prompt wording can harm provider-output
+reliability. It keeps only the evidence-only, citation, valid-time, and JSON
+contract rules. Behavior-specific correctness is enforced by deterministic
+validation rather than long prompt templates.
+
+Provider-native structured JSON output is not required for this benchmark path.
+The current implementation keeps the SDK call backward-compatible and uses
+parser/schema validation as the fallback contract layer.
+
+For comparative runs, pass `--result-suffix topk5` or another safe suffix to
+write distinct result files while leaving the default output paths unchanged.
