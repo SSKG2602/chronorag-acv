@@ -77,9 +77,9 @@ chronorag/
 │   ├── schemas/            # Pydantic request/response contracts
 │   └── services/           # Ingest, retrieve, answer, policy, maintenance logic
 ├── core/                   # Temporal reasoning, retrieval, routing, generation modules
-│   ├── dhqc/               # Domain Heuristic Query Controller
+│   ├── dhqc/               # Retrieval-hop planning helper used by answer orchestration
 │   ├── generator/          # Prompting, backend loading, answer generation
-│   ├── gsm/                # Grounding/source/metadata heuristics
+│   ├── gsm/                # Intent, source-risk, and metadata heuristics
 │   ├── retrieval/          # BM25, reranking, LLM judge hooks
 │   └── router/             # Temporal query routing
 ├── storage/                # Cache, graph, and PVDB persistence layers
@@ -110,6 +110,11 @@ chronorag/
 - Evidence-only fallback when conflicts or weak grounding make generation unsafe.
 - Attribution cards with source windows, confidence, alternative windows, and counterfactual timelines.
 - Controller telemetry: hop plan, executed hops, latency, token counts, degradation reason, retrieval weights, and router metrics.
+- DHQC remains in the runtime path as a small retrieval-hop planning helper, but
+  it is not the main architectural contribution of the current checkpoint.
+- GSM remains in the runtime path for intent detection, temporal hint
+  normalization, and source-risk heuristics, but it is a supporting layer around
+  the TCC plus retrieval pipeline rather than the headline mechanism.
 - Config-driven model and policy selection through YAML files.
 - Lightweight mode for tests/smoke runs and full mode for model-backed execution.
 
@@ -124,9 +129,20 @@ chronorag/
   external benchmark.
 - No Dockerfile or production deployment manifest is visible in the repo root.
 - Storage currently appears oriented around local persisted state and experimental PVDB abstractions, not a hardened multi-tenant Postgres/pgvector deployment.
+- Graph retrieval is not implemented in the current checkpoint. The
+  `core/retrieval/graph_paths.py` module is a disabled stub that raises
+  `GraphNotConfigured`.
 - Authentication, authorization, rate limiting, and tenant isolation are not yet production-grade.
 - Observability is designed conceptually through telemetry fields, but no complete OpenTelemetry dashboard/export pipeline is documented.
 - The system should not be presented as a finished commercial RAG platform. Present it as a research scaffold and temporal-RAG prototype.
+
+## Scope Note
+
+Temporal Contextual Chunking, temporal retrieval, and grounded answer
+validation are the core of the current ChronoRAG checkpoint. DHQC and GSM are
+still part of the active code path, but they should be described as supporting
+heuristic/controller modules rather than the main architectural contribution.
+Graph-based retrieval is not part of the current working path.
 
 ## Setup
 

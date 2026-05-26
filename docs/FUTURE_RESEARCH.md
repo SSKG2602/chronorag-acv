@@ -5,6 +5,11 @@ answer-validation evaluation over a controlled temporal corpus. The next work
 should broaden evidence, domains, and baselines without claiming SOTA or
 publication-grade proof prematurely.
 
+Temporal Contextual Chunking is the current architectural center. Older helper
+layers such as DHQC and GSM may still be useful for controller and heuristic
+support, but they are not the main research claim of the present checkpoint.
+Graph retrieval is still future work rather than an active subsystem.
+
 ## 1. Layer 2 Cross-Domain Benchmark
 
 Build a second-domain benchmark with questions that require correct valid-time

@@ -55,3 +55,12 @@ the next major benchmark step is a Layer 2 multi-domain benchmark.
 - Measure conflict precision and recall.
 - Evaluate when evidence-only degradation changes trust.
 - Add better counterfactual/alternative-window reporting.
+
+## Scope Note
+
+- Temporal Contextual Chunking, temporal retrieval, and grounded answer
+  validation define the current core path.
+- DHQC and GSM remain active support modules and may continue to evolve, but
+  they are not the main claim of the current checkpoint.
+- Graph retrieval remains future work until `graph_paths.py` is replaced with a
+  real implementation.

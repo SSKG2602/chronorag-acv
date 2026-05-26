@@ -44,6 +44,13 @@ The system is organized into:
 - Optional provider-backed answer synthesis or evidence-only fallback
 - Attribution card generation
 
+Supporting modules still exist around this main path. DHQC is an active
+controller helper that plans retrieval-hop budgets from simple coverage and
+authority signals. GSM is an active heuristics layer for intent detection,
+temporal hint normalization, and source-risk scoring. Both are part of the
+working system, but neither is the main contribution of the current TCC plus
+Layer 1B checkpoint.
+
 ## 4. Retrieval Pipeline
 
 Before retrieval, ChronoRAG needs chunk records that carry both searchable
@@ -217,6 +224,9 @@ Latency ms: wall-clock runtime for the method.
   answer-quality evaluation is added.
 - CI currently validates light mode, not full model-backed generation.
 - ChronoSanity quality depends on passage granularity and metadata quality.
+- Graph retrieval is not implemented in the current system. The graph-path
+  module is a disabled stub, so graph-based reasoning is not part of the
+  current proof.
 - The system is not production-hardened for authentication, multi-tenancy,
   monitoring, or deployment.
 

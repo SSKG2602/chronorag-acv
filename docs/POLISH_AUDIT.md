@@ -68,3 +68,27 @@ external comparison exists.
 
 Measure semantic conflict detection, refusal quality, and evidence-only
 degradation behavior against manually labeled cases.
+
+## Core Path Scope Audit
+
+- TCC is core. Temporal Contextual Chunking is implemented in ingestion and is
+  the main architectural contribution of the current checkpoint.
+- Layer 1B answer validation is core. The current benchmark proof depends on
+  TCC-enriched evidence cards, temporal retrieval, grounded synthesis, and
+  deterministic validation.
+- Vertex provider mode is core for full benchmark execution. Light mode remains
+  the CI-safe validation harness.
+- DHQC status: active auxiliary module. It is instantiated in `app/deps.py`,
+  consumed by `app/services/answer_service.py`, and covered by
+  `tests/unit/test_dhqc_caps.py`. It affects controller planning telemetry, but
+  it is not the main Layer 1B contribution.
+- GSM status: active auxiliary module. It is used in
+  `app/services/ingest_service.py`, `app/services/retrieve_service.py`, and
+  `core/router/temporal_router.py` for source-risk, intent, and temporal
+  normalization heuristics.
+- Graph path status: stub-only. `core/retrieval/graph_paths.py` only raises
+  `GraphNotConfigured`, so graph retrieval is not implemented in the current
+  proof path.
+- Not part of current proof: graph retrieval, external baseline comparison,
+  Layer 2 cross-domain generalization, and any claim that DHQC or GSM are the
+  main architectural novelty.
