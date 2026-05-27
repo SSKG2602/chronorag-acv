@@ -53,3 +53,6 @@ __pycache__/
 # Local environments
 .venv/
 venv/
+
+# Generated Layer 2 benchmark corpus
+benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl
