@@ -4,6 +4,12 @@ from dataclasses import dataclass
 
 from app.utils.fusion import monotone_temporal_fusion
 from benchmarks.layer2_crossdomain.schemas import CorpusRow, QuestionCase
+from benchmarks.layer2_crossdomain.temporal_precision import (
+    extract_temporal_constraints,
+    has_exact_date_query,
+    has_exact_timestamp_query,
+    score_temporal_precision,
+)
 from core.ingestion.temporal_contextual_chunker import build_temporal_contextual_chunks
 from core.retrieval.lexical_bm25 import bm25_search
 
@@ -72,6 +78,7 @@ def adapt_corpus(rows: list[CorpusRow]) -> list[AdaptedChronoEvidence]:
 
 def retrieve_with_chronorag_adapter(case: QuestionCase, corpus: list[CorpusRow], top_k: int) -> tuple[list[CorpusRow], dict]:
     adapted = adapt_corpus(corpus)
+    temporal_constraints = extract_temporal_constraints(case.question)
     lexical = dict(bm25_search(case.question, [(item.row.id, item.retrieval_text) for item in adapted], top_k=len(adapted)))
     scored: list[AdaptedChronoEvidence] = []
     for item in adapted:
@@ -102,6 +109,12 @@ def retrieve_with_chronorag_adapter(case: QuestionCase, corpus: list[CorpusRow],
         "adapter_used": True,
         "uses_tcc": True,
         "uses_monotone_temporal_fusion": True,
+        "temporal_precision_applied": True,
+        "extracted_temporal_constraints": [constraint.to_dict() for constraint in temporal_constraints],
+        "exact_date_query": has_exact_date_query(temporal_constraints),
+        "exact_timestamp_query": has_exact_timestamp_query(temporal_constraints),
+        "temporal_granularity": temporal_constraints[0].granularity if temporal_constraints else "none",
+        "temporal_role_detected": temporal_constraints[0].temporal_role if temporal_constraints else "unknown",
         "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
         "selected_scores": {item.row.id: round(item.score, 4) for item in scored[:top_k]},
     }
@@ -118,18 +131,9 @@ def _year(value: str | None) -> int | None:
 
 
 def _temporal_weight(case: QuestionCase, row: CorpusRow) -> float:
-    expected_years = {item[:4] for item in case.expected_valid_time if item}
-    if row.temporal_type == "transaction_time_only":
-        return 0.15 if case.category in {"transaction_vs_valid_time", "transaction_time_vs_valid_time"} else 0.03
-    if not expected_years:
-        return 0.40 if row.temporal_type != "missing_or_unknown" else 0.10
-    if row.valid_from and row.valid_from[:4] in expected_years and row.temporal_type == "valid_time_exact":
-        return 1.0
-    if row.valid_from and row.valid_to and any(row.valid_from[:4] <= year <= row.valid_to[:4] for year in expected_years):
-        return 0.65
     if row.temporal_type == "conflict_claim" and case.category in {"conflict_or_revision", "conflict_detection"}:
         return 0.80
-    return 0.05
+    return score_temporal_precision(case, row)
 
 
 def _normalize(value: float, values) -> float:

@@ -455,6 +455,14 @@ No final Layer 2 performance claim exists yet. The framework is ready for
 controlled benchmark construction, estimate-only checks, dry-run prompt review,
 and limited provider-backed runs. See `benchmarks/layer2_crossdomain/`.
 
+The current generated Layer 2 corpus path targets 5,000 processed rows and 200
+questions. A small diagnostic Vertex pilot exposed a real dense time-series
+failure: year-level scoring could retrieve wrong same-year FRED rows for exact
+daily Treasury-yield questions. The ChronoRAG Layer 2 adapter now applies
+symbolic multi-granularity temporal precision before answer synthesis, so exact
+dates/timestamps outrank same-year wrong-date rows. This is a retrieval repair,
+not a superiority claim.
+
 | Method | Corpus | Questions | Mode | Overall | Evidence | Valid-time | Transaction trap | Conflict | Refusal/partial | Status |
 |---|---:|---:|---|---:|---:|---:|---:|---:|---:|---|
 | Direct LLM full-context | pending | pending | pending | pending | pending | pending | pending | pending | pending | framework ready |
@@ -482,6 +490,8 @@ python benchmarks/run_temporal_eval_v2.py --light
 ## Technical Limitations
 
 - Temporal extraction is partly heuristic and depends on document formatting.
+- Layer 2 exact-time precision is implemented in the comparison adapter; deeper
+  core TCC precision integration across all ingestion paths remains future work.
 - Domain support is strongest for the world-economy/Maddison-style path; other domains need dedicated policy sets and evaluation.
 - Cross-encoder and LLM reranking can be expensive in full mode.
 - Local model execution depends on CPU/GPU memory and Hugging Face model access.
@@ -491,14 +501,17 @@ python benchmarks/run_temporal_eval_v2.py --light
 
 ## Future Research Direction
 
-1. **Temporal evaluation benchmark**
-   - Build a small temporal QA set with known valid-time and transaction-time labels.
-   - Compare vanilla RAG vs ChronoRAG on time-window correctness.
+1. **Layer 2 controlled comparison**
+   - Run the 5,000-row / 200-question cross-domain comparison against direct
+     LLM full-context and metadata-aware temporal RAG baselines.
+   - Treat diagnostic pilots as debugging evidence, not final benchmark wins.
 
 2. **Temporal retrieval ablations**
    - BM25 only vs ANN only vs hybrid.
    - Hybrid retrieval with and without temporal pre-mask.
    - Monotone temporal fusion vs ordinary rerank score.
+   - Compare symbolic temporal precision at year, month, day, and timestamp
+     granularity before adding heavier embedding/reranker profiles.
 
 3. **ChronoSanity reliability study**
    - Measure false positives and false negatives for conflict detection.

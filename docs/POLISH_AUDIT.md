@@ -30,6 +30,10 @@ or publication-grade proof.
   benchmark.
 - Layer 1B Temporal Answer Validation v2 is implemented with light and Vertex
   modes.
+- Layer 2 has a cross-domain comparison framework and generated local
+  5,000-row / 200-question dataset path.
+- Layer 2 ChronoRAG adapter retrieval now applies symbolic multi-granularity
+  temporal precision for dense exact-date/timestamp cases.
 - The primary stored Vertex result is
   `benchmarks/results/temporal_answer_validation_v2_vertex_topk5_results.md`.
 - The dynamic top-k result is stored separately as a diagnostic at
@@ -39,7 +43,7 @@ or publication-grade proof.
 
 - The current benchmark is controlled and useful for a research-demo checkpoint,
   but it is not a publication-grade external benchmark.
-- Layer 2 cross-domain evaluation is still required.
+- Full Layer 2 provider-backed comparison is still required.
 - External baseline comparisons against other time-aware RAG or temporal
   retrieval systems are still future work.
 - No production deployment layer, migration path, or external observability stack
@@ -59,9 +63,16 @@ candidate domains include policy revisions, software documentation versions,
 company filings, or scientific guideline updates.
 
 The comparison framework now exists under `benchmarks/layer2_crossdomain/`.
-It is a scaffold for direct LLM full-context, independent metadata temporal RAG,
-and ChronoRAG full comparisons. It does not contain the final 5,000-row /
-200-question dataset and does not establish a result claim yet.
+It supports direct LLM full-context, independent metadata temporal RAG, and
+ChronoRAG full comparisons with a generated local 5,000-row / 200-question data
+path. It does not establish a result claim yet.
+
+A limited Vertex pilot was diagnostic only. It showed that ChronoRAG's adapter
+could fail dense FRED daily exact-date retrieval when time was reduced to year
+granularity. The adapter now uses Layer 2 temporal precision scoring for year,
+month, day, timestamp, range, quarter, daypart, and fuzzy interval constraints.
+This repair keeps valid time separate from transaction/publication/filing/release
+time and should not be presented as a benchmark win.
 
 ### P2: External Baselines
 

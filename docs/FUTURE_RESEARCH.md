@@ -14,9 +14,10 @@ Graph retrieval is still future work rather than an active subsystem.
 
 Build a second-domain benchmark with questions that require correct valid-time
 and transaction-time reasoning outside the current historical GDP-style corpus.
-The scaffold now exists under `benchmarks/layer2_crossdomain/`; the next step is
-turning the downloaded raw pool into the planned processed corpus and question
-set.
+The scaffold now exists under `benchmarks/layer2_crossdomain/`, with a generated
+local path for the planned 5,000-row / 200-question processed corpus. The next
+step is controlled provider-backed comparison and review of failure categories,
+not a superiority claim.
 
 Minimum dataset fields:
 
@@ -44,6 +45,14 @@ The Layer 2 comparison target is direct Gemini full-context, an independent
 metadata temporal RAG baseline, and ChronoRAG full through an adapter around the
 existing TCC/retrieval framework. No result claim exists until the full
 cross-domain benchmark is built and run.
+
+A small diagnostic pilot exposed an exact-date retrieval weakness on dense FRED
+daily series, where year-level scoring could retrieve wrong same-year rows.
+Layer 2 now includes symbolic multi-granularity temporal precision for year,
+month, day, timestamp, ranges, quarters, dayparts, and fuzzy phrases. This
+precision should remain separate from embedding-model experiments: stronger
+embeddings can help recall, but exact valid-time matching should not be
+delegated only to semantic similarity.
 
 Each domain needs a metadata schema, source-family disclosure, sample corpus,
 expected evidence IDs, expected behavior labels, and readable expected answers.

@@ -2,8 +2,10 @@
 
 ChronoRAG is a research scaffold for temporal RAG. It implements bitemporal
 retrieval concepts and validates them with Temporal Eval v2, a controlled
-multi-source retrieval diagnostic. Layer 1B answer validation is implemented;
-the next major benchmark step is a Layer 2 multi-domain benchmark.
+multi-source retrieval diagnostic. Layer 1B answer validation is implemented.
+The Layer 2 multi-domain comparison framework and generated local dataset path
+now exist; the next benchmark step is controlled provider-backed comparison
+without overclaiming diagnostic pilots.
 
 ## P0: Credibility Cleanup
 
@@ -44,15 +46,19 @@ the next major benchmark step is a Layer 2 multi-domain benchmark.
 
 ## P3: Layer 2 Generalization
 
-- Add at least one second domain beyond historical GDP/debt style data.
-- Evaluate generalization across domains.
-- Add answer-quality evaluation after retrieval quality is measurable.
+- Maintain the 5,000-row / 200-question generated dataset path before claiming
+  cross-domain performance.
+- Evaluate generalization across domains using direct LLM full-context,
+  independent metadata temporal RAG, and ChronoRAG full under the same corpus,
+  model, and validator.
+- Treat small Vertex pilots as diagnostics, not final benchmark results.
 - Separate retrieval metrics from provider-backed answer synthesis quality.
 - Use the new `benchmarks/layer2_crossdomain/` framework to compare direct LLM
   full-context, metadata temporal RAG, and ChronoRAG full under the same corpus,
   model, and validator.
-- Build the planned processed Layer 2 corpus from the downloaded raw pool before
-  making any comparison claim.
+- Use multi-granularity symbolic temporal precision for dense time-series rows:
+  exact dates/timestamps must outrank same-year wrong-date evidence before
+  embedding similarity is considered sufficient.
 
 ## P4: ChronoSanity Strengthening
 

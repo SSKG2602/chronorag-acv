@@ -114,6 +114,20 @@ Field meanings:
 - `temporal_ambiguity`: whether the time signal may apply to multiple facts or
   only broad context.
 
+Layer 1 mostly exercises year/window discrimination. Layer 2 adds
+multi-granularity temporal precision in the cross-domain adapter so dense
+time-series retrieval can distinguish exact dates and timestamps from other
+rows in the same year. The current precision module supports year, month, day,
+hour, minute, second, ranges, quarters, dayparts, and fuzzy phrases while still
+separating valid time from transaction/publication/filing/release time.
+
+This precision layer currently lives in
+`benchmarks/layer2_crossdomain/temporal_precision.py` and is used by the Layer 2
+ChronoRAG adapter before answer synthesis. Deeper core TCC integration of
+`normalized_start`, `normalized_end`, `precision`, `temporal_role`,
+`original_temporal_expression`, and `ambiguous_parse` is planned, but the core
+ingestion path remains backward-compatible in this checkpoint.
+
 ## Temporal Inference Hierarchy
 
 1. `chunk_explicit`
