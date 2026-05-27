@@ -436,6 +436,31 @@ validation more behavior-aware: correct valid-time windows, true refusals, and
 provider flag shape drift are accepted without weakening grounding or temporal
 checks. Latest generated results are stored in `benchmarks/results/`.
 
+## Layer 2 Cross-Domain Comparison Framework
+
+Layer 2 is ready as a comparison framework, not a final result claim. The
+downloaded raw pool currently contains 46,503 raw rows/items from five domains:
+FRED macro data, market/index data, SEC submissions, Federal Register
+regulations, and GitHub software releases. The target controlled benchmark is
+5,000 processed evidence rows and 200 benchmark questions.
+
+Layer 2 compares three methods under the same processed corpus, same question
+set, same Gemini/Vertex model in provider mode, and same final validator:
+
+1. Direct LLM full-context baseline.
+2. Metadata-aware temporal RAG baseline.
+3. ChronoRAG full framework through the existing TCC/retrieval adapter.
+
+No final Layer 2 performance claim exists yet. The framework is ready for
+controlled benchmark construction, estimate-only checks, dry-run prompt review,
+and limited provider-backed runs. See `benchmarks/layer2_crossdomain/`.
+
+| Method | Corpus | Questions | Mode | Overall | Evidence | Valid-time | Transaction trap | Conflict | Refusal/partial | Status |
+|---|---:|---:|---|---:|---:|---:|---:|---:|---:|---|
+| Direct LLM full-context | pending | pending | pending | pending | pending | pending | pending | pending | pending | framework ready |
+| Metadata temporal RAG | pending | pending | pending | pending | pending | pending | pending | pending | pending | framework ready |
+| ChronoRAG full | pending | pending | pending | pending | pending | pending | pending | pending | pending | framework ready |
+
 Current Layer 1A light-mode retrieval result:
 
 | Method | Hit@5 Evidence | Top1 Window | Hit@5 Window | Source Family Hit@5 | Distractor Avoidance | Proxy Conflict Correct | Proxy Partial/Refusal Correct | Proxy Behavior Correct | Latency ms |

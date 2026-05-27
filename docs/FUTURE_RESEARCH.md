@@ -14,6 +14,9 @@ Graph retrieval is still future work rather than an active subsystem.
 
 Build a second-domain benchmark with questions that require correct valid-time
 and transaction-time reasoning outside the current historical GDP-style corpus.
+The scaffold now exists under `benchmarks/layer2_crossdomain/`; the next step is
+turning the downloaded raw pool into the planned processed corpus and question
+set.
 
 Minimum dataset fields:
 
@@ -36,6 +39,11 @@ Candidate domains:
 - scientific literature revisions
 - medical guideline changes
 - legal case history
+
+The Layer 2 comparison target is direct Gemini full-context, an independent
+metadata temporal RAG baseline, and ChronoRAG full through an adapter around the
+existing TCC/retrieval framework. No result claim exists until the full
+cross-domain benchmark is built and run.
 
 Each domain needs a metadata schema, source-family disclosure, sample corpus,
 expected evidence IDs, expected behavior labels, and readable expected answers.

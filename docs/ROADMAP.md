@@ -48,6 +48,11 @@ the next major benchmark step is a Layer 2 multi-domain benchmark.
 - Evaluate generalization across domains.
 - Add answer-quality evaluation after retrieval quality is measurable.
 - Separate retrieval metrics from provider-backed answer synthesis quality.
+- Use the new `benchmarks/layer2_crossdomain/` framework to compare direct LLM
+  full-context, metadata temporal RAG, and ChronoRAG full under the same corpus,
+  model, and validator.
+- Build the planned processed Layer 2 corpus from the downloaded raw pool before
+  making any comparison claim.
 
 ## P4: ChronoSanity Strengthening
 

@@ -58,6 +58,11 @@ Build a second-domain temporal benchmark beyond historical GDP-style data. Good
 candidate domains include policy revisions, software documentation versions,
 company filings, or scientific guideline updates.
 
+The comparison framework now exists under `benchmarks/layer2_crossdomain/`.
+It is a scaffold for direct LLM full-context, independent metadata temporal RAG,
+and ChronoRAG full comparisons. It does not contain the final 5,000-row /
+200-question dataset and does not establish a result claim yet.
+
 ### P2: External Baselines
 
 Compare ChronoRAG against vanilla vector RAG, hybrid BM25/vector RAG, and at

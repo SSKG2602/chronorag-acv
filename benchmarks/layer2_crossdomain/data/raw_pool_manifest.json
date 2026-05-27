@@ -1,0 +1,38 @@
+{
+  "raw_root": "data/raw/layer2_crossdomain/",
+  "status": "downloaded_locally_not_processed_by_this_framework_task",
+  "total_files": 17,
+  "total_size_mb": 7.04,
+  "detected_rows_or_items": 46503,
+  "domains": {
+    "fred": {
+      "rows": 19553,
+      "description": "FRED macro time-series rows"
+    },
+    "stocks": {
+      "rows": 19646,
+      "description": "Market and index rows"
+    },
+    "sec": {
+      "rows": 5004,
+      "description": "SEC submissions rows/items"
+    },
+    "regulations": {
+      "rows": 2000,
+      "description": "Federal Register regulation rows/items"
+    },
+    "software": {
+      "rows": 300,
+      "description": "GitHub software release rows/items"
+    }
+  },
+  "layer2_target": {
+    "processed_corpus_rows": 5000,
+    "questions": 200
+  },
+  "notes": [
+    "Raw files are not processed or committed by this scaffold task.",
+    "Sample fixture data under benchmarks/layer2_crossdomain/data is only for plumbing tests.",
+    "No superiority or SOTA claim follows from fixture smoke runs."
+  ]
+}
