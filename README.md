@@ -458,10 +458,10 @@ and limited provider-backed runs. See `benchmarks/layer2_crossdomain/`.
 The current generated Layer 2 corpus path targets 5,000 processed rows and 200
 questions. A small diagnostic Vertex pilot exposed a real dense time-series
 failure: year-level scoring could retrieve wrong same-year FRED rows for exact
-daily Treasury-yield questions. The ChronoRAG Layer 2 adapter now applies
-symbolic multi-granularity temporal precision before answer synthesis, so exact
-dates/timestamps outrank same-year wrong-date rows. This is a retrieval repair,
-not a superiority claim.
+daily Treasury-yield questions. Adapter-side temporal precision fixed the
+ChronoRAG-only 5-case pilot from 2/5 to 5/5, and the reusable precision parser
+now lives in core TCC so exact dates/timestamps can be preserved before answer
+synthesis. This is capability hardening, not a superiority claim.
 
 | Method | Corpus | Questions | Mode | Overall | Evidence | Valid-time | Transaction trap | Conflict | Refusal/partial | Status |
 |---|---:|---:|---|---:|---:|---:|---:|---:|---:|---|
@@ -490,8 +490,8 @@ python benchmarks/run_temporal_eval_v2.py --light
 ## Technical Limitations
 
 - Temporal extraction is partly heuristic and depends on document formatting.
-- Layer 2 exact-time precision is implemented in the comparison adapter; deeper
-  core TCC precision integration across all ingestion paths remains future work.
+- Layer 2 exact-time precision is now preserved in core TCC metadata and used by
+  the comparison adapter; broader full-benchmark validation remains pending.
 - Domain support is strongest for the world-economy/Maddison-style path; other domains need dedicated policy sets and evaluation.
 - Cross-encoder and LLM reranking can be expensive in full mode.
 - Local model execution depends on CPU/GPU memory and Hugging Face model access.

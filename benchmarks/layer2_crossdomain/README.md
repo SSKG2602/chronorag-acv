@@ -47,14 +47,16 @@ No final Layer 2 results exist yet. This table is a placeholder for the
 A limited Vertex pilot was diagnostic only, but it exposed a real retrieval
 issue in the ChronoRAG adapter on dense daily FRED series. The adapter was
 scoring expected time at year granularity, so exact-date queries such as
-`1962-08-15` could retrieve same-year wrong-date rows. Layer 2 now adds
-symbolic multi-granularity temporal precision in
-`benchmarks/layer2_crossdomain/temporal_precision.py`.
+`1962-08-15` could retrieve same-year wrong-date rows. Adapter-side precision
+fixed the ChronoRAG-only pilot from 2/5 to 5/5. The reusable parser now lives in
+`core/ingestion/temporal_precision.py`, and
+`benchmarks/layer2_crossdomain/temporal_precision.py` is a compatibility wrapper
+for Layer 2 scoring.
 
-Supported retrieval precision includes year, month, day, timestamp, ranges,
-quarters, dayparts, and fuzzy phrases such as `early 2024` or `around
-2024-10-23`. Valid time and transaction/publication/filing/release time remain
-separate. Exact-time precision is not delegated only to embeddings.
+Supported retrieval precision includes year, month, day, hour, minute, second,
+ranges, fuzzy ranges, quarters, dayparts, and phrases such as `early 2024` or
+`around 2024-10-23`. Valid time and transaction/publication/filing/release time
+remain separate. Exact-time precision is not delegated only to embeddings.
 
 `config/models.yaml` documents optional retrieval profiles for later
 experiments: `light` keeps `BAAI/bge-small-en-v1.5`, `strong` references

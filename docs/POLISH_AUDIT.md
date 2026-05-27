@@ -32,8 +32,9 @@ or publication-grade proof.
   modes.
 - Layer 2 has a cross-domain comparison framework and generated local
   5,000-row / 200-question dataset path.
-- Layer 2 ChronoRAG adapter retrieval now applies symbolic multi-granularity
-  temporal precision for dense exact-date/timestamp cases.
+- Layer 2 ChronoRAG adapter retrieval applies symbolic multi-granularity
+  temporal precision for dense exact-date/timestamp cases, and core TCC now
+  preserves the same precision metadata.
 - The primary stored Vertex result is
   `benchmarks/results/temporal_answer_validation_v2_vertex_topk5_results.md`.
 - The dynamic top-k result is stored separately as a diagnostic at
@@ -69,10 +70,12 @@ path. It does not establish a result claim yet.
 
 A limited Vertex pilot was diagnostic only. It showed that ChronoRAG's adapter
 could fail dense FRED daily exact-date retrieval when time was reduced to year
-granularity. The adapter now uses Layer 2 temporal precision scoring for year,
-month, day, timestamp, range, quarter, daypart, and fuzzy interval constraints.
-This repair keeps valid time separate from transaction/publication/filing/release
-time and should not be presented as a benchmark win.
+granularity. Adapter-side precision fixed the ChronoRAG-only pilot from 2/5 to
+5/5, and the reusable parser was moved into `core/ingestion/temporal_precision.py`.
+Core TCC now preserves year, month, day, hour, minute, second, range, fuzzy,
+daypart, and role metadata while keeping valid time separate from
+transaction/publication/filing/release time. This repair should not be presented
+as a benchmark win.
 
 ### P2: External Baselines
 

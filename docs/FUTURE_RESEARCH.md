@@ -48,8 +48,9 @@ cross-domain benchmark is built and run.
 
 A small diagnostic pilot exposed an exact-date retrieval weakness on dense FRED
 daily series, where year-level scoring could retrieve wrong same-year rows.
-Layer 2 now includes symbolic multi-granularity temporal precision for year,
-month, day, timestamp, ranges, quarters, dayparts, and fuzzy phrases. This
+Adapter-side precision fixed the ChronoRAG-only pilot from 2/5 to 5/5, and core
+TCC now preserves multi-granularity temporal metadata for year, month, day,
+hour, minute, second, ranges, quarters, dayparts, and fuzzy phrases. This
 precision should remain separate from embedding-model experiments: stronger
 embeddings can help recall, but exact valid-time matching should not be
 delegated only to semantic similarity.

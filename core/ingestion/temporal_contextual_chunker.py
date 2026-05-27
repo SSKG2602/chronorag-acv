@@ -11,10 +11,11 @@ from __future__ import annotations
 import datetime as dt
 import re
 import uuid
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, Iterable, List, Mapping, Optional
 
 from app.utils.time_windows import TimeWindow, make_window, parse_date
+from core.ingestion.temporal_precision import TemporalConstraint, extract_temporal_constraints
 
 YEAR_RE = re.compile(r"(?<![\d,])(1[0-9]{3}|20[0-9]{2})(?!\d)")
 RANGE_RE = re.compile(
@@ -34,6 +35,14 @@ class TemporalMetadata:
     temporal_source: str
     temporal_confidence: float
     temporal_ambiguity: bool
+    normalized_start: Optional[str] = None
+    normalized_end: Optional[str] = None
+    precision: str = "unknown"
+    temporal_role: str = "unknown"
+    original_temporal_expression: Optional[str] = None
+    ambiguous_parse: bool = False
+    temporal_constraints: List[Dict[str, Any]] = field(default_factory=list)
+    interval_confidence: float = 0.0
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -136,6 +145,114 @@ def infer_temporal_metadata(
     global_context = global_context or GlobalContext()
 
     tx_start, tx_end = _tx_from_payload(payload)
+    constraints = extract_temporal_constraints(raw_text)
+    row_window = _row_valid_window(payload)
+
+    explicit_valid = _best_constraint(constraints, role="valid_time")
+    explicit_tx = _best_transaction_constraint(constraints)
+
+    if explicit_tx and not tx_start:
+        tx_start = _constraint_start_date(explicit_tx)
+        tx_end = _constraint_end_date(explicit_tx) if explicit_tx.normalized_end != explicit_tx.normalized_start else tx_end
+
+    valid_constraints = [
+        constraint
+        for constraint in constraints
+        if constraint.temporal_role == "valid_time" and not constraint.ambiguous_parse and constraint.normalized_start
+    ]
+    if len(valid_constraints) > 1:
+        starts = sorted(_constraint_start_date(constraint) for constraint in valid_constraints if _constraint_start_date(constraint))
+        ends = sorted(_constraint_end_date(constraint) for constraint in valid_constraints if _constraint_end_date(constraint))
+        if starts and ends:
+            return TemporalMetadata(
+                valid_from=starts[0],
+                valid_to=ends[-1],
+                tx_start=tx_start,
+                tx_end=tx_end,
+                granularity="range",
+                temporal_source="chunk_explicit",
+                temporal_confidence=0.55,
+                temporal_ambiguity=True,
+                normalized_start=starts[0],
+                normalized_end=ends[-1],
+                precision="range",
+                temporal_role="valid_time",
+                temporal_constraints=_constraints_to_dicts(constraints),
+                interval_confidence=0.55,
+            )
+
+    if explicit_valid:
+        return _metadata_from_constraint(
+            explicit_valid,
+            tx_start=tx_start,
+            tx_end=tx_end,
+            source="chunk_explicit",
+            constraints=constraints,
+        )
+
+    if row_window:
+        start, end, granularity = row_window
+        return TemporalMetadata(
+            valid_from=start,
+            valid_to=end,
+            tx_start=tx_start,
+            tx_end=tx_end,
+            granularity=granularity,
+            temporal_source="row_metadata",
+            temporal_confidence=0.90 if granularity == "year" else 0.75,
+            temporal_ambiguity=False,
+            normalized_start=start,
+            normalized_end=end,
+            precision=_precision_label(granularity),
+            temporal_role="valid_time",
+            original_temporal_expression=None,
+            ambiguous_parse=False,
+            temporal_constraints=_constraints_to_dicts(constraints),
+            interval_confidence=0.90 if granularity == "year" else 0.75,
+        )
+
+    if explicit_tx:
+        tx_start = tx_start or _constraint_start_date(explicit_tx)
+        tx_end = tx_end or (_constraint_end_date(explicit_tx) if explicit_tx.normalized_end != explicit_tx.normalized_start else None)
+        return TemporalMetadata(
+            valid_from=None,
+            valid_to=None,
+            tx_start=tx_start,
+            tx_end=tx_end,
+            granularity="document",
+            temporal_source="document_tx_time",
+            temporal_confidence=0.30,
+            temporal_ambiguity=True,
+            normalized_start=explicit_tx.normalized_start or tx_start,
+            normalized_end=explicit_tx.normalized_end or tx_end or tx_start,
+            precision=_precision_label(explicit_tx.granularity),
+            temporal_role=explicit_tx.temporal_role,
+            original_temporal_expression=explicit_tx.original_text,
+            ambiguous_parse=explicit_tx.ambiguous_parse,
+            temporal_constraints=_constraints_to_dicts(constraints),
+            interval_confidence=explicit_tx.confidence,
+        )
+
+    ambiguous = next((constraint for constraint in constraints if constraint.ambiguous_parse), None)
+    if ambiguous:
+        return TemporalMetadata(
+            valid_from=None,
+            valid_to=None,
+            tx_start=tx_start,
+            tx_end=tx_end,
+            granularity="unknown",
+            temporal_source="ambiguous_parse",
+            temporal_confidence=0.20,
+            temporal_ambiguity=True,
+            normalized_start=None,
+            normalized_end=None,
+            precision="unknown",
+            temporal_role=ambiguous.temporal_role,
+            original_temporal_expression=ambiguous.original_text,
+            ambiguous_parse=True,
+            temporal_constraints=_constraints_to_dicts(constraints),
+            interval_confidence=ambiguous.confidence,
+        )
 
     explicit_range = _explicit_range(raw_text)
     if explicit_range:
@@ -149,6 +266,13 @@ def infer_temporal_metadata(
             temporal_source="chunk_explicit_range",
             temporal_confidence=0.70,
             temporal_ambiguity=False,
+            normalized_start=_iso_date(start_year, 1, 1),
+            normalized_end=_iso_date(end_year, 12, 31),
+            precision="range",
+            temporal_role="valid_time",
+            original_temporal_expression=f"{start_year}-{end_year}",
+            temporal_constraints=_constraints_to_dicts(constraints),
+            interval_confidence=0.70,
         )
 
     explicit_years = _years(raw_text)
@@ -163,6 +287,13 @@ def infer_temporal_metadata(
             temporal_source="chunk_explicit",
             temporal_confidence=0.95,
             temporal_ambiguity=False,
+            normalized_start=_iso_date(year, 1, 1),
+            normalized_end=_iso_date(year, 12, 31),
+            precision="year",
+            temporal_role="valid_time",
+            original_temporal_expression=str(year),
+            temporal_constraints=_constraints_to_dicts(constraints),
+            interval_confidence=0.95,
         )
     if len(explicit_years) == 1 and _looks_like_publication_time(raw_text):
         tx_start = tx_start or _iso_date(explicit_years[0], 1, 1)
@@ -175,6 +306,13 @@ def infer_temporal_metadata(
             temporal_source="document_tx_time",
             temporal_confidence=0.30,
             temporal_ambiguity=True,
+            normalized_start=tx_start,
+            normalized_end=tx_end or tx_start,
+            precision="year",
+            temporal_role="publication_time",
+            original_temporal_expression=str(explicit_years[0]),
+            temporal_constraints=_constraints_to_dicts(constraints),
+            interval_confidence=0.30,
         )
     if len(explicit_years) > 1:
         start_year, end_year = min(explicit_years), max(explicit_years)
@@ -187,20 +325,13 @@ def infer_temporal_metadata(
             temporal_source="chunk_explicit",
             temporal_confidence=0.55,
             temporal_ambiguity=True,
-        )
-
-    row_window = _row_valid_window(payload)
-    if row_window:
-        start, end, granularity = row_window
-        return TemporalMetadata(
-            valid_from=start,
-            valid_to=end,
-            tx_start=tx_start,
-            tx_end=tx_end,
-            granularity=granularity,
-            temporal_source="row_metadata",
-            temporal_confidence=0.90 if granularity == "year" else 0.75,
-            temporal_ambiguity=False,
+            normalized_start=_iso_date(start_year, 1, 1),
+            normalized_end=_iso_date(end_year, 12, 31),
+            precision="range",
+            temporal_role="valid_time",
+            original_temporal_expression=f"{start_year}-{end_year}",
+            temporal_constraints=_constraints_to_dicts(constraints),
+            interval_confidence=0.55,
         )
 
     section_window = _section_window(payload, global_context)
@@ -215,6 +346,12 @@ def infer_temporal_metadata(
             temporal_source="section_range",
             temporal_confidence=0.60,
             temporal_ambiguity=False,
+            normalized_start=start,
+            normalized_end=end,
+            precision="range",
+            temporal_role="valid_time",
+            temporal_constraints=_constraints_to_dicts(constraints),
+            interval_confidence=0.60,
         )
 
     if tx_start:
@@ -230,6 +367,12 @@ def infer_temporal_metadata(
             temporal_source="document_tx_time",
             temporal_confidence=0.30,
             temporal_ambiguity=True,
+            normalized_start=tx_start,
+            normalized_end=tx_end or tx_start,
+            precision="unknown",
+            temporal_role="transaction_time",
+            temporal_constraints=_constraints_to_dicts(constraints),
+            interval_confidence=0.30,
         )
 
     return TemporalMetadata(
@@ -241,6 +384,7 @@ def infer_temporal_metadata(
         temporal_source="unknown",
         temporal_confidence=0.0,
         temporal_ambiguity=True,
+        temporal_constraints=_constraints_to_dicts(constraints),
     )
 
 
@@ -271,6 +415,9 @@ def build_retrieval_text(raw_text: str, context: GlobalContext, temporal: Tempor
     scope = _temporal_scope(temporal)
     if scope:
         parts.append(f"Temporal scope: {scope}.")
+    hint = _temporal_hint(temporal)
+    if hint:
+        parts.append(f"Temporal hint: {hint}.")
     prefix = " ".join(parts)
     if prefix:
         return f"{prefix} Original chunk: {raw_text}"
@@ -288,14 +435,99 @@ def _split_multi_year_claims(raw_text: str, temporal: TemporalMetadata) -> List[
     return buckets if len(buckets) > 1 else [raw_text]
 
 
+def _metadata_from_constraint(
+    constraint: TemporalConstraint,
+    *,
+    tx_start: Optional[str],
+    tx_end: Optional[str],
+    source: str,
+    constraints: List[TemporalConstraint],
+) -> TemporalMetadata:
+    valid_from = _constraint_start_date(constraint)
+    valid_to = _constraint_end_date(constraint)
+    if "T" in constraint.normalized_start:
+        valid_from = constraint.normalized_start[:10]
+        valid_to = constraint.normalized_end[:10]
+    if _time_only(constraint.normalized_start):
+        valid_from = None
+        valid_to = None
+    granularity = _precision_label(constraint.granularity)
+    confidence = 0.95 if source == "chunk_explicit" and granularity == "year" else constraint.confidence
+    return TemporalMetadata(
+        valid_from=valid_from,
+        valid_to=valid_to,
+        tx_start=tx_start,
+        tx_end=tx_end,
+        granularity=granularity,
+        temporal_source=source,
+        temporal_confidence=confidence,
+        temporal_ambiguity=constraint.ambiguous_parse,
+        normalized_start=constraint.normalized_start or valid_from,
+        normalized_end=constraint.normalized_end or valid_to,
+        precision=granularity,
+        temporal_role=constraint.temporal_role,
+        original_temporal_expression=constraint.original_text,
+        ambiguous_parse=constraint.ambiguous_parse,
+        temporal_constraints=_constraints_to_dicts(constraints),
+        interval_confidence=confidence,
+    )
+
+
+def _best_constraint(constraints: List[TemporalConstraint], *, role: str) -> Optional[TemporalConstraint]:
+    candidates = [
+        constraint
+        for constraint in constraints
+        if constraint.temporal_role == role and not constraint.ambiguous_parse and constraint.normalized_start
+    ]
+    return candidates[0] if candidates else None
+
+
+def _best_transaction_constraint(constraints: List[TemporalConstraint]) -> Optional[TemporalConstraint]:
+    candidates = [
+        constraint
+        for constraint in constraints
+        if constraint.temporal_role in {"transaction_time", "publication_time", "filing_time", "release_time"}
+        and not constraint.ambiguous_parse
+        and constraint.normalized_start
+    ]
+    return candidates[0] if candidates else None
+
+
+def _constraint_start_date(constraint: TemporalConstraint) -> Optional[str]:
+    if not constraint.normalized_start or _time_only(constraint.normalized_start):
+        return None
+    return constraint.normalized_start[:10]
+
+
+def _constraint_end_date(constraint: TemporalConstraint) -> Optional[str]:
+    if not constraint.normalized_end or _time_only(constraint.normalized_end):
+        return None
+    return constraint.normalized_end[:10]
+
+
+def _constraints_to_dicts(constraints: List[TemporalConstraint]) -> List[Dict[str, Any]]:
+    return [constraint.to_dict() for constraint in constraints]
+
+
+def _precision_label(granularity: str) -> str:
+    mapping = {
+        "fuzzy_interval": "fuzzy",
+        "quarter": "range",
+        "time": "daypart",
+    }
+    return mapping.get(granularity, granularity or "unknown")
+
+
+def _time_only(value: Optional[str]) -> bool:
+    return bool(value and re.fullmatch(r"\d{2}:\d{2}:\d{2}", value))
+
+
 def _row_valid_window(payload: Mapping[str, Any]) -> Optional[tuple[str, str, str]]:
     valid = payload.get("valid") if isinstance(payload.get("valid"), Mapping) else {}
     start_raw = valid.get("from") if valid else None
     end_raw = valid.get("to") if valid else None
     granularity = str(valid.get("granularity") or "") if valid else ""
     year = payload.get("year")
-    if isinstance(year, int):
-        return _iso_date(year, 1, 1), _iso_date(year, 12, 31), "year"
     if start_raw:
         start = parse_date(str(start_raw))
         if end_raw:
@@ -306,6 +538,8 @@ def _row_valid_window(payload: Mapping[str, Any]) -> Optional[tuple[str, str, st
         if granularity == "year" or re.fullmatch(r"\d{4}(?:-01-01)?", str(start_raw)):
             return _iso_date(start.year, 1, 1), _iso_date(start.year, 12, 31), "year"
         return start.date().isoformat(), "9999-12-31", granularity or "range"
+    if isinstance(year, int):
+        return _iso_date(year, 1, 1), _iso_date(year, 12, 31), "year"
     return None
 
 
@@ -333,6 +567,10 @@ def _tx_from_payload(payload: Mapping[str, Any]) -> tuple[Optional[str], Optiona
         provenance = payload.get("provenance") if isinstance(payload.get("provenance"), Mapping) else {}
         start = (
             payload.get("revision_timestamp")
+            or payload.get("transaction_time")
+            or payload.get("release_time")
+            or payload.get("filing_time")
+            or payload.get("publication_time")
             or payload.get("published_at")
             or payload.get("publication_date")
             or provenance.get("observed_at")
@@ -420,6 +658,17 @@ def _temporal_scope(temporal: TemporalMetadata) -> Optional[str]:
     if temporal.tx_start and temporal.temporal_source == "document_tx_time":
         return f"transaction time {temporal.tx_start[:4]}"
     return None
+
+
+def _temporal_hint(temporal: TemporalMetadata) -> Optional[str]:
+    if not temporal.normalized_start:
+        return None
+    role = temporal.temporal_role if temporal.temporal_role != "unknown" else "valid_time"
+    precision = temporal.precision or temporal.granularity
+    if temporal.normalized_end and temporal.normalized_end != temporal.normalized_start:
+        original = f" original='{temporal.original_temporal_expression}'" if temporal.original_temporal_expression else ""
+        return f"[{role}_range={temporal.normalized_start}..{temporal.normalized_end} precision={precision}{original}]"
+    return f"[{role}={temporal.normalized_start} precision={precision}]"
 
 
 def _clip(value: str, max_words: int) -> str:

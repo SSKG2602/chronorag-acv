@@ -209,8 +209,10 @@ def test_chronorag_adapter_first_five_expected_ids_in_top5():
     for case in questions:
         rows, metadata = retrieve_with_chronorag_adapter(case, corpus, top_k=5)
         ids = [row.id for row in rows]
+        assert rows[0].id == case.expected_evidence_ids[0]
         assert case.expected_evidence_ids[0] in ids
         assert metadata["temporal_precision_applied"] is True
+        assert metadata["uses_tcc_precision_metadata"] is True
 
 
 def test_metadata_temporal_rag_remains_independent():

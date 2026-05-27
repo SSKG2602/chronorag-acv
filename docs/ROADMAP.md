@@ -59,6 +59,9 @@ without overclaiming diagnostic pilots.
 - Use multi-granularity symbolic temporal precision for dense time-series rows:
   exact dates/timestamps must outrank same-year wrong-date evidence before
   embedding similarity is considered sufficient.
+- Keep core TCC precision metadata backward-compatible while extending
+  `normalized_start`, `normalized_end`, `precision`, `temporal_role`, and
+  ambiguity fields across ingestion paths.
 
 ## P4: ChronoSanity Strengthening
 

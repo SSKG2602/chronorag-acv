@@ -66,6 +66,13 @@ Original chunk: GDP per capita in Western Europe was 1,960 in 1870.
 BM25 and vector search should use `retrieval_text`. Attribution cards and answer
 grounding should cite `raw_text`.
 
+When a precise temporal expression is detected, `retrieval_text` may also carry
+a compact normalized hint while `raw_text` remains unchanged, for example:
+
+```text
+Temporal hint: [valid_time=1962-08-15 precision=day]. Original chunk: United States 10-year Treasury yield was 3.98 percent on 1962-08-15.
+```
+
 ## Global Context
 
 `global_context` stores structured metadata that can be inherited from the
@@ -114,19 +121,20 @@ Field meanings:
 - `temporal_ambiguity`: whether the time signal may apply to multiple facts or
   only broad context.
 
-Layer 1 mostly exercises year/window discrimination. Layer 2 adds
-multi-granularity temporal precision in the cross-domain adapter so dense
-time-series retrieval can distinguish exact dates and timestamps from other
-rows in the same year. The current precision module supports year, month, day,
-hour, minute, second, ranges, quarters, dayparts, and fuzzy phrases while still
-separating valid time from transaction/publication/filing/release time.
+Layer 1 mostly exercises year/window discrimination. A Layer 2 diagnostic pilot
+exposed a dense daily exact-date retrieval failure: reducing time to year
+granularity caused wrong same-year FRED rows to outrank the exact requested
+date. Adapter-side precision fixed the 5-case ChronoRAG pilot from 2/5 to 5/5,
+and the reusable parser now lives in `core/ingestion/temporal_precision.py` so
+core TCC preserves multi-granularity metadata too.
 
-This precision layer currently lives in
-`benchmarks/layer2_crossdomain/temporal_precision.py` and is used by the Layer 2
-ChronoRAG adapter before answer synthesis. Deeper core TCC integration of
+The precision parser supports year, month, day, hour, minute, second, ranges,
+quarters, dayparts, and fuzzy phrases while still separating valid time from
+transaction/publication/filing/release time. TCC now preserves
 `normalized_start`, `normalized_end`, `precision`, `temporal_role`,
-`original_temporal_expression`, and `ambiguous_parse` is planned, but the core
-ingestion path remains backward-compatible in this checkpoint.
+`original_temporal_expression`, `ambiguous_parse`, `temporal_constraints`, and
+`interval_confidence` alongside the older valid-time and transaction-time
+fields.
 
 ## Temporal Inference Hierarchy
 

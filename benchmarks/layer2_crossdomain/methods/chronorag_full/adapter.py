@@ -20,6 +20,7 @@ class AdaptedChronoEvidence:
     retrieval_text: str
     temporal_confidence: float
     temporal_source: str
+    temporal_metadata: dict
     score: float = 0.0
 
 
@@ -35,7 +36,7 @@ def adapt_corpus(rows: list[CorpusRow]) -> list[AdaptedChronoEvidence]:
             "valid": {
                 "from": row.valid_from,
                 "to": row.valid_to,
-                "granularity": "year" if row.temporal_type == "valid_time_exact" else "range",
+                "granularity": _granularity_from_row(row),
             }
             if row.valid_from and row.valid_to
             else None,
@@ -61,6 +62,7 @@ def adapt_corpus(rows: list[CorpusRow]) -> list[AdaptedChronoEvidence]:
                     retrieval_text=row.raw_text,
                     temporal_confidence=0.0,
                     temporal_source="unknown",
+                    temporal_metadata={},
                 )
             )
             continue
@@ -71,6 +73,7 @@ def adapt_corpus(rows: list[CorpusRow]) -> list[AdaptedChronoEvidence]:
                 retrieval_text=chunk.retrieval_text,
                 temporal_confidence=chunk.temporal.temporal_confidence,
                 temporal_source=chunk.temporal.temporal_source,
+                temporal_metadata=chunk.temporal.to_dict(),
             )
         )
     return adapted
@@ -99,6 +102,7 @@ def retrieve_with_chronorag_adapter(case: QuestionCase, corpus: list[CorpusRow],
                 retrieval_text=item.retrieval_text,
                 temporal_confidence=item.temporal_confidence,
                 temporal_source=item.temporal_source,
+                temporal_metadata=item.temporal_metadata,
                 score=score,
             )
         )
@@ -108,6 +112,7 @@ def retrieve_with_chronorag_adapter(case: QuestionCase, corpus: list[CorpusRow],
         "uses_existing_chronorag_framework": True,
         "adapter_used": True,
         "uses_tcc": True,
+        "uses_tcc_precision_metadata": any(item.temporal_metadata.get("normalized_start") for item in scored[:top_k]),
         "uses_monotone_temporal_fusion": True,
         "temporal_precision_applied": True,
         "extracted_temporal_constraints": [constraint.to_dict() for constraint in temporal_constraints],
@@ -117,6 +122,15 @@ def retrieve_with_chronorag_adapter(case: QuestionCase, corpus: list[CorpusRow],
         "temporal_role_detected": temporal_constraints[0].temporal_role if temporal_constraints else "unknown",
         "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
         "selected_scores": {item.row.id: round(item.score, 4) for item in scored[:top_k]},
+        "selected_tcc_precision": {
+            item.row.id: {
+                "normalized_start": item.temporal_metadata.get("normalized_start"),
+                "normalized_end": item.temporal_metadata.get("normalized_end"),
+                "precision": item.temporal_metadata.get("precision"),
+                "temporal_role": item.temporal_metadata.get("temporal_role"),
+            }
+            for item in scored[:top_k]
+        },
     }
     return [item.row for item in scored[:top_k]], metadata
 
@@ -128,6 +142,14 @@ def _year(value: str | None) -> int | None:
         return int(value[:4])
     except ValueError:
         return None
+
+
+def _granularity_from_row(row: CorpusRow) -> str:
+    if not row.valid_from or row.temporal_type != "valid_time_exact":
+        return "range"
+    if row.valid_from == row.valid_to and len(row.valid_from) >= 10:
+        return "day"
+    return "year"
 
 
 def _temporal_weight(case: QuestionCase, row: CorpusRow) -> float:
