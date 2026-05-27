@@ -19,6 +19,8 @@ from benchmarks.layer2_crossdomain.validator import validate_answer
 METHODS = ("direct_llm_full_context", "metadata_temporal_rag", "chronorag_full")
 DEFAULT_CORPUS = "benchmarks/layer2_crossdomain/data/layer2_corpus.sample.jsonl"
 DEFAULT_QUESTIONS = "benchmarks/layer2_crossdomain/data/layer2_questions.sample.jsonl"
+REAL_CORPUS = "benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl"
+REAL_QUESTIONS = "benchmarks/layer2_crossdomain/data/layer2_questions.jsonl"
 
 
 def main() -> None:
@@ -26,6 +28,7 @@ def main() -> None:
     parser.add_argument("--method", choices=[*METHODS, "all"], default="all")
     parser.add_argument("--corpus", default=DEFAULT_CORPUS)
     parser.add_argument("--questions", default=DEFAULT_QUESTIONS)
+    parser.add_argument("--dataset", choices=["sample", "real"], default="sample")
     parser.add_argument("--mode", choices=["light", "vertex"], default="light")
     parser.add_argument("--limit", type=int)
     parser.add_argument("--case-id")
@@ -37,8 +40,10 @@ def main() -> None:
     args = parser.parse_args()
 
     suffix = _sanitize_suffix(args.result_suffix)
-    corpus = load_corpus(args.corpus)
-    questions = _select_questions(load_questions(args.questions), args.limit, args.case_id)
+    corpus_path = REAL_CORPUS if args.dataset == "real" and args.corpus == DEFAULT_CORPUS else args.corpus
+    questions_path = REAL_QUESTIONS if args.dataset == "real" and args.questions == DEFAULT_QUESTIONS else args.questions
+    corpus = load_corpus(corpus_path)
+    questions = _select_questions(load_questions(questions_path), args.limit, args.case_id)
     selected_methods = list(METHODS) if args.method == "all" else [args.method]
     estimated_calls = len(questions) * len(selected_methods) if args.mode == "vertex" else 0
     prompt_estimates = estimate_prompt_sizes(selected_methods, corpus, questions, args.top_k)

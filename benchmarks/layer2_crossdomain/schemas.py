@@ -18,15 +18,25 @@ TemporalType = Literal[
 
 QuestionCategory = Literal[
     "exact_valid_time",
+    "exact_valid_time_retrieval",
     "wrong_year_trap",
+    "same_entity_wrong_year_trap",
     "transaction_vs_valid_time",
+    "transaction_time_vs_valid_time",
     "broad_window_vs_exact",
+    "broad_window_distractor",
     "conflict_or_revision",
+    "conflict_detection",
     "cross_domain_dependency",
+    "cross_domain_temporal_comparison",
     "missing_evidence",
+    "partial_or_insufficient_evidence",
     "ambiguous_temporal_query",
+    "ambiguous_time_query",
     "metric_confusion",
+    "metric_specific_query",
     "source_family_grounding",
+    "source_specific_temporal_query",
 ]
 
 ExpectedBehavior = Literal[
@@ -124,6 +134,7 @@ class QuestionCase:
     forbidden_facts: list[str]
     expected_valid_time: list[str]
     notes: str | None
+    synthetic_evidence_ids: list[str] = field(default_factory=list)
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "QuestionCase":
@@ -146,6 +157,7 @@ class QuestionCase:
             forbidden_facts=list(payload.get("forbidden_facts") or []),
             expected_valid_time=_as_list(payload.get("expected_valid_time")),
             notes=payload.get("notes", ""),
+            synthetic_evidence_ids=list(payload.get("synthetic_evidence_ids") or []),
         )
 
 

@@ -52,9 +52,9 @@ def _related_entity_score(case: QuestionCase, row: CorpusRow) -> float:
 
 
 def _conflict_score(case: QuestionCase, row: CorpusRow) -> float:
-    if case.category == "conflict_or_revision" and row.temporal_type in {"conflict_claim", "revision"}:
+    if case.category in {"conflict_or_revision", "conflict_detection"} and row.temporal_type in {"conflict_claim", "revision"}:
         return 0.35
-    if case.category == "broad_window_vs_exact" and row.temporal_type == "valid_time_exact":
+    if case.category in {"broad_window_vs_exact", "broad_window_distractor"} and row.temporal_type == "valid_time_exact":
         return 0.20
     return 0.0
 

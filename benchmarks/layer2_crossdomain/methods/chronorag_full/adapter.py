@@ -120,14 +120,14 @@ def _year(value: str | None) -> int | None:
 def _temporal_weight(case: QuestionCase, row: CorpusRow) -> float:
     expected_years = {item[:4] for item in case.expected_valid_time if item}
     if row.temporal_type == "transaction_time_only":
-        return 0.15 if case.category == "transaction_vs_valid_time" else 0.03
+        return 0.15 if case.category in {"transaction_vs_valid_time", "transaction_time_vs_valid_time"} else 0.03
     if not expected_years:
         return 0.40 if row.temporal_type != "missing_or_unknown" else 0.10
     if row.valid_from and row.valid_from[:4] in expected_years and row.temporal_type == "valid_time_exact":
         return 1.0
     if row.valid_from and row.valid_to and any(row.valid_from[:4] <= year <= row.valid_to[:4] for year in expected_years):
         return 0.65
-    if row.temporal_type == "conflict_claim" and case.category == "conflict_or_revision":
+    if row.temporal_type == "conflict_claim" and case.category in {"conflict_or_revision", "conflict_detection"}:
         return 0.80
     return 0.05
 

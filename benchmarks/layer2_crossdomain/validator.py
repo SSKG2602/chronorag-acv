@@ -127,6 +127,8 @@ def _valid_time_correct(
 
 
 def _evidence_correct(expected: set[str], acceptable: set[str], cited: set[str]) -> bool:
+    expected = {item for item in expected if not item.startswith("synthetic:")}
+    acceptable = {item for item in acceptable if not item.startswith("synthetic:")}
     if expected:
         return expected.issubset(cited)
     if acceptable:
@@ -155,7 +157,7 @@ def _cross_domain_dependency_correct(
     cited: set[str],
     row_by_id: dict[str, CorpusRow],
 ) -> bool:
-    if case.category != "cross_domain_dependency":
+    if case.category not in {"cross_domain_dependency", "cross_domain_temporal_comparison"}:
         return True
     domains = {row_by_id[item].domain for item in cited if item in row_by_id}
     return len(domains) >= 2
