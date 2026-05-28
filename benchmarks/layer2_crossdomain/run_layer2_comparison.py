@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 import time
@@ -15,6 +16,7 @@ if str(ROOT) not in sys.path:
 from benchmarks.layer2_crossdomain.reporting import metric_summary, write_comparison_report, write_method_results
 from benchmarks.layer2_crossdomain.schemas import CorpusRow, ModelAnswer, QuestionCase, load_corpus, load_questions
 from benchmarks.layer2_crossdomain.validator import validate_answer
+from benchmarks.layer2_crossdomain.vertex_retry import call_with_backoff
 
 METHODS = ("direct_llm_full_context", "metadata_temporal_rag", "chronorag_full")
 DEFAULT_CORPUS = "benchmarks/layer2_crossdomain/data/layer2_corpus.sample.jsonl"
@@ -37,7 +39,18 @@ def main() -> None:
     parser.add_argument("--max-output-tokens", type=int, default=2048)
     parser.add_argument("--result-suffix", default="default")
     parser.add_argument("--top-k", type=int, default=5)
+    parser.add_argument("--request-sleep-seconds", type=float, default=3.0)
+    parser.add_argument("--retry-max-attempts", type=int, default=5)
+    parser.add_argument("--retry-base-sleep-seconds", type=float, default=5.0)
+    parser.add_argument("--retry-max-sleep-seconds", type=float, default=90.0)
+    parser.add_argument("--vertex-location")
+    parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--write-partial", dest="write_partial", action="store_true", default=True)
+    parser.add_argument("--no-write-partial", dest="write_partial", action="store_false")
     args = parser.parse_args()
+
+    if args.vertex_location:
+        os.environ["GOOGLE_CLOUD_LOCATION"] = args.vertex_location
 
     suffix = _sanitize_suffix(args.result_suffix)
     corpus_path = REAL_CORPUS if args.dataset == "real" and args.corpus == DEFAULT_CORPUS else args.corpus
@@ -52,6 +65,13 @@ def main() -> None:
     print(f"Methods: {', '.join(selected_methods)}")
     print(f"Selected cases: {len(questions)}")
     print(f"Estimated Vertex calls: {estimated_calls}")
+    if args.mode == "vertex":
+        print(
+            "Vertex config: "
+            f"project={os.getenv('GOOGLE_CLOUD_PROJECT') or '(unset)'}; "
+            f"location={os.getenv('GOOGLE_CLOUD_LOCATION', 'us-central1')}; "
+            f"model={os.getenv('VERTEX_MODEL_ID', 'gemini-2.5-flash')}"
+        )
     for method, estimate in prompt_estimates.items():
         print(
             f"Prompt estimate {method}: max_chars={estimate['max_prompt_chars']}, "
@@ -63,6 +83,8 @@ def main() -> None:
 
     payloads = []
     for method in selected_methods:
+        json_path, md_path = _result_paths(method, suffix)
+        existing_payload = _load_existing_payload(json_path) if args.resume else None
         payload = run_method(
             method=method,
             corpus=corpus,
@@ -72,9 +94,16 @@ def main() -> None:
             dry_run_prompts=args.dry_run_prompts,
             max_output_tokens=args.max_output_tokens,
             suffix=suffix,
+            request_sleep_seconds=args.request_sleep_seconds,
+            retry_max_attempts=args.retry_max_attempts,
+            retry_base_sleep_seconds=args.retry_base_sleep_seconds,
+            retry_max_sleep_seconds=args.retry_max_sleep_seconds,
+            write_partial=args.write_partial,
+            json_path=json_path,
+            md_path=md_path,
+            existing_payload=existing_payload,
         )
         payloads.append(payload)
-        json_path, md_path = _result_paths(method, suffix)
         write_method_results(payload, json_path, md_path)
         print(f"Wrote: {json_path}")
         print(f"Wrote: {md_path}")
@@ -94,11 +123,23 @@ def run_method(
     dry_run_prompts: bool,
     max_output_tokens: int,
     suffix: str,
+    request_sleep_seconds: float = 3.0,
+    retry_max_attempts: int = 5,
+    retry_base_sleep_seconds: float = 5.0,
+    retry_max_sleep_seconds: float = 90.0,
+    write_partial: bool = True,
+    json_path: Path | None = None,
+    md_path: Path | None = None,
+    existing_payload: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     module = _method_module(method)
-    results = []
+    results = list((existing_payload or {}).get("results") or [])
+    completed_case_ids = _completed_case_ids(results)
     started = time.perf_counter()
     for case in questions:
+        if case.id in completed_case_ids:
+            print(f"[resume] method={method} case={case.id} skipped existing completed result")
+            continue
         method_payload = module.build_prompt(case, corpus, top_k)
         prompt = method_payload["prompt"]
         evidence_rows = method_payload["evidence_rows"]
@@ -110,7 +151,44 @@ def run_method(
         elif mode == "light":
             answer = _light_answer(case, evidence_rows)
         else:
-            answer = _vertex_answer(prompt, max_output_tokens)
+            attempts = {"count": 0}
+
+            def provider_call() -> dict[str, Any]:
+                attempts["count"] += 1
+                return _vertex_answer(prompt, max_output_tokens)
+
+            try:
+                answer = call_with_backoff(
+                    provider_call,
+                    max_attempts=retry_max_attempts,
+                    base_sleep=retry_base_sleep_seconds,
+                    max_sleep=retry_max_sleep_seconds,
+                    label=f"case={case.id} method={method}",
+                )
+                method_metadata["retry_attempts"] = max(0, attempts["count"] - 1)
+            except Exception as exc:
+                latency_ms = (time.perf_counter() - case_started) * 1000.0
+                results.append(
+                    _provider_error_result(
+                        method=method,
+                        case=case,
+                        evidence_rows=evidence_rows,
+                        mode=mode,
+                        latency_ms=latency_ms,
+                        prompt_preview=prompt[:1200] if dry_run_prompts else None,
+                        method_metadata=method_metadata,
+                        error=exc,
+                        retry_attempts=max(0, attempts["count"] - 1),
+                    )
+                )
+                if write_partial and json_path and md_path:
+                    write_method_results(
+                        _build_payload(method, mode, suffix, corpus, questions, top_k, started, results, dry_run_prompts),
+                        json_path,
+                        md_path,
+                    )
+                _sleep_after_vertex_call(mode, dry_run_prompts, request_sleep_seconds)
+                continue
         latency_ms = (time.perf_counter() - case_started) * 1000.0
         model_answer = ModelAnswer.from_dict(answer).to_dict()
         validation = validate_answer(case, answer, corpus)
@@ -127,13 +205,47 @@ def run_method(
                 "prompt_preview": prompt[:1200] if dry_run_prompts else None,
                 "answer": model_answer,
                 "validation": validation.to_dict(),
+                "status": "completed",
+                "infrastructure_failure": False,
+                "provider_error": None,
                 "metadata": {
                     **method_metadata,
                     "dry_run_prompts": dry_run_prompts,
                 },
             }
         )
+        if write_partial and json_path and md_path:
+            write_method_results(
+                _build_payload(method, mode, suffix, corpus, questions, top_k, started, results, dry_run_prompts),
+                json_path,
+                md_path,
+            )
+        _sleep_after_vertex_call(mode, dry_run_prompts, request_sleep_seconds)
+    return _build_payload(method, mode, suffix, corpus, questions, top_k, started, results, dry_run_prompts)
+
+
+def _build_payload(
+    method: str,
+    mode: str,
+    suffix: str,
+    corpus: list[CorpusRow],
+    questions: list[QuestionCase],
+    top_k: int,
+    started: float,
+    results: list[dict[str, Any]],
+    dry_run_prompts: bool = False,
+) -> dict[str, Any]:
     latency_ms = (time.perf_counter() - started) * 1000.0
+    summary = metric_summary(results)
+    summary.update(
+        {
+            "infrastructure_failure_count": sum(1 for row in results if row.get("infrastructure_failure")),
+            "provider_error_count": sum(1 for row in results if row.get("provider_error")),
+            "retry_attempts_total": sum(int((row.get("metadata") or {}).get("retry_attempts", 0)) for row in results),
+            "json_parse_failure_count": sum(1 for row in results if row.get("failure_type") == "JSON Parse Failure"),
+            "scored_case_count": sum(1 for row in results if not row.get("infrastructure_failure")),
+        }
+    )
     return {
         "benchmark": "layer2_crossdomain",
         "method": method,
@@ -148,7 +260,7 @@ def run_method(
             sum(len(row["selected_evidence_ids"]) for row in results) / len(results) if results else 0.0
         ),
         "latency_ms": round(latency_ms, 2),
-        "summary": metric_summary(results),
+        "summary": summary,
         "results": results,
     }
 
@@ -215,8 +327,12 @@ def _vertex_answer(prompt: str, max_output_tokens: int) -> dict[str, Any]:
         max_output_tokens=max_output_tokens,
     )
     if not result.ok:
-        raise SystemExit(result.provider_error or "Vertex provider failed.")
-    return json.loads(_extract_json_object(result.text))
+        detail = " ".join(item for item in (result.provider_error, result.debug) if item)
+        raise ProviderCallError(detail or "Vertex provider failed.")
+    try:
+        return json.loads(_extract_json_object(result.text))
+    except Exception as exc:
+        raise ProviderJSONError(f"{exc}; raw_response_preview={_preview(result.text)}") from exc
 
 
 def estimate_prompt_sizes(
@@ -246,7 +362,7 @@ def estimate_prompt_sizes(
 def _extract_json_object(text: str) -> str:
     start = text.find("{")
     if start < 0:
-        raise SystemExit("Vertex response did not contain a JSON object.")
+        raise ValueError("Vertex response did not contain a JSON object.")
     depth = 0
     in_string = False
     escaped = False
@@ -269,7 +385,7 @@ def _extract_json_object(text: str) -> str:
             depth -= 1
             if depth == 0:
                 return text[start : idx + 1]
-    raise SystemExit("Vertex response contained incomplete JSON.")
+    raise ValueError("Vertex response contained incomplete JSON.")
 
 
 def _select_questions(questions: list[QuestionCase], limit: int | None, case_id: str | None) -> list[QuestionCase]:
@@ -278,6 +394,110 @@ def _select_questions(questions: list[QuestionCase], limit: int | None, case_id:
     if limit is not None:
         questions = questions[:limit]
     return questions
+
+
+class ProviderCallError(RuntimeError):
+    """Provider call failed before a scorable model answer was available."""
+
+
+class ProviderJSONError(RuntimeError):
+    """Provider returned text that could not be converted into model JSON."""
+
+
+def _provider_error_result(
+    *,
+    method: str,
+    case: QuestionCase,
+    evidence_rows: list[CorpusRow],
+    mode: str,
+    latency_ms: float,
+    prompt_preview: str | None,
+    method_metadata: dict[str, Any],
+    error: Exception,
+    retry_attempts: int,
+) -> dict[str, Any]:
+    failure_type = "JSON Parse Failure" if isinstance(error, ProviderJSONError) else "Provider Infrastructure Failure"
+    return {
+        "method": method,
+        "case_id": case.id,
+        "question": case.question,
+        "category": case.category,
+        "selected_evidence_ids": [row.id for row in evidence_rows],
+        "prompt_truncated": False,
+        "provider_mode": mode,
+        "latency_ms": round(latency_ms, 2),
+        "prompt_preview": prompt_preview,
+        "answer": ModelAnswer.from_dict(
+            {
+                "answer": "",
+                "behavior": "partial",
+                "cited_evidence_ids": [],
+                "valid_time_used": [],
+                "transaction_time_used_as_valid_time": False,
+                "conflict_warning": False,
+                "partial_or_refusal": True,
+                "clarification_requested": False,
+                "confidence": "low",
+            }
+        ).to_dict(),
+        "validation": _infrastructure_validation(failure_type),
+        "status": "provider_error",
+        "infrastructure_failure": True,
+        "provider_error": _preview(str(error), limit=800),
+        "failure_type": failure_type,
+        "metadata": {
+            **method_metadata,
+            "retry_attempts": retry_attempts,
+            "provider_error_preview": _preview(str(error), limit=800),
+        },
+    }
+
+
+def _infrastructure_validation(failure_type: str) -> dict[str, Any]:
+    return {
+        "required_facts_present": False,
+        "forbidden_facts_absent": True,
+        "evidence_correct": False,
+        "forbidden_evidence_absent": True,
+        "valid_time_correct": False,
+        "transaction_time_not_misused": True,
+        "conflict_warning_correct": False,
+        "partial_refusal_correct": False,
+        "clarification_correct": False,
+        "confidence_correct": True,
+        "behavior_correct": False,
+        "grounding_correct": True,
+        "cross_domain_dependency_correct": False,
+        "overall_pass": False,
+        "infrastructure_failure": True,
+        "failure_reasons": [failure_type],
+    }
+
+
+def _completed_case_ids(results: list[dict[str, Any]]) -> set[str]:
+    return {
+        row["case_id"]
+        for row in results
+        if row.get("case_id") and row.get("status", "completed") != "provider_error"
+    }
+
+
+def _load_existing_payload(path: Path) -> dict[str, Any] | None:
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"Could not resume from invalid result JSON {path}: {exc}") from exc
+
+
+def _sleep_after_vertex_call(mode: str, dry_run_prompts: bool, seconds: float) -> None:
+    if mode == "vertex" and not dry_run_prompts and seconds > 0:
+        time.sleep(seconds)
+
+
+def _preview(text: str, limit: int = 500) -> str:
+    return text.replace("\n", " ").strip()[:limit]
 
 
 def _sanitize_suffix(value: str) -> str:

@@ -129,6 +129,46 @@ python3 benchmarks/layer2_crossdomain/run_layer2_comparison.py --method metadata
 python3 benchmarks/layer2_crossdomain/run_layer2_comparison.py --method chronorag_full --mode vertex --limit 1 --result-suffix chrono_vertex_1
 ```
 
+Recommended controlled GCP 25-case pilot with retry, resume, and traffic
+shaping:
+
+```bash
+python benchmarks/layer2_crossdomain/run_layer2_comparison.py \
+  --method all \
+  --mode vertex \
+  --dataset real \
+  --limit 25 \
+  --result-suffix vertex_pilot25_tcc_precision \
+  --vertex-location global \
+  --request-sleep-seconds 8 \
+  --retry-max-attempts 6 \
+  --retry-base-sleep-seconds 8 \
+  --retry-max-sleep-seconds 120 \
+  --resume
+```
+
+Method-isolated ChronoRAG run:
+
+```bash
+python benchmarks/layer2_crossdomain/run_layer2_comparison.py \
+  --method chronorag_full \
+  --mode vertex \
+  --dataset real \
+  --limit 25 \
+  --result-suffix vertex_chrono25_tcc_precision \
+  --vertex-location global \
+  --request-sleep-seconds 8 \
+  --retry-max-attempts 6 \
+  --resume
+```
+
+`429 Resource Exhausted` is a capacity/rate-exhaustion signal, not a benchmark
+failure. Use the global endpoint when available, keep requests sequential,
+smooth traffic with `--request-sleep-seconds`, and use retry/backoff for
+temporary 429/503/transport failures. For longer provider-backed runs, use
+`tmux` on a GCP VM and keep generated result files out of commits unless they
+are explicitly being published as result artifacts.
+
 ## Current Scope
 
 Only tiny fixture data is included. Do not use these smoke outputs as evidence
