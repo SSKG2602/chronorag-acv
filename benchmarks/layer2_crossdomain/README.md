@@ -142,6 +142,7 @@ python benchmarks/layer2_crossdomain/run_layer2_comparison.py \
   --vertex-location global \
   --request-sleep-seconds 8 \
   --retry-max-attempts 6 \
+  --json-retry-max-attempts 2 \
   --retry-base-sleep-seconds 8 \
   --retry-max-sleep-seconds 120 \
   --resume
@@ -159,15 +160,18 @@ python benchmarks/layer2_crossdomain/run_layer2_comparison.py \
   --vertex-location global \
   --request-sleep-seconds 8 \
   --retry-max-attempts 6 \
+  --json-retry-max-attempts 2 \
   --resume
 ```
 
 `429 Resource Exhausted` is a capacity/rate-exhaustion signal, not a benchmark
 failure. Use the global endpoint when available, keep requests sequential,
 smooth traffic with `--request-sleep-seconds`, and use retry/backoff for
-temporary 429/503/transport failures. For longer provider-backed runs, use
-`tmux` on a GCP VM and keep generated result files out of commits unless they
-are explicitly being published as result artifacts.
+temporary 429/503/transport failures. JSON-format failures use a smaller
+`--json-retry-max-attempts` cap so deterministic non-JSON responses do not burn
+the full overload retry budget. For longer provider-backed runs, use `tmux` on
+a GCP VM and keep generated result files out of commits unless they are
+explicitly being published as result artifacts.
 
 ## Current Scope
 

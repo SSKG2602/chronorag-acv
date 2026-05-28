@@ -43,6 +43,7 @@ def main() -> None:
     parser.add_argument("--retry-max-attempts", type=int, default=5)
     parser.add_argument("--retry-base-sleep-seconds", type=float, default=5.0)
     parser.add_argument("--retry-max-sleep-seconds", type=float, default=90.0)
+    parser.add_argument("--json-retry-max-attempts", type=int, default=2)
     parser.add_argument("--vertex-location")
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--write-partial", dest="write_partial", action="store_true", default=True)
@@ -98,6 +99,7 @@ def main() -> None:
             retry_max_attempts=args.retry_max_attempts,
             retry_base_sleep_seconds=args.retry_base_sleep_seconds,
             retry_max_sleep_seconds=args.retry_max_sleep_seconds,
+            json_retry_max_attempts=args.json_retry_max_attempts,
             write_partial=args.write_partial,
             json_path=json_path,
             md_path=md_path,
@@ -127,6 +129,7 @@ def run_method(
     retry_max_attempts: int = 5,
     retry_base_sleep_seconds: float = 5.0,
     retry_max_sleep_seconds: float = 90.0,
+    json_retry_max_attempts: int = 2,
     write_partial: bool = True,
     json_path: Path | None = None,
     md_path: Path | None = None,
@@ -152,10 +155,20 @@ def run_method(
             answer = _light_answer(case, evidence_rows)
         else:
             attempts = {"count": 0}
+            json_failures = {"count": 0}
+            json_attempt_limit = max(1, json_retry_max_attempts)
 
             def provider_call() -> dict[str, Any]:
                 attempts["count"] += 1
-                return _vertex_answer(prompt, max_output_tokens)
+                try:
+                    return _vertex_answer(prompt, max_output_tokens)
+                except ProviderJSONError as exc:
+                    json_failures["count"] += 1
+                    if json_failures["count"] >= json_attempt_limit:
+                        raise ProviderJSONRetryLimitError(
+                            f"JSON retry limit reached after {json_failures['count']} attempts: {exc}"
+                        ) from exc
+                    raise
 
             try:
                 answer = call_with_backoff(
@@ -166,6 +179,7 @@ def run_method(
                     label=f"case={case.id} method={method}",
                 )
                 method_metadata["retry_attempts"] = max(0, attempts["count"] - 1)
+                method_metadata["json_parse_failures"] = json_failures["count"]
             except Exception as exc:
                 latency_ms = (time.perf_counter() - case_started) * 1000.0
                 results.append(
@@ -179,6 +193,7 @@ def run_method(
                         method_metadata=method_metadata,
                         error=exc,
                         retry_attempts=max(0, attempts["count"] - 1),
+                        json_parse_failures=json_failures["count"],
                     )
                 )
                 if write_partial and json_path and md_path:
@@ -404,6 +419,10 @@ class ProviderJSONError(RuntimeError):
     """Provider returned text that could not be converted into model JSON."""
 
 
+class ProviderJSONRetryLimitError(ProviderJSONError):
+    """Provider repeatedly returned non-JSON despite the JSON-specific retry cap."""
+
+
 def _provider_error_result(
     *,
     method: str,
@@ -415,6 +434,7 @@ def _provider_error_result(
     method_metadata: dict[str, Any],
     error: Exception,
     retry_attempts: int,
+    json_parse_failures: int = 0,
 ) -> dict[str, Any]:
     failure_type = "JSON Parse Failure" if isinstance(error, ProviderJSONError) else "Provider Infrastructure Failure"
     return {
@@ -448,6 +468,7 @@ def _provider_error_result(
         "metadata": {
             **method_metadata,
             "retry_attempts": retry_attempts,
+            "json_parse_failures": json_parse_failures,
             "provider_error_preview": _preview(str(error), limit=800),
         },
     }

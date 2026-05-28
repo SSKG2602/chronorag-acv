@@ -102,6 +102,7 @@ def test_retryable_classifier_handles_vertex_patterns():
     assert is_retryable_vertex_error(RuntimeError("TSI_DATA_CORRUPTED"))
     assert is_retryable_vertex_error(RuntimeError("Vertex response did not contain a JSON object"))
     assert is_retryable_vertex_error(runner.ProviderJSONError("json.loads failed"))
+    assert not is_retryable_vertex_error(runner.ProviderJSONRetryLimitError("JSON retry limit reached"))
     assert not is_retryable_vertex_error(RuntimeError("Application Default Credentials missing"))
 
 

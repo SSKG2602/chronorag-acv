@@ -39,6 +39,8 @@ NON_RETRYABLE_MARKERS = (
     "forbidden",
     "invalid argument",
     "prompt contract",
+    "providerjsonretrylimiterror",
+    "json retry limit reached",
 )
 
 
