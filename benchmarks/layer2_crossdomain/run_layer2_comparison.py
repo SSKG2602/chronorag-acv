@@ -18,6 +18,7 @@ from benchmarks.layer2_crossdomain.schemas import CorpusRow, ModelAnswer, Questi
 from benchmarks.layer2_crossdomain.validator import validate_answer
 from benchmarks.layer2_crossdomain.vertex_retry import call_with_backoff
 from benchmarks.layer2_crossdomain.prompts import build_evidence_fact_sentence
+from benchmarks.layer2_crossdomain.llm_judge import evidence_cards_from_rows, validate_case_v3
 
 METHODS = ("direct_llm_full_context", "metadata_temporal_rag", "chronorag_full")
 DEFAULT_CORPUS = "benchmarks/layer2_crossdomain/data/layer2_corpus.sample.jsonl"
@@ -33,6 +34,7 @@ def main() -> None:
     parser.add_argument("--questions", default=DEFAULT_QUESTIONS)
     parser.add_argument("--dataset", choices=["sample", "real"], default="sample")
     parser.add_argument("--mode", choices=["light", "vertex"], default="light")
+    parser.add_argument("--validator", choices=["deterministic", "llm_judge"], default="deterministic")
     parser.add_argument("--limit", type=int)
     parser.add_argument("--case-id")
     parser.add_argument("--estimate-only", action="store_true")
@@ -45,6 +47,14 @@ def main() -> None:
     parser.add_argument("--retry-base-sleep-seconds", type=float, default=5.0)
     parser.add_argument("--retry-max-sleep-seconds", type=float, default=90.0)
     parser.add_argument("--json-retry-max-attempts", type=int, default=2)
+    parser.add_argument("--judge-runs", type=int, default=3)
+    parser.add_argument("--judge-temperature", type=float, default=0.3)
+    parser.add_argument("--judge-max-output-tokens", type=int, default=600)
+    parser.add_argument("--judge-request-sleep-seconds", type=float, default=6.0)
+    parser.add_argument("--judge-retry-max-attempts", type=int, default=4)
+    parser.add_argument("--judge-retry-base-sleep-seconds", type=float, default=8.0)
+    parser.add_argument("--judge-retry-max-sleep-seconds", type=float, default=90.0)
+    parser.add_argument("--judge-json-retry-max-attempts", type=int, default=1)
     parser.add_argument("--vertex-location")
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--write-partial", dest="write_partial", action="store_true", default=True)
@@ -64,6 +74,7 @@ def main() -> None:
     prompt_estimates = estimate_prompt_sizes(selected_methods, corpus, questions, args.top_k)
 
     print(f"Mode: {args.mode}")
+    print(f"Validator: {args.validator}")
     print(f"Methods: {', '.join(selected_methods)}")
     print(f"Selected cases: {len(questions)}")
     print(f"Estimated Vertex calls: {estimated_calls}")
@@ -101,6 +112,15 @@ def main() -> None:
             retry_base_sleep_seconds=args.retry_base_sleep_seconds,
             retry_max_sleep_seconds=args.retry_max_sleep_seconds,
             json_retry_max_attempts=args.json_retry_max_attempts,
+            validator=args.validator,
+            judge_runs=args.judge_runs,
+            judge_temperature=args.judge_temperature,
+            judge_max_output_tokens=args.judge_max_output_tokens,
+            judge_request_sleep_seconds=args.judge_request_sleep_seconds,
+            judge_retry_max_attempts=args.judge_retry_max_attempts,
+            judge_retry_base_sleep_seconds=args.judge_retry_base_sleep_seconds,
+            judge_retry_max_sleep_seconds=args.judge_retry_max_sleep_seconds,
+            judge_json_retry_max_attempts=args.judge_json_retry_max_attempts,
             write_partial=args.write_partial,
             json_path=json_path,
             md_path=md_path,
@@ -131,6 +151,16 @@ def run_method(
     retry_base_sleep_seconds: float = 5.0,
     retry_max_sleep_seconds: float = 90.0,
     json_retry_max_attempts: int = 2,
+    validator: str = "deterministic",
+    judge_runs: int = 3,
+    judge_temperature: float = 0.3,
+    judge_max_output_tokens: int = 600,
+    judge_request_sleep_seconds: float = 6.0,
+    judge_retry_max_attempts: int = 4,
+    judge_retry_base_sleep_seconds: float = 8.0,
+    judge_retry_max_sleep_seconds: float = 90.0,
+    judge_json_retry_max_attempts: int = 1,
+    judge_provider: Any | None = None,
     write_partial: bool = True,
     json_path: Path | None = None,
     md_path: Path | None = None,
@@ -140,6 +170,9 @@ def run_method(
     results = list((existing_payload or {}).get("results") or [])
     completed_case_ids = _completed_case_ids(results)
     started = time.perf_counter()
+    active_judge_provider = judge_provider
+    if validator == "llm_judge" and not dry_run_prompts and active_judge_provider is None:
+        active_judge_provider = _build_vertex_provider()
     for case in questions:
         if case.id in completed_case_ids:
             print(f"[resume] method={method} case={case.id} skipped existing completed result")
@@ -199,7 +232,7 @@ def run_method(
                 )
                 if write_partial and json_path and md_path:
                     write_method_results(
-                        _build_payload(method, mode, suffix, corpus, questions, top_k, started, results, dry_run_prompts),
+                        _build_payload(method, mode, suffix, corpus, questions, top_k, started, results, dry_run_prompts, validator),
                         json_path,
                         md_path,
                     )
@@ -208,7 +241,25 @@ def run_method(
         latency_ms = (time.perf_counter() - case_started) * 1000.0
         answer, postprocess_metadata = _postprocess_answer_with_cited_evidence(answer, evidence_rows)
         model_answer = ModelAnswer.from_dict(answer).to_dict()
-        validation = validate_answer(case, answer, corpus)
+        if validator == "llm_judge" and not dry_run_prompts:
+            validation = validate_case_v3(
+                case,
+                model_answer,
+                evidence_cards_from_rows(evidence_rows),
+                active_judge_provider,
+                runs=judge_runs,
+                temperature=judge_temperature,
+                max_output_tokens=judge_max_output_tokens,
+                request_sleep_seconds=judge_request_sleep_seconds,
+                retry_max_attempts=judge_retry_max_attempts,
+                retry_base_sleep_seconds=judge_retry_base_sleep_seconds,
+                retry_max_sleep_seconds=judge_retry_max_sleep_seconds,
+                json_retry_max_attempts=judge_json_retry_max_attempts,
+            )
+        elif validator == "llm_judge":
+            validation = _judge_skipped_validation(case.id, "Judge skipped for dry-run prompts.")
+        else:
+            validation = validate_answer(case, answer, corpus).to_dict()
         results.append(
             {
                 "method": method,
@@ -221,7 +272,8 @@ def run_method(
                 "latency_ms": round(latency_ms, 2),
                 "prompt_preview": prompt[:1200] if dry_run_prompts else None,
                 "answer": model_answer,
-                "validation": validation.to_dict(),
+                "validation": validation,
+                "validator": validator,
                 "status": "completed",
                 "infrastructure_failure": False,
                 "provider_error": None,
@@ -234,12 +286,12 @@ def run_method(
         )
         if write_partial and json_path and md_path:
             write_method_results(
-                _build_payload(method, mode, suffix, corpus, questions, top_k, started, results, dry_run_prompts),
+                _build_payload(method, mode, suffix, corpus, questions, top_k, started, results, dry_run_prompts, validator),
                 json_path,
                 md_path,
             )
         _sleep_after_vertex_call(mode, dry_run_prompts, request_sleep_seconds)
-    return _build_payload(method, mode, suffix, corpus, questions, top_k, started, results, dry_run_prompts)
+    return _build_payload(method, mode, suffix, corpus, questions, top_k, started, results, dry_run_prompts, validator)
 
 
 def _build_payload(
@@ -252,9 +304,10 @@ def _build_payload(
     started: float,
     results: list[dict[str, Any]],
     dry_run_prompts: bool = False,
+    validator: str = "deterministic",
 ) -> dict[str, Any]:
     latency_ms = (time.perf_counter() - started) * 1000.0
-    summary = metric_summary(results)
+    summary = metric_summary(results, validator=validator)
     summary.update(
         {
             "infrastructure_failure_count": sum(1 for row in results if row.get("infrastructure_failure")),
@@ -268,6 +321,7 @@ def _build_payload(
         "benchmark": "layer2_crossdomain",
         "method": method,
         "mode": mode,
+        "validator": validator,
         "result_suffix": suffix,
         "corpus_rows": len(corpus),
         "question_count": len(questions),
@@ -351,6 +405,12 @@ def _vertex_answer(prompt: str, max_output_tokens: int) -> dict[str, Any]:
         return json.loads(_extract_json_object(result.text))
     except Exception as exc:
         raise ProviderJSONError(f"{exc}; raw_response_preview={_preview(result.text)}") from exc
+
+
+def _build_vertex_provider() -> Any:
+    from core.generator.vertex_provider import VertexGeminiProvider
+
+    return VertexGeminiProvider()
 
 
 def _postprocess_answer_with_cited_evidence(
@@ -538,6 +598,41 @@ def _infrastructure_validation(failure_type: str) -> dict[str, Any]:
         "overall_pass": False,
         "infrastructure_failure": True,
         "failure_reasons": [failure_type],
+    }
+
+
+def _judge_skipped_validation(case_id: str, reason: str) -> dict[str, Any]:
+    return {
+        "case_id": case_id,
+        "judge_overall_pass": False,
+        "strict_overall_pass": False,
+        "criteria_passed": 0,
+        "criteria_scores": {
+            "temporal_scope_correct": 0,
+            "factual_grounding": 0,
+            "behavior_justified": 0,
+            "transaction_time_clean": 0,
+            "no_overconfidence": 0,
+        },
+        "criteria_reasons": {
+            "temporal_scope_correct": reason,
+            "factual_grounding": reason,
+            "behavior_justified": reason,
+            "transaction_time_clean": reason,
+            "no_overconfidence": reason,
+        },
+        "diagnostics": {
+            "behavior_label_match": False,
+            "cited_ids_grounded": False,
+            "schema_fields_present": False,
+        },
+        "raw_run_scores": [],
+        "judge_parse_failures": 0,
+        "judge_provider_failures": 0,
+        "judge_retry_attempts": 0,
+        "judge_runs": 0,
+        "overall_pass": False,
+        "failure_reasons": [reason],
     }
 
 

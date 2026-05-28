@@ -18,15 +18,56 @@ METRICS = [
     ("cross_domain_dependency_correct", "Cross-Domain Dependency Correct"),
 ]
 
+JUDGE_METRICS = [
+    ("judge_overall_pass", "Judge Overall Pass"),
+    ("strict_overall_pass", "Strict Overall Pass"),
+    ("temporal_scope_correct", "Temporal Scope Correct"),
+    ("factual_grounding", "Factual Grounding"),
+    ("behavior_justified", "Behavior Justified"),
+    ("transaction_time_clean", "Transaction-Time Clean"),
+    ("no_overconfidence", "No Overconfidence"),
+    ("behavior_label_accuracy", "Behavior Label Accuracy"),
+    ("citation_grounding_accuracy", "Citation Grounding Accuracy"),
+    ("schema_field_presence", "Schema Field Presence"),
+]
 
-def metric_summary(results: list[dict[str, Any]]) -> dict[str, float]:
+
+def metric_summary(results: list[dict[str, Any]], validator: str = "deterministic") -> dict[str, float]:
     scorable = [row for row in results if not row.get("infrastructure_failure")]
+    if validator == "llm_judge":
+        return _judge_metric_summary(scorable)
     if not scorable:
         return {key: 0.0 for key, _ in METRICS}
     return {
         key: float(mean(1.0 if row["validation"].get(key) else 0.0 for row in scorable))
         for key, _ in METRICS
     }
+
+
+def _judge_metric_summary(results: list[dict[str, Any]]) -> dict[str, float]:
+    if not results:
+        summary = {key: 0.0 for key, _ in JUDGE_METRICS}
+    else:
+        summary = {
+            "judge_overall_pass": float(mean(1.0 if row["validation"].get("judge_overall_pass") else 0.0 for row in results)),
+            "strict_overall_pass": float(mean(1.0 if row["validation"].get("strict_overall_pass") else 0.0 for row in results)),
+            "behavior_label_accuracy": float(mean(1.0 if row["validation"].get("diagnostics", {}).get("behavior_label_match") else 0.0 for row in results)),
+            "citation_grounding_accuracy": float(mean(1.0 if row["validation"].get("diagnostics", {}).get("cited_ids_grounded") else 0.0 for row in results)),
+            "schema_field_presence": float(mean(1.0 if row["validation"].get("diagnostics", {}).get("schema_fields_present") else 0.0 for row in results)),
+        }
+        for criterion in (
+            "temporal_scope_correct",
+            "factual_grounding",
+            "behavior_justified",
+            "transaction_time_clean",
+            "no_overconfidence",
+        ):
+            summary[criterion] = float(mean(1.0 if row["validation"].get("criteria_scores", {}).get(criterion) else 0.0 for row in results))
+    summary["overall_pass"] = summary.get("strict_overall_pass", 0.0)
+    summary["judge_parse_failures"] = sum(int(row["validation"].get("judge_parse_failures", 0)) for row in results)
+    summary["judge_provider_failures"] = sum(int(row["validation"].get("judge_provider_failures", 0)) for row in results)
+    summary["judge_retry_attempts"] = sum(int(row["validation"].get("judge_retry_attempts", 0)) for row in results)
+    return summary
 
 
 def write_method_results(
@@ -59,15 +100,15 @@ def write_comparison_report(method_payloads: list[dict[str, Any]], md_path: Path
                 infra=summary.get("infrastructure_failure_count", 0),
                 avg=payload.get("average_selected_evidence", 0.0),
                 truncated=payload.get("prompt_truncation_count", 0),
-                overall=summary["overall_pass"],
-                behavior=summary["behavior_correct"],
-                evidence=summary["evidence_correct"],
-                valid=summary["valid_time_correct"],
-                tx=summary["transaction_time_not_misused"],
-                conflict=summary["conflict_warning_correct"],
-                partial=summary["partial_refusal_correct"],
-                clarify=summary["clarification_correct"],
-                cross=summary["cross_domain_dependency_correct"],
+                overall=summary.get("overall_pass", 0.0),
+                behavior=summary.get("behavior_correct", summary.get("behavior_label_accuracy", 0.0)),
+                evidence=summary.get("evidence_correct", summary.get("citation_grounding_accuracy", 0.0)),
+                valid=summary.get("valid_time_correct", summary.get("temporal_scope_correct", 0.0)),
+                tx=summary.get("transaction_time_not_misused", summary.get("transaction_time_clean", 0.0)),
+                conflict=summary.get("conflict_warning_correct", 0.0),
+                partial=summary.get("partial_refusal_correct", 0.0),
+                clarify=summary.get("clarification_correct", 0.0),
+                cross=summary.get("cross_domain_dependency_correct", 0.0),
                 calls=payload.get("estimated_calls", 0),
                 latency=payload.get("latency_ms", 0.0),
             )
@@ -78,6 +119,8 @@ def write_comparison_report(method_payloads: list[dict[str, Any]], md_path: Path
 
 
 def _method_markdown(payload: dict[str, Any]) -> str:
+    if payload.get("validator") == "llm_judge":
+        return _judge_method_markdown(payload)
     lines = [
         f"# Layer 2 Results: {payload['method']}",
         "",
@@ -128,5 +171,81 @@ def _method_markdown(payload: dict[str, Any]) -> str:
         failures = ", ".join(validation.get("failure_reasons", []))
         lines.append(
             f"| {row['case_id']} | {row.get('status', 'completed')} | {row['answer'].get('behavior', '')} | {selected} | {cited} | {validation['overall_pass']} | {failures} |"
+        )
+    return "\n".join(lines) + "\n"
+
+
+def _judge_method_markdown(payload: dict[str, Any]) -> str:
+    summary = payload["summary"]
+    lines = [
+        f"# Layer 2 Results: {payload['method']}",
+        "",
+        "This is an optional LLM-judge validation report, not a SOTA or publication-grade claim.",
+        "",
+        f"- Mode: `{payload['mode']}`",
+        f"- Validator: `llm_judge`",
+        f"- Corpus rows: {payload['corpus_rows']}",
+        f"- Questions: {payload['question_count']}",
+        f"- Top-k: {payload.get('top_k', 'n/a')}",
+        f"- Scored cases: {summary.get('scored_case_count', len(payload.get('results', [])))}",
+        f"- Provider/infrastructure failures: {summary.get('infrastructure_failure_count', 0)}",
+        f"- Judge parse failures: {summary.get('judge_parse_failures', 0)}",
+        f"- Judge provider failures: {summary.get('judge_provider_failures', 0)}",
+        f"- Judge retry attempts: {summary.get('judge_retry_attempts', 0)}",
+        "",
+        "| Metric | Score |",
+        "|---|---:|",
+    ]
+    for key, label in JUDGE_METRICS:
+        lines.append(f"| {label} | {summary.get(key, 0.0):.2f} |")
+    lines.extend(
+        [
+            f"| Judge Parse Failures | {summary.get('judge_parse_failures', 0)} |",
+            f"| Judge Provider Failures | {summary.get('judge_provider_failures', 0)} |",
+            f"| Judge Retry Attempts | {summary.get('judge_retry_attempts', 0)} |",
+            "",
+            "## Failure Analysis",
+            "",
+        ]
+    )
+    failures = [row for row in payload["results"] if not row["validation"].get("strict_overall_pass")]
+    if failures:
+        for row in failures:
+            validation = row["validation"]
+            failed_criteria = [
+                key for key, value in validation.get("criteria_scores", {}).items() if not value
+            ]
+            failed_diagnostics = [
+                key for key, value in validation.get("diagnostics", {}).items() if not value
+            ]
+            lines.append(
+                "- `{case}`: judge_overall={judge}; strict={strict}; "
+                "criteria_failed={criteria}; diagnostics_failed={diagnostics}; "
+                "judge_parse_failures={parse}; judge_provider_failures={provider}".format(
+                    case=row["case_id"],
+                    judge=validation.get("judge_overall_pass"),
+                    strict=validation.get("strict_overall_pass"),
+                    criteria=", ".join(failed_criteria) or "none",
+                    diagnostics=", ".join(failed_diagnostics) or "none",
+                    parse=validation.get("judge_parse_failures", 0),
+                    provider=validation.get("judge_provider_failures", 0),
+                )
+            )
+    else:
+        lines.append("- No strict failures in this run.")
+    lines.extend(
+        [
+            "",
+            "| Case | Status | Judge Pass | Strict Pass | Criteria Passed | Diagnostics Failed |",
+            "|---|---|---:|---:|---:|---|",
+        ]
+    )
+    for row in payload["results"]:
+        validation = row["validation"]
+        failed_diagnostics = [
+            key for key, value in validation.get("diagnostics", {}).items() if not value
+        ]
+        lines.append(
+            f"| {row['case_id']} | {row.get('status', 'completed')} | {validation.get('judge_overall_pass')} | {validation.get('strict_overall_pass')} | {validation.get('criteria_passed', 0)} | {', '.join(failed_diagnostics)} |"
         )
     return "\n".join(lines) + "\n"
