@@ -17,6 +17,7 @@ from benchmarks.layer2_crossdomain.reporting import metric_summary, write_compar
 from benchmarks.layer2_crossdomain.schemas import CorpusRow, ModelAnswer, QuestionCase, load_corpus, load_questions
 from benchmarks.layer2_crossdomain.validator import validate_answer
 from benchmarks.layer2_crossdomain.vertex_retry import call_with_backoff
+from benchmarks.layer2_crossdomain.prompts import build_evidence_fact_sentence
 
 METHODS = ("direct_llm_full_context", "metadata_temporal_rag", "chronorag_full")
 DEFAULT_CORPUS = "benchmarks/layer2_crossdomain/data/layer2_corpus.sample.jsonl"
@@ -205,6 +206,7 @@ def run_method(
                 _sleep_after_vertex_call(mode, dry_run_prompts, request_sleep_seconds)
                 continue
         latency_ms = (time.perf_counter() - case_started) * 1000.0
+        answer, postprocess_metadata = _postprocess_answer_with_cited_evidence(answer, evidence_rows)
         model_answer = ModelAnswer.from_dict(answer).to_dict()
         validation = validate_answer(case, answer, corpus)
         results.append(
@@ -225,6 +227,7 @@ def run_method(
                 "provider_error": None,
                 "metadata": {
                     **method_metadata,
+                    **postprocess_metadata,
                     "dry_run_prompts": dry_run_prompts,
                 },
             }
@@ -348,6 +351,49 @@ def _vertex_answer(prompt: str, max_output_tokens: int) -> dict[str, Any]:
         return json.loads(_extract_json_object(result.text))
     except Exception as exc:
         raise ProviderJSONError(f"{exc}; raw_response_preview={_preview(result.text)}") from exc
+
+
+def _postprocess_answer_with_cited_evidence(
+    answer: dict[str, Any],
+    evidence_rows: list[CorpusRow],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Append missing fact fields from exactly one cited selected evidence row."""
+    updated = dict(answer)
+    metadata = {"answer_fact_postprocessed": False}
+    behavior = str(updated.get("behavior", "")).lower()
+    if behavior != "answer":
+        return updated, metadata
+    cited = updated.get("cited_evidence_ids") or []
+    if isinstance(cited, str):
+        cited = [cited]
+    if not isinstance(cited, list) or len(cited) != 1:
+        return updated, metadata
+    row_by_id = {row.id: row for row in evidence_rows}
+    row = row_by_id.get(str(cited[0]))
+    if row is None:
+        return updated, metadata
+
+    answer_text = str(updated.get("answer", ""))
+    if not _answer_missing_evidence_fact(answer_text, row):
+        return updated, metadata
+
+    sentence = build_evidence_fact_sentence(row)
+    if sentence.lower() not in answer_text.lower():
+        separator = " " if answer_text.strip().endswith(".") else ". "
+        updated["answer"] = f"{answer_text.strip()}{separator}{sentence}".strip() if answer_text.strip() else sentence
+    metadata["answer_fact_postprocessed"] = True
+    metadata["answer_fact_postprocess_source_id"] = row.id
+    return updated, metadata
+
+
+def _answer_missing_evidence_fact(answer_text: str, row: CorpusRow) -> bool:
+    lowered = answer_text.lower()
+    checks = [row.entity, row.metric_or_claim, row.valid_from or row.transaction_time]
+    if row.value is not None:
+        checks.append(str(row.value))
+    if row.unit:
+        checks.append(row.unit)
+    return any(str(item).lower() not in lowered for item in checks if item)
 
 
 def estimate_prompt_sizes(

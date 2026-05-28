@@ -29,9 +29,43 @@ JSON_ONLY_RULES = """Output contract:
 - If the answer cannot be determined, use behavior "partial", "clarify", or "refuse" and set partial_or_refusal or clarification_requested accordingly.
 """
 
+ANSWER_FIELD_RULES = """Answer field contract:
+- For answerable exact retrieval cases, the JSON "answer" field MUST include the entity, metric_or_claim, value, unit if available, and exact valid_from/valid_to date or timestamp from the cited evidence.
+- For numeric macro/market rows, use this style: "{entity} {metric_or_claim} was {value} {unit} on {valid_from}."
+- For GitHub release rows, use this style: "{entity} {metric_or_claim} was {value} on {valid_from}."
+- For SEC filing rows, use valid_from if present, otherwise transaction_time.
+- Do not answer with only a number and unit.
+"""
+
 
 def compact_row(row: CorpusRow) -> str:
     return json.dumps(row.to_prompt_dict(), ensure_ascii=False, sort_keys=True)
+
+
+def build_evidence_fact_sentence(row: CorpusRow) -> str:
+    """Build a fact sentence only from evidence fields, never answer-key fields."""
+    when = row.valid_from or row.transaction_time
+    value = "" if row.value is None else str(row.value)
+    unit = f" {row.unit}" if row.unit and value else ""
+    if value and when:
+        return f"{row.entity} {row.metric_or_claim} was {value}{unit} on {when}."
+    if value:
+        return f"{row.entity} {row.metric_or_claim} was {value}{unit}."
+    if when:
+        return f"{row.entity} {row.metric_or_claim} was recorded on {when}."
+    return f"{row.entity} {row.metric_or_claim}."
+
+
+def build_candidate_fact_hint(rows: list[CorpusRow]) -> str:
+    if not rows:
+        return "No evidence-derived candidate fact sentence is available."
+    row = rows[0]
+    if row.temporal_type not in {"valid_time_exact", "revision"}:
+        return "No exact evidence-derived candidate fact sentence is available."
+    return (
+        "Use this evidence-derived candidate fact sentence if it is supported by "
+        f"the cited evidence: {build_evidence_fact_sentence(row)}"
+    )
 
 
 def build_grounded_prompt(case: QuestionCase, rows: list[CorpusRow], method_name: str) -> str:
@@ -48,7 +82,10 @@ Prefer exact valid-time evidence over broad-window evidence for exact-time quest
 If evidence is missing, conflicting, partial, or ambiguous, say so clearly.
 For conflict/revision questions, surface disagreement instead of hiding it.
 If this is a same-entity wrong-year or multi-evidence case, select the evidence matching the requested valid_time and still return JSON.
+Each evidence row below is a JSON evidence packet with id, domain, entity, metric_or_claim, value, unit, valid_from, valid_to, transaction_time, temporal_type, and raw_text.
 {JSON_ONLY_RULES}
+{ANSWER_FIELD_RULES}
+{build_candidate_fact_hint(rows)}
 Required JSON schema and allowed values:
 {json.dumps(ANSWER_SCHEMA, sort_keys=True)}
 
