@@ -27,7 +27,7 @@ REAL_CORPUS = "benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl"
 REAL_QUESTIONS = "benchmarks/layer2_crossdomain/data/layer2_questions.jsonl"
 
 
-def main() -> None:
+def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run Layer 2 cross-domain comparison framework.")
     parser.add_argument("--method", choices=[*METHODS, "all"], default="all")
     parser.add_argument("--corpus", default=DEFAULT_CORPUS)
@@ -49,7 +49,7 @@ def main() -> None:
     parser.add_argument("--json-retry-max-attempts", type=int, default=2)
     parser.add_argument("--judge-runs", type=int, default=3)
     parser.add_argument("--judge-temperature", type=float, default=0.3)
-    parser.add_argument("--judge-max-output-tokens", type=int, default=600)
+    parser.add_argument("--judge-max-output-tokens", type=int, default=1000)
     parser.add_argument("--judge-request-sleep-seconds", type=float, default=6.0)
     parser.add_argument("--judge-retry-max-attempts", type=int, default=4)
     parser.add_argument("--judge-retry-base-sleep-seconds", type=float, default=8.0)
@@ -59,6 +59,11 @@ def main() -> None:
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--write-partial", dest="write_partial", action="store_true", default=True)
     parser.add_argument("--no-write-partial", dest="write_partial", action="store_false")
+    return parser
+
+
+def main() -> None:
+    parser = build_arg_parser()
     args = parser.parse_args()
 
     if args.vertex_location:
@@ -154,7 +159,7 @@ def run_method(
     validator: str = "deterministic",
     judge_runs: int = 3,
     judge_temperature: float = 0.3,
-    judge_max_output_tokens: int = 600,
+    judge_max_output_tokens: int = 1000,
     judge_request_sleep_seconds: float = 6.0,
     judge_retry_max_attempts: int = 4,
     judge_retry_base_sleep_seconds: float = 8.0,
@@ -417,22 +422,48 @@ def _postprocess_answer_with_cited_evidence(
     answer: dict[str, Any],
     evidence_rows: list[CorpusRow],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Append missing fact fields from exactly one cited selected evidence row."""
+    """Repair answer shape only from selected evidence rows, never answer keys."""
     updated = dict(answer)
-    metadata = {"answer_fact_postprocessed": False}
+    metadata = {
+        "answer_fact_postprocessed": False,
+        "valid_time_fact_postprocessed": False,
+        "citation_fact_postprocessed": False,
+    }
     behavior = str(updated.get("behavior", "")).lower()
-    if behavior != "answer":
-        return updated, metadata
+    updated["behavior"] = behavior
+    row_by_id = {row.id: row for row in evidence_rows}
+
     cited = updated.get("cited_evidence_ids") or []
     if isinstance(cited, str):
         cited = [cited]
-    if not isinstance(cited, list) or len(cited) != 1:
+    if not isinstance(cited, list):
+        cited = []
+    cited = [str(item) for item in cited if item]
+
+    if behavior == "answer" and not cited and evidence_rows and _selected_row_is_direct_answer(evidence_rows[0]):
+        cited = [evidence_rows[0].id]
+        metadata["citation_fact_postprocessed"] = True
+        metadata["citation_fact_postprocess_source_id"] = evidence_rows[0].id
+    updated["cited_evidence_ids"] = cited
+
+    if updated.get("answer") is None:
+        if behavior == "answer" and len(cited) == 1 and row_by_id.get(str(cited[0])) is not None:
+            updated["answer"] = build_evidence_fact_sentence(row_by_id[str(cited[0])])
+            metadata["answer_fact_postprocessed"] = True
+            metadata["answer_fact_postprocess_source_id"] = str(cited[0])
+        elif behavior in {"partial", "refuse", "clarify"}:
+            updated["answer"] = ""
+
+    if behavior != "answer":
         return updated, metadata
-    row_by_id = {row.id: row for row in evidence_rows}
+
+    if len(cited) != 1:
+        return updated, metadata
     row = row_by_id.get(str(cited[0]))
     if row is None:
         return updated, metadata
 
+    _repair_valid_time_from_cited_row(updated, row, metadata)
     answer_text = str(updated.get("answer", ""))
     if not _answer_missing_evidence_fact(answer_text, row):
         return updated, metadata
@@ -446,6 +477,34 @@ def _postprocess_answer_with_cited_evidence(
     return updated, metadata
 
 
+def _repair_valid_time_from_cited_row(
+    answer: dict[str, Any],
+    row: CorpusRow,
+    metadata: dict[str, Any],
+) -> None:
+    valid_from = row.valid_from
+    if not valid_from:
+        return
+    current = answer.get("valid_time_used") or []
+    if isinstance(current, str):
+        current = [current]
+    if not isinstance(current, list):
+        current = []
+    normalized = [str(item) for item in current if item]
+    answer_text = str(answer.get("answer") or "")
+    exact_date_in_answer = valid_from in answer_text
+    has_exact = valid_from in normalized
+    year_only = len(valid_from) >= 10 and valid_from[:4] in normalized and not has_exact
+    if exact_date_in_answer or not normalized or year_only:
+        if valid_from not in normalized:
+            normalized.append(valid_from)
+        if year_only:
+            normalized = [item for item in normalized if item != valid_from[:4]]
+        answer["valid_time_used"] = normalized
+        metadata["valid_time_fact_postprocessed"] = True
+        metadata["valid_time_fact_postprocess_source_id"] = row.id
+
+
 def _answer_missing_evidence_fact(answer_text: str, row: CorpusRow) -> bool:
     lowered = answer_text.lower()
     checks = [row.entity, row.metric_or_claim, row.valid_from or row.transaction_time]
@@ -454,6 +513,15 @@ def _answer_missing_evidence_fact(answer_text: str, row: CorpusRow) -> bool:
     if row.unit:
         checks.append(row.unit)
     return any(str(item).lower() not in lowered for item in checks if item)
+
+
+def _selected_row_is_direct_answer(row: CorpusRow) -> bool:
+    return bool(
+        row.id
+        and row.temporal_type in {"valid_time_exact", "revision"}
+        and (row.value is not None or row.raw_text)
+        and (row.valid_from or row.transaction_time)
+    )
 
 
 def estimate_prompt_sizes(
@@ -621,6 +689,8 @@ def _judge_skipped_validation(case_id: str, reason: str) -> dict[str, Any]:
             "transaction_time_clean": reason,
             "no_overconfidence": reason,
         },
+        "judge_infrastructure_failure": True,
+        "judge_reason": reason,
         "diagnostics": {
             "behavior_label_match": False,
             "cited_ids_grounded": False,
@@ -630,6 +700,8 @@ def _judge_skipped_validation(case_id: str, reason: str) -> dict[str, Any]:
         "judge_parse_failures": 0,
         "judge_provider_failures": 0,
         "judge_retry_attempts": 0,
+        "judge_scored_runs": 0,
+        "judge_unscored_runs": 0,
         "judge_runs": 0,
         "overall_pass": False,
         "failure_reasons": [reason],

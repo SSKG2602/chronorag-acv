@@ -52,6 +52,16 @@ def _cards() -> list[dict]:
 
 
 def _judge_json(passed: int = 5) -> str:
+    scores = [1 if index < passed else 0 for index, _criterion in enumerate(llm_judge.CRITERIA)]
+    return json.dumps(
+        {
+            "scores": scores,
+            "reason": "grounded and temporally correct",
+        }
+    )
+
+
+def _verbose_judge_json(passed: int = 5) -> str:
     scores = {criterion: 1 for criterion in llm_judge.CRITERIA}
     for criterion in llm_judge.CRITERIA[passed:]:
         scores[criterion] = 0
@@ -81,6 +91,9 @@ def test_judge_prompt_contains_evidence_cards():
     assert "Evidence cards:" in prompt
     assert "e1" in prompt
     assert "3.98" in prompt
+    assert "Return only compact JSON" in prompt
+    assert '"scores": [' in prompt
+    assert "step-by-step" in prompt
 
 
 def test_judge_prompt_does_not_contain_forbidden_answer_key_fields():
@@ -103,6 +116,30 @@ def test_majority_vote_works(monkeypatch):
     provider = FakeProvider([_judge_json(5), _judge_json(5), _judge_json(0)])
     result = llm_judge.run_judge(_case(), _answer(), _cards(), provider, runs=3, request_sleep_seconds=0)
     assert result["criteria_passed"] == 5
+    assert result["judge_overall_pass"] is True
+    assert result["judge_scored_runs"] == 3
+    assert result["judge_unscored_runs"] == 0
+
+
+def test_old_verbose_criterion_format_still_parses(monkeypatch):
+    monkeypatch.setattr(llm_judge.time, "sleep", lambda _seconds: None)
+    provider = FakeProvider([_verbose_judge_json(5)])
+    result = llm_judge.validate_case_v3(_case(), _answer(), _cards(), provider, runs=1, request_sleep_seconds=0)
+    assert result["criteria_passed"] == 5
+    assert result["judge_overall_pass"] is True
+
+
+def test_fenced_judge_json_parses(monkeypatch):
+    monkeypatch.setattr(llm_judge.time, "sleep", lambda _seconds: None)
+    provider = FakeProvider([f"```json\n{_judge_json(5)}\n```"])
+    result = llm_judge.validate_case_v3(_case(), _answer(), _cards(), provider, runs=1, request_sleep_seconds=0)
+    assert result["judge_overall_pass"] is True
+
+
+def test_judge_json_with_text_before_after_parses(monkeypatch):
+    monkeypatch.setattr(llm_judge.time, "sleep", lambda _seconds: None)
+    provider = FakeProvider([f"Here is JSON: {_judge_json(5)} done"])
+    result = llm_judge.validate_case_v3(_case(), _answer(), _cards(), provider, runs=1, request_sleep_seconds=0)
     assert result["judge_overall_pass"] is True
 
 
@@ -135,7 +172,29 @@ def test_one_parse_failure_does_not_kill_judge_result(monkeypatch):
         json_retry_max_attempts=1,
     )
     assert result["judge_parse_failures"] == 1
+    assert result["judge_scored_runs"] == 2
+    assert result["judge_unscored_runs"] == 1
     assert result["judge_overall_pass"] is True
+
+
+def test_all_parse_failures_are_infrastructure_not_semantic(monkeypatch):
+    monkeypatch.setattr(llm_judge.time, "sleep", lambda _seconds: None)
+    provider = FakeProvider(["plain English", '{"scores": [1, 1'])
+    result = llm_judge.validate_case_v3(
+        _case(),
+        _answer(),
+        _cards(),
+        provider,
+        runs=2,
+        request_sleep_seconds=0,
+        json_retry_max_attempts=1,
+    )
+    assert result["judge_parse_failures"] == 2
+    assert result["judge_infrastructure_failure"] is True
+    assert result["judge_scored_runs"] == 0
+    assert result["judge_unscored_runs"] == 2
+    assert set(result["criteria_reasons"].values()) == {"unscored_due_to_judge_failure"}
+    assert result["judge_overall_pass"] is False
 
 
 def test_provider_failure_for_one_run_does_not_kill_case(monkeypatch):
@@ -152,6 +211,8 @@ def test_provider_failure_for_one_run_does_not_kill_case(monkeypatch):
         retry_max_attempts=1,
     )
     assert result["judge_provider_failures"] == 1
+    assert result["judge_scored_runs"] == 2
+    assert result["judge_unscored_runs"] == 1
     assert result["judge_overall_pass"] is True
 
 
@@ -174,6 +235,11 @@ def test_diagnostics_do_not_alter_judge_overall(monkeypatch):
     assert result["diagnostics"]["behavior_label_match"] is False
     assert result["diagnostics"]["schema_fields_present"] is False
     assert result["strict_overall_pass"] is False
+
+
+def test_cli_default_judge_max_output_tokens_is_1000():
+    args = runner.build_arg_parser().parse_args([])
+    assert args.judge_max_output_tokens == 1000
 
 
 def test_deterministic_validator_path_remains_available(tmp_path):

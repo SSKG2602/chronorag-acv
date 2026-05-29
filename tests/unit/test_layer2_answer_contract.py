@@ -98,6 +98,19 @@ def test_prompt_instructs_answer_field_to_include_required_evidence_facts():
     prompt = build_grounded_prompt(_case(), [_fred_row()], "chronorag_full")
     assert 'the JSON "answer" field MUST include the entity, metric_or_claim, value, unit if available' in prompt
     assert "Do not answer with only a number and unit" in prompt
+    assert "Think privately. Return only the final JSON object." in prompt
+    assert "Return exactly the required JSON object and never return null for required fields." in prompt
+    assert "Do not refuse merely because multiple same-year rows exist." in prompt
+    assert "If an exact date is asked, prefer exact-date evidence over same-year evidence." in prompt
+    assert "Do not treat transaction_time, publication time, filing time, or release time as valid_time" in prompt
+    assert "chain-of-thought" not in prompt.lower()
+
+
+def test_prompt_schema_is_strict_without_markdown_requirement():
+    prompt = build_grounded_prompt(_case(), [_fred_row()], "chronorag_full")
+    assert '"behavior": "answer|partial|refuse|clarify"' in prompt
+    assert '"valid_time_used": ["YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS or YYYY"]' in prompt
+    assert "Do not wrap the JSON in markdown or code fences." in prompt
 
 
 def test_evidence_fact_sentence_for_fred_row():
@@ -128,6 +141,69 @@ def test_postprocessor_appends_missing_cited_evidence_facts():
     )
     assert metadata["answer_fact_postprocessed"] is True
     assert "United States 10-year Treasury 10-year Treasury yield was 3.98 percent on 1962-08-15." in answer["answer"]
+
+
+def test_postprocessor_repairs_valid_time_used_from_cited_evidence_date():
+    answer, metadata = _postprocess_answer_with_cited_evidence(
+        {
+            "answer": "United States 10-year Treasury yield was 3.98 percent on 1962-08-15.",
+            "behavior": "answer",
+            "cited_evidence_ids": ["l2:macro_fred:dgs10:1962-08-15"],
+            "valid_time_used": ["1962"],
+            "transaction_time_used_as_valid_time": False,
+            "conflict_warning": False,
+            "partial_or_refusal": False,
+            "clarification_requested": False,
+            "confidence": "high",
+        },
+        [_fred_row()],
+    )
+    assert metadata["valid_time_fact_postprocessed"] is True
+    assert answer["valid_time_used"] == ["1962-08-15"]
+
+
+def test_postprocessor_repairs_null_answer_from_cited_evidence():
+    answer, metadata = _postprocess_answer_with_cited_evidence(
+        {
+            "answer": None,
+            "behavior": "answer",
+            "cited_evidence_ids": ["l2:macro_fred:dgs10:1962-08-15"],
+            "valid_time_used": ["1962-08-15"],
+            "transaction_time_used_as_valid_time": False,
+            "conflict_warning": False,
+            "partial_or_refusal": False,
+            "clarification_requested": False,
+            "confidence": "high",
+        },
+        [_fred_row()],
+    )
+    assert metadata["answer_fact_postprocessed"] is True
+    assert answer["answer"] == "United States 10-year Treasury 10-year Treasury yield was 3.98 percent on 1962-08-15."
+
+
+def test_postprocessor_cites_top_selected_direct_answer_when_missing_citation():
+    answer, metadata = _postprocess_answer_with_cited_evidence(
+        {
+            "answer": "United States 10-year Treasury yield was 3.98 percent on 1962-08-15.",
+            "behavior": "answer",
+            "cited_evidence_ids": [],
+            "valid_time_used": ["1962-08-15"],
+            "transaction_time_used_as_valid_time": False,
+            "conflict_warning": False,
+            "partial_or_refusal": False,
+            "clarification_requested": False,
+            "confidence": "high",
+        },
+        [_fred_row()],
+    )
+    assert metadata["citation_fact_postprocessed"] is True
+    assert answer["cited_evidence_ids"] == ["l2:macro_fred:dgs10:1962-08-15"]
+
+
+def test_prompt_same_year_policy_does_not_force_refusal():
+    prompt = build_grounded_prompt(_case(), [_fred_row(), _github_row()], "chronorag_full")
+    assert "Do not refuse merely because multiple same-year rows exist." in prompt
+    assert "choose the highest-ranked selected evidence" in prompt
 
 
 def test_postprocessor_does_not_run_for_partial_refuse_or_clarify():

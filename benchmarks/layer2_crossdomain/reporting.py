@@ -29,6 +29,9 @@ JUDGE_METRICS = [
     ("behavior_label_accuracy", "Behavior Label Accuracy"),
     ("citation_grounding_accuracy", "Citation Grounding Accuracy"),
     ("schema_field_presence", "Schema Field Presence"),
+    ("judge_infrastructure_failure_count", "Judge Infrastructure Failure Count"),
+    ("judge_scored_runs", "Judge Scored Runs"),
+    ("judge_unscored_runs", "Judge Unscored Runs"),
 ]
 
 
@@ -67,6 +70,11 @@ def _judge_metric_summary(results: list[dict[str, Any]]) -> dict[str, float]:
     summary["judge_parse_failures"] = sum(int(row["validation"].get("judge_parse_failures", 0)) for row in results)
     summary["judge_provider_failures"] = sum(int(row["validation"].get("judge_provider_failures", 0)) for row in results)
     summary["judge_retry_attempts"] = sum(int(row["validation"].get("judge_retry_attempts", 0)) for row in results)
+    summary["judge_infrastructure_failure_count"] = sum(
+        1 for row in results if row["validation"].get("judge_infrastructure_failure")
+    )
+    summary["judge_scored_runs"] = sum(int(row["validation"].get("judge_scored_runs", 0)) for row in results)
+    summary["judge_unscored_runs"] = sum(int(row["validation"].get("judge_unscored_runs", 0)) for row in results)
     return summary
 
 
@@ -192,10 +200,21 @@ def _judge_method_markdown(payload: dict[str, Any]) -> str:
         f"- Judge parse failures: {summary.get('judge_parse_failures', 0)}",
         f"- Judge provider failures: {summary.get('judge_provider_failures', 0)}",
         f"- Judge retry attempts: {summary.get('judge_retry_attempts', 0)}",
+        f"- Judge infrastructure failure count: {summary.get('judge_infrastructure_failure_count', 0)}",
+        f"- Judge scored runs: {summary.get('judge_scored_runs', 0)}",
+        f"- Judge unscored runs: {summary.get('judge_unscored_runs', 0)}",
         "",
         "| Metric | Score |",
         "|---|---:|",
     ]
+    if summary.get("judge_unscored_runs", 0) > summary.get("judge_scored_runs", 0):
+        lines.extend(
+            [
+                "",
+                "**LLM judge result is not valid because judge infrastructure failures dominate.**",
+                "",
+            ]
+        )
     for key, label in JUDGE_METRICS:
         lines.append(f"| {label} | {summary.get(key, 0.0):.2f} |")
     lines.extend(
@@ -218,17 +237,28 @@ def _judge_method_markdown(payload: dict[str, Any]) -> str:
             failed_diagnostics = [
                 key for key, value in validation.get("diagnostics", {}).items() if not value
             ]
+            infra = bool(validation.get("judge_infrastructure_failure"))
+            if infra:
+                reason = "judge infrastructure failure"
+            elif failed_criteria:
+                reason = "semantic criteria failure"
+            else:
+                reason = "strict diagnostic failure"
             lines.append(
                 "- `{case}`: judge_overall={judge}; strict={strict}; "
-                "criteria_failed={criteria}; diagnostics_failed={diagnostics}; "
-                "judge_parse_failures={parse}; judge_provider_failures={provider}".format(
+                "reason={reason}; criteria_failed={criteria}; diagnostics_failed={diagnostics}; "
+                "judge_parse_failures={parse}; judge_provider_failures={provider}; "
+                "judge_scored_runs={scored}; judge_unscored_runs={unscored}".format(
                     case=row["case_id"],
                     judge=validation.get("judge_overall_pass"),
                     strict=validation.get("strict_overall_pass"),
+                    reason=reason,
                     criteria=", ".join(failed_criteria) or "none",
                     diagnostics=", ".join(failed_diagnostics) or "none",
                     parse=validation.get("judge_parse_failures", 0),
                     provider=validation.get("judge_provider_failures", 0),
+                    scored=validation.get("judge_scored_runs", 0),
+                    unscored=validation.get("judge_unscored_runs", 0),
                 )
             )
     else:

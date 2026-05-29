@@ -58,7 +58,18 @@ def test_prompt_instructs_json_for_same_entity_multi_evidence_case():
     prompt = build_grounded_prompt(_case(), [_row("e1", "1990-01-01", "8.0"), _row("e2", "1989-01-01", "7.0")], "chronorag_full")
     assert "same-entity wrong-year" in prompt
     assert "still return JSON" in prompt
-    assert '"behavior": "answer|compare|prefer_exact|partial|refuse|conflict_warning|clarify"' in prompt
+    assert '"behavior": "answer|partial|refuse|clarify"' in prompt
+    assert "Do not refuse merely because multiple same-year rows exist." in prompt
+
+
+def test_json_extraction_handles_fenced_json():
+    text = '```json\n{"answer": "ok", "behavior": "answer"}\n```'
+    assert runner._extract_json_object(text) == '{"answer": "ok", "behavior": "answer"}'
+
+
+def test_json_extraction_handles_text_before_and_after_json():
+    text = 'Here is the object: {"answer": "ok", "behavior": "answer"} trailing prose'
+    assert runner._extract_json_object(text) == '{"answer": "ok", "behavior": "answer"}'
 
 
 def test_json_parse_failure_retry_cap_is_lower_than_provider_retry_cap(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):

@@ -7,18 +7,20 @@ from benchmarks.layer2_crossdomain.schemas import CorpusRow, QuestionCase
 
 ANSWER_SCHEMA = {
     "answer": "string",
-    "behavior": "answer|compare|prefer_exact|partial|refuse|conflict_warning|clarify",
-    "cited_evidence_ids": ["evidence_id"],
-    "valid_time_used": ["YYYY or interval"],
+    "behavior": "answer|partial|refuse|clarify",
+    "cited_evidence_ids": ["string"],
+    "valid_time_used": ["YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS or YYYY"],
     "transaction_time_used_as_valid_time": False,
     "conflict_warning": False,
     "partial_or_refusal": False,
     "clarification_requested": False,
-    "confidence": "high|medium|low",
+    "confidence": "low|medium|high",
 }
 
 JSON_ONLY_RULES = """Output contract:
+- Think privately. Return only the final JSON object.
 - Return ONLY one valid JSON object.
+- Return exactly the required JSON object and never return null for required fields.
 - Do not wrap the JSON in markdown or code fences.
 - Do not include prose before JSON.
 - Do not include prose after JSON.
@@ -35,6 +37,21 @@ ANSWER_FIELD_RULES = """Answer field contract:
 - For GitHub release rows, use this style: "{entity} {metric_or_claim} was {value} on {valid_from}."
 - For SEC filing rows, use valid_from if present, otherwise transaction_time.
 - Do not answer with only a number and unit.
+"""
+
+HARD_TEMPORAL_RULES = """Hard temporal decision rules:
+- If selected evidence contains a direct answer, answer from the best cited row.
+- Do not refuse merely because multiple same-year rows exist.
+- If the question asks for a year and evidence has multiple exact dates in that year, choose the highest-ranked selected evidence satisfying entity, metric, and valid-time constraints.
+- If an exact date is asked, prefer exact-date evidence over same-year evidence.
+- If an exact year is asked, an exact date inside that year can satisfy the year query unless the question explicitly asks for one annual aggregate.
+- If wording says "not YEAR" but repeats the same year as the target, treat the positive target year as intended and select the best matching evidence from that year.
+- Refuse only when no selected evidence supports the requested entity, metric, and time.
+- Clarify only when the question itself lacks enough target entity, metric, or time and selected evidence does not resolve it.
+- For SEC filings, answer with company/entity, form type or claim, and filing/valid date from cited evidence.
+- For market and FRED rows, answer with entity, metric, value, unit, and exact valid date.
+- For GitHub releases, answer with repository/project, release/tag/version, and release date.
+- Do not treat transaction_time, publication time, filing time, or release time as valid_time unless the question explicitly asks for that timing.
 """
 
 
@@ -85,6 +102,7 @@ If this is a same-entity wrong-year or multi-evidence case, select the evidence 
 Each evidence row below is a JSON evidence packet with id, domain, entity, metric_or_claim, value, unit, valid_from, valid_to, transaction_time, temporal_type, and raw_text.
 {JSON_ONLY_RULES}
 {ANSWER_FIELD_RULES}
+{HARD_TEMPORAL_RULES}
 {build_candidate_fact_hint(rows)}
 Required JSON schema and allowed values:
 {json.dumps(ANSWER_SCHEMA, sort_keys=True)}

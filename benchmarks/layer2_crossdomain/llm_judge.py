@@ -24,27 +24,22 @@ You are an impartial temporal reasoning judge evaluating a RAG system's answer.
 Your job is to determine if the answer is temporally correct and factually grounded against the provided evidence cards only.
 
 ABSOLUTE RULES:
+- Think privately. Return only compact JSON.
 - Judge against evidence cards only. No outside knowledge.
 - Do NOT penalize different phrasing of the same correct fact.
 - Do NOT reward confident answers that contradict evidence cards.
 - A correct refusal when evidence is missing is a PASS.
+- A refusal when sufficient evidence exists is a FAIL.
 - A confident specific value when evidence is missing is a FAIL.
 - Answer phrasing may vary freely. Truth against cards may not.
+- Do not return markdown.
+- Do not include prose before or after JSON.
+- Give only one short reason, not step-by-step reasoning.
 """
 
 JUDGE_OUTPUT_SCHEMA = {
-    "temporal_scope_correct": 1,
-    "factual_grounding": 1,
-    "behavior_justified": 1,
-    "transaction_time_clean": 1,
-    "no_overconfidence": 1,
-    "reasons": {
-        "temporal_scope_correct": "one sentence",
-        "factual_grounding": "one sentence",
-        "behavior_justified": "one sentence",
-        "transaction_time_clean": "one sentence",
-        "no_overconfidence": "one sentence",
-    },
+    "scores": [1, 1, 1, 1, 1],
+    "reason": "grounded and temporally correct",
 }
 
 REQUIRED_SCHEMA_FIELDS = {"answer", "behavior", "cited_evidence_ids", "valid_time_used", "confidence"}
@@ -98,9 +93,16 @@ System answer fields:
 Scoring criteria:
 {json.dumps(CRITERIA, sort_keys=True)}
 
+Score mapping:
+- scores[0] = temporal_scope_correct
+- scores[1] = factual_grounding
+- scores[2] = behavior_justified
+- scores[3] = transaction_time_clean
+- scores[4] = no_overconfidence
+
 Return ONLY one valid JSON object.
 Do not include markdown, code fences, prose, or explanation outside JSON.
-Use this exact output schema:
+Use this compact output schema:
 {json.dumps(JUDGE_OUTPUT_SCHEMA, sort_keys=True, indent=2)}
 """
 
@@ -112,7 +114,7 @@ def run_judge(
     provider,
     runs: int = 3,
     temperature: float = 0.3,
-    max_output_tokens: int = 600,
+    max_output_tokens: int = 1000,
     request_sleep_seconds: float = 6,
     retry_max_attempts: int = 4,
     retry_base_sleep_seconds: float = 8,
@@ -143,13 +145,37 @@ def run_judge(
         judge_provider_failures += diagnostics["provider_failures"]
         judge_retry_attempts += diagnostics["retry_attempts"]
 
-    threshold = ceil(max(1, runs) / 2)
+    scored_runs = [run for run in raw_run_scores if run.get("judge_run_status") == "scored"]
+    unscored_runs = len(raw_run_scores) - len(scored_runs)
+    if not scored_runs:
+        criteria_scores = {criterion: 0 for criterion in CRITERIA}
+        criteria_reasons = {
+            criterion: "unscored_due_to_judge_failure"
+            for criterion in CRITERIA
+        }
+        return {
+            "criteria_passed": 0,
+            "criteria_scores": criteria_scores,
+            "criteria_reasons": criteria_reasons,
+            "raw_run_scores": raw_run_scores,
+            "judge_parse_failures": judge_parse_failures,
+            "judge_provider_failures": judge_provider_failures,
+            "judge_retry_attempts": judge_retry_attempts,
+            "judge_runs": max(1, runs),
+            "judge_scored_runs": 0,
+            "judge_unscored_runs": unscored_runs,
+            "judge_infrastructure_failure": True,
+            "judge_reason": "unscored_due_to_judge_failure",
+            "judge_overall_pass": False,
+        }
+
+    threshold = ceil(len(scored_runs) / 2)
     criteria_scores = {
-        criterion: int(sum(int(run.get(criterion, 0)) for run in raw_run_scores) >= threshold)
+        criterion: int(sum(int(run.get(criterion, 0)) for run in scored_runs) >= threshold)
         for criterion in CRITERIA
     }
     criteria_reasons = {
-        criterion: _majority_reason(criterion, raw_run_scores, criteria_scores[criterion])
+        criterion: _majority_reason(criterion, scored_runs, criteria_scores[criterion])
         for criterion in CRITERIA
     }
     criteria_passed = sum(criteria_scores.values())
@@ -162,6 +188,10 @@ def run_judge(
         "judge_provider_failures": judge_provider_failures,
         "judge_retry_attempts": judge_retry_attempts,
         "judge_runs": max(1, runs),
+        "judge_scored_runs": len(scored_runs),
+        "judge_unscored_runs": unscored_runs,
+        "judge_infrastructure_failure": False,
+        "judge_reason": _first_scored_reason(scored_runs),
         "judge_overall_pass": criteria_passed >= 4,
     }
 
@@ -173,7 +203,7 @@ def validate_case_v3(
     provider,
     runs: int = 3,
     temperature: float = 0.3,
-    max_output_tokens: int = 600,
+    max_output_tokens: int = 1000,
     request_sleep_seconds: float = 6,
     retry_max_attempts: int = 4,
     retry_base_sleep_seconds: float = 8,
@@ -210,11 +240,15 @@ def validate_case_v3(
         "criteria_passed": judge["criteria_passed"],
         "criteria_scores": judge["criteria_scores"],
         "criteria_reasons": judge["criteria_reasons"],
+        "judge_infrastructure_failure": judge["judge_infrastructure_failure"],
+        "judge_reason": judge["judge_reason"],
         "diagnostics": diagnostics,
         "raw_run_scores": judge["raw_run_scores"],
         "judge_parse_failures": judge["judge_parse_failures"],
         "judge_provider_failures": judge["judge_provider_failures"],
         "judge_retry_attempts": judge["judge_retry_attempts"],
+        "judge_scored_runs": judge["judge_scored_runs"],
+        "judge_unscored_runs": judge["judge_unscored_runs"],
         "judge_runs": judge["judge_runs"],
         "overall_pass": strict_overall_pass,
         "failure_reasons": [*failed_criteria, *failed_diagnostics],
@@ -251,7 +285,7 @@ def _run_single_judge(
             except Exception as exc:
                 parse_failures += 1
                 if parse_failures >= json_limit:
-                    return _failed_run(f"Judge JSON parse failure: {exc}"), {
+                    return _unscored_run("parse_failure", f"Judge JSON parse failure: {exc}"), {
                         "parse_failures": parse_failures,
                         "provider_failures": provider_failures,
                         "retry_attempts": retry_attempts,
@@ -261,7 +295,7 @@ def _run_single_judge(
             provider_failures += 1
             provider_attempts += 1
             if provider_attempts >= provider_limit or not is_retryable_vertex_error(exc):
-                return _failed_run(f"Judge provider failure: {exc}"), {
+                return _unscored_run("provider_failure", f"Judge provider failure: {exc}"), {
                     "parse_failures": parse_failures,
                     "provider_failures": provider_failures,
                     "retry_attempts": retry_attempts,
@@ -272,7 +306,7 @@ def _run_single_judge(
             if sleep_seconds > 0:
                 time.sleep(sleep_seconds)
 
-    return _failed_run("Judge provider failure: exhausted retries"), {
+    return _unscored_run("provider_failure", "Judge provider failure: exhausted retries"), {
         "parse_failures": parse_failures,
         "provider_failures": provider_failures,
         "retry_attempts": retry_attempts,
@@ -299,6 +333,25 @@ def _call_provider(provider: Any, prompt: str, temperature: float, max_output_to
 
 
 def _normalize_judge_json(payload: Mapping[str, Any]) -> dict[str, Any]:
+    if "scores" in payload:
+        scores = payload.get("scores")
+        if not isinstance(scores, list) or len(scores) != len(CRITERIA):
+            raise ValueError("Judge compact scores must be a list of exactly five values.")
+        normalized = {
+            criterion: _as_binary(scores[index])
+            for index, criterion in enumerate(CRITERIA)
+        }
+        reason = str(payload.get("reason") or "No reason supplied.")[:500]
+        normalized.update(
+            {
+                "scores": [normalized[criterion] for criterion in CRITERIA],
+                "reason": reason,
+                "reasons": {criterion: reason for criterion in CRITERIA},
+                "judge_run_status": "scored",
+            }
+        )
+        return normalized
+
     reasons = dict(payload.get("reasons") or {})
     normalized = {
         criterion: _as_binary(payload.get(criterion))
@@ -308,12 +361,17 @@ def _normalize_judge_json(payload: Mapping[str, Any]) -> dict[str, Any]:
         criterion: str(reasons.get(criterion) or "No reason supplied.")[:500]
         for criterion in CRITERIA
     }
+    normalized["scores"] = [normalized[criterion] for criterion in CRITERIA]
+    normalized["reason"] = _first_reason(normalized["reasons"])
+    normalized["judge_run_status"] = "scored"
     return normalized
 
 
-def _failed_run(reason: str) -> dict[str, Any]:
+def _unscored_run(status: str, reason: str) -> dict[str, Any]:
     return {
-        **{criterion: 0 for criterion in CRITERIA},
+        "judge_run_status": status,
+        "scores": None,
+        "reason": reason,
         "reasons": {criterion: reason for criterion in CRITERIA},
     }
 
@@ -324,6 +382,22 @@ def _majority_reason(criterion: str, raw_run_scores: list[dict[str, Any]], passe
         if int(run.get(criterion, 0)) == target:
             return str((run.get("reasons") or {}).get(criterion) or "")
     return ""
+
+
+def _first_scored_reason(raw_run_scores: list[dict[str, Any]]) -> str:
+    for run in raw_run_scores:
+        reason = str(run.get("reason") or "")
+        if reason:
+            return reason
+    return ""
+
+
+def _first_reason(reasons: Mapping[str, Any]) -> str:
+    for criterion in CRITERIA:
+        reason = str(reasons.get(criterion) or "")
+        if reason:
+            return reason
+    return "No reason supplied."
 
 
 def _diagnostics(case: Any, answer: Mapping[str, Any], evidence_cards: Sequence[Mapping[str, Any]]) -> dict[str, bool]:
@@ -341,9 +415,29 @@ def _diagnostics(case: Any, answer: Mapping[str, Any], evidence_cards: Sequence[
 
 
 def _extract_json_object(text: str) -> str:
-    start = text.find("{")
-    if start < 0:
+    stripped = text.strip()
+    if stripped.startswith("```"):
+        lines = stripped.splitlines()
+        if lines and lines[0].lstrip().startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip().startswith("```"):
+            lines = lines[:-1]
+        stripped = "\n".join(lines).strip()
+    starts = [idx for idx, char in enumerate(stripped) if char == "{"]
+    if not starts:
         raise ValueError("Judge response did not contain a JSON object.")
+    for start in starts:
+        candidate = _balanced_json_from(stripped, start)
+        if candidate is not None:
+            return candidate
+    first = stripped.find("{")
+    last = stripped.rfind("}")
+    if first >= 0 and last > first:
+        return stripped[first : last + 1]
+    raise ValueError("Judge response contained incomplete JSON.")
+
+
+def _balanced_json_from(text: str, start: int) -> str | None:
     depth = 0
     in_string = False
     escaped = False
@@ -366,7 +460,7 @@ def _extract_json_object(text: str) -> str:
             depth -= 1
             if depth == 0:
                 return text[start : idx + 1]
-    raise ValueError("Judge response contained incomplete JSON.")
+    return None
 
 
 def _as_binary(value: Any) -> int:
