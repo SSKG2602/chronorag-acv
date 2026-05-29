@@ -56,3 +56,6 @@ venv/
 
 # Generated Layer 2 benchmark corpus
 benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl
+
+# Layer 2 runtime logs
+benchmarks/layer2_crossdomain/run_logs/
