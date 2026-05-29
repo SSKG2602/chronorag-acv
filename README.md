@@ -127,6 +127,9 @@ chronorag/
 - Demo screenshots are committed under `assets/demo/`.
 - The current evaluation report is internal/diagnostic, not a publication-grade
   external benchmark.
+- Layer 2 retrieval-only reports are diagnostic and category-aware; generic
+  Hit@k must not be presented as final proof, SOTA evidence, or answer-quality
+  validation.
 - No Dockerfile or production deployment manifest is visible in the repo root.
 - Storage currently appears oriented around local persisted state and experimental PVDB abstractions, not a hardened multi-tenant Postgres/pgvector deployment.
 - Graph retrieval is not implemented in the current checkpoint. The
@@ -216,9 +219,17 @@ debug note instead of crashing. See `docs/PROVIDER_MODE.md`.
 
 Provider mode only moves answer synthesis to remote Gemini/Vertex. Local
 retrieval still uses a local embedding model. The default embedding model is
-`BAAI/bge-small-en-v1.5` with 384 dimensions for laptop-friendly runs. If you
-change embedding model or dimension, purge and reingest before querying because
-old vectors are incompatible with the new dimension:
+`BAAI/bge-small-en-v1.5` with 384 dimensions for laptop-friendly runs. For
+Layer 2A cloud retrieval runs, use `BAAI/bge-base-en-v1.5` with 768 dimensions:
+
+```bash
+export CHRONORAG_EMBED_MODEL=BAAI/bge-base-en-v1.5
+export CHRONORAG_EMBED_DIM=768
+```
+
+If you change embedding model or dimension, purge and reingest before querying
+because old vectors are incompatible with the new dimension. Persisted indexes
+record model and dimension and fail clearly on mismatch:
 
 ```bash
 python -m cli.chronorag_cli purge
@@ -444,12 +455,16 @@ FRED macro data, market/index data, SEC submissions, Federal Register
 regulations, and GitHub software releases. The target controlled benchmark is
 5,000 processed evidence rows and 200 benchmark questions.
 
-Layer 2 compares three methods under the same processed corpus, same question
-set, same Gemini/Vertex model in provider mode, and same final validator:
+Layer 2A now compares retrieval methods under the same processed corpus, same
+question set, same Gemini/Vertex model in provider mode, and same final
+validator:
 
-1. Direct LLM full-context baseline.
-2. Metadata-aware temporal RAG baseline.
-3. ChronoRAG full framework through the existing TCC/retrieval adapter.
+1. Metadata-aware temporal RAG baseline.
+2. ChronoRAG-GSM: ChronoRAG full plus deterministic Guided Semantic Mode.
+
+Direct LLM full-context remains available only as a historical/small-context
+diagnostic. It is deprecated for serious 5,000-row Layer 2A because it is not a
+retrieval baseline and can truncate heavily.
 
 No final Layer 2 performance claim exists yet. The framework is ready for
 controlled benchmark construction, estimate-only checks, dry-run prompt review,
@@ -465,9 +480,9 @@ synthesis. This is capability hardening, not a superiority claim.
 
 | Method | Corpus | Questions | Mode | Overall | Evidence | Valid-time | Transaction trap | Conflict | Refusal/partial | Status |
 |---|---:|---:|---|---:|---:|---:|---:|---:|---:|---|
-| Direct LLM full-context | pending | pending | pending | pending | pending | pending | pending | pending | pending | framework ready |
 | Metadata temporal RAG | pending | pending | pending | pending | pending | pending | pending | pending | pending | framework ready |
 | ChronoRAG full | pending | pending | pending | pending | pending | pending | pending | pending | pending | framework ready |
+| ChronoRAG-GSM | pending | pending | pending | pending | pending | pending | pending | pending | pending | retrieval planner ready |
 
 Current Layer 1A light-mode retrieval result:
 
@@ -502,8 +517,8 @@ python benchmarks/run_temporal_eval_v2.py --light
 ## Future Research Direction
 
 1. **Layer 2 controlled comparison**
-   - Run the 5,000-row / 200-question cross-domain comparison against direct
-     LLM full-context and metadata-aware temporal RAG baselines.
+   - Run the 5,000-row / 200-question cross-domain comparison against
+     metadata-aware temporal RAG, with ChronoRAG-GSM as the ChronoRAG method.
    - Treat diagnostic pilots as debugging evidence, not final benchmark wins.
 
 2. **Temporal retrieval ablations**
