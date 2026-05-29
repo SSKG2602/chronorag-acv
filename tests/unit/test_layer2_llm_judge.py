@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 
 from benchmarks.layer2_crossdomain import llm_judge
+from benchmarks.layer2_crossdomain import reporting
 from benchmarks.layer2_crossdomain import run_layer2_comparison as runner
 from benchmarks.layer2_crossdomain.schemas import CorpusRow, QuestionCase
 
@@ -94,6 +95,7 @@ def test_judge_prompt_contains_evidence_cards():
     assert "Return only compact JSON" in prompt
     assert '"scores": [' in prompt
     assert "step-by-step" in prompt
+    assert "under 20 words" in prompt
 
 
 def test_judge_prompt_does_not_contain_forbidden_answer_key_fields():
@@ -140,6 +142,24 @@ def test_judge_json_with_text_before_after_parses(monkeypatch):
     monkeypatch.setattr(llm_judge.time, "sleep", lambda _seconds: None)
     provider = FakeProvider([f"Here is JSON: {_judge_json(5)} done"])
     result = llm_judge.validate_case_v3(_case(), _answer(), _cards(), provider, runs=1, request_sleep_seconds=0)
+    assert result["judge_overall_pass"] is True
+
+
+def test_judge_accepts_stringified_score_ints(monkeypatch):
+    monkeypatch.setattr(llm_judge.time, "sleep", lambda _seconds: None)
+    provider = FakeProvider(['{"scores":["1","1","1","1","1"],"reason":"ok"}'])
+    result = llm_judge.validate_case_v3(_case(), _answer(), _cards(), provider, runs=1, request_sleep_seconds=0)
+    assert result["criteria_passed"] == 5
+    assert result["judge_overall_pass"] is True
+
+
+def test_judge_recovers_scores_array_from_malformed_response(monkeypatch):
+    monkeypatch.setattr(llm_judge.time, "sleep", lambda _seconds: None)
+    provider = FakeProvider(['prefix {"scores":[1,1,1,1,1],"reason":"ok"'])
+    result = llm_judge.validate_case_v3(_case(), _answer(), _cards(), provider, runs=1, request_sleep_seconds=0)
+    assert result["judge_recovered_partial_json_count"] == 1
+    assert result["judge_scored_runs"] == 1
+    assert result["judge_parse_failures"] == 0
     assert result["judge_overall_pass"] is True
 
 
@@ -237,9 +257,60 @@ def test_diagnostics_do_not_alter_judge_overall(monkeypatch):
     assert result["strict_overall_pass"] is False
 
 
-def test_cli_default_judge_max_output_tokens_is_1000():
+def test_cli_default_output_token_and_json_retry_limits_are_4000_and_3():
     args = runner.build_arg_parser().parse_args([])
-    assert args.judge_max_output_tokens == 1000
+    assert args.judge_max_output_tokens == 4000
+    assert args.answer_max_output_tokens == 4000
+    assert args.json_retry_max_attempts == 3
+    assert args.judge_json_retry_max_attempts == 3
+
+
+def test_reporting_separates_judge_infra_and_provider_output_failures():
+    results = [
+        {
+            "infrastructure_failure": False,
+            "validation": {
+                "judge_overall_pass": True,
+                "strict_overall_pass": True,
+                "diagnostics": {
+                    "behavior_label_match": True,
+                    "cited_ids_grounded": True,
+                    "schema_fields_present": True,
+                },
+                "criteria_scores": {criterion: 1 for criterion in llm_judge.CRITERIA},
+                "judge_parse_failures": 0,
+                "judge_provider_failures": 0,
+                "judge_retry_attempts": 0,
+                "judge_infrastructure_failure": False,
+                "judge_scored_runs": 1,
+                "judge_unscored_runs": 0,
+                "judge_recovered_partial_json_count": 1,
+            },
+            "metadata": {"answer_json_recovered": True},
+        },
+        {
+            "infrastructure_failure": True,
+            "provider_output_contract_failure": True,
+            "validation": {},
+            "metadata": {},
+        },
+    ]
+    summary = reporting.metric_summary(results, validator="llm_judge")
+    summary.update(
+        {
+            "provider_output_contract_failure_count": sum(
+                1 for row in results if row.get("provider_output_contract_failure")
+            ),
+            "answer_json_recovered_count": sum(
+                1 for row in results if (row.get("metadata") or {}).get("answer_json_recovered")
+            ),
+            "scored_case_count": sum(1 for row in results if not row.get("infrastructure_failure")),
+        }
+    )
+    assert summary["judge_overall_pass"] == 1.0
+    assert summary["judge_recovered_partial_json_count"] == 1
+    assert summary["provider_output_contract_failure_count"] == 1
+    assert summary["answer_json_recovered_count"] == 1
 
 
 def test_deterministic_validator_path_remains_available(tmp_path):

@@ -48,14 +48,12 @@ without overclaiming diagnostic pilots.
 
 - Maintain the 5,000-row / 200-question generated dataset path before claiming
   cross-domain performance.
-- Evaluate generalization across domains using direct LLM full-context,
-  independent metadata temporal RAG, and ChronoRAG full under the same corpus,
-  model, and validator.
+- Evaluate generalization across domains using independent metadata temporal
+  RAG and ChronoRAG-GSM under the same corpus, model, and validator.
 - Treat small Vertex pilots as diagnostics, not final benchmark results.
 - Separate retrieval metrics from provider-backed answer synthesis quality.
-- Use the new `benchmarks/layer2_crossdomain/` framework to compare direct LLM
-  full-context, metadata temporal RAG, and ChronoRAG full under the same corpus,
-  model, and validator.
+- Use the new `benchmarks/layer2_crossdomain/` framework to compare metadata
+  temporal RAG and ChronoRAG-GSM under the same corpus, model, and validator.
 - Use multi-granularity symbolic temporal precision for dense time-series rows:
   exact dates/timestamps must outrank same-year wrong-date evidence before
   embedding similarity is considered sufficient.

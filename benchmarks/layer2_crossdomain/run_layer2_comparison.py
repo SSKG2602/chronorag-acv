@@ -20,7 +20,10 @@ from benchmarks.layer2_crossdomain.vertex_retry import call_with_backoff
 from benchmarks.layer2_crossdomain.prompts import build_evidence_fact_sentence
 from benchmarks.layer2_crossdomain.llm_judge import evidence_cards_from_rows, validate_case_v3
 
-METHODS = ("direct_llm_full_context", "metadata_temporal_rag", "chronorag_full")
+METHODS = ("direct_llm_full_context", "metadata_temporal_rag", "chronorag_full", "chronorag_gsm")
+# Direct full-context remains callable for historical diagnostics, but it is
+# not a retrieval baseline and can truncate on the 5,000-row Layer 2A corpus.
+DEFAULT_METHODS = ("metadata_temporal_rag", "chronorag_gsm")
 DEFAULT_CORPUS = "benchmarks/layer2_crossdomain/data/layer2_corpus.sample.jsonl"
 DEFAULT_QUESTIONS = "benchmarks/layer2_crossdomain/data/layer2_questions.sample.jsonl"
 REAL_CORPUS = "benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl"
@@ -33,28 +36,37 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--corpus", default=DEFAULT_CORPUS)
     parser.add_argument("--questions", default=DEFAULT_QUESTIONS)
     parser.add_argument("--dataset", choices=["sample", "real"], default="sample")
-    parser.add_argument("--mode", choices=["light", "vertex"], default="light")
+    parser.add_argument("--mode", choices=["light", "vertex", "dry_run"], default="light")
     parser.add_argument("--validator", choices=["deterministic", "llm_judge"], default="deterministic")
     parser.add_argument("--limit", type=int)
     parser.add_argument("--case-id")
     parser.add_argument("--estimate-only", action="store_true")
     parser.add_argument("--dry-run-prompts", action="store_true")
-    parser.add_argument("--max-output-tokens", type=int, default=2048)
+    parser.add_argument("--max-output-tokens", type=int, default=None)
+    # This is a ceiling to prevent answer JSON truncation on hard Layer 2 cases.
+    # The prompt still asks for concise answers; the larger cap is not a request
+    # for verbosity.
+    parser.add_argument("--answer-max-output-tokens", type=int, default=4000)
     parser.add_argument("--result-suffix", default="default")
     parser.add_argument("--top-k", type=int, default=5)
+    parser.add_argument("--embedding-model", default=None)
+    parser.add_argument("--embedding-dim", type=int, default=None)
     parser.add_argument("--request-sleep-seconds", type=float, default=3.0)
     parser.add_argument("--retry-max-attempts", type=int, default=5)
     parser.add_argument("--retry-base-sleep-seconds", type=float, default=5.0)
     parser.add_argument("--retry-max-sleep-seconds", type=float, default=90.0)
-    parser.add_argument("--json-retry-max-attempts", type=int, default=2)
+    parser.add_argument("--json-retry-max-attempts", type=int, default=3)
     parser.add_argument("--judge-runs", type=int, default=3)
     parser.add_argument("--judge-temperature", type=float, default=0.3)
-    parser.add_argument("--judge-max-output-tokens", type=int, default=1000)
+    # Judge output should remain compact. This higher ceiling only avoids
+    # incomplete provider JSON on hard cases; semantic scoring is independent of
+    # output length.
+    parser.add_argument("--judge-max-output-tokens", type=int, default=4000)
     parser.add_argument("--judge-request-sleep-seconds", type=float, default=6.0)
     parser.add_argument("--judge-retry-max-attempts", type=int, default=4)
     parser.add_argument("--judge-retry-base-sleep-seconds", type=float, default=8.0)
     parser.add_argument("--judge-retry-max-sleep-seconds", type=float, default=90.0)
-    parser.add_argument("--judge-json-retry-max-attempts", type=int, default=1)
+    parser.add_argument("--judge-json-retry-max-attempts", type=int, default=3)
     parser.add_argument("--vertex-location")
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--write-partial", dest="write_partial", action="store_true", default=True)
@@ -68,19 +80,31 @@ def main() -> None:
 
     if args.vertex_location:
         os.environ["GOOGLE_CLOUD_LOCATION"] = args.vertex_location
+    if args.embedding_model:
+        os.environ["CHRONORAG_EMBED_MODEL"] = args.embedding_model
+    if args.embedding_dim is not None:
+        os.environ["CHRONORAG_EMBED_DIM"] = str(args.embedding_dim)
 
     suffix = _sanitize_suffix(args.result_suffix)
+    answer_max_output_tokens = args.answer_max_output_tokens
+    if args.max_output_tokens is not None and args.answer_max_output_tokens == 4000:
+        answer_max_output_tokens = args.max_output_tokens
     corpus_path = REAL_CORPUS if args.dataset == "real" and args.corpus == DEFAULT_CORPUS else args.corpus
     questions_path = REAL_QUESTIONS if args.dataset == "real" and args.questions == DEFAULT_QUESTIONS else args.questions
     corpus = load_corpus(corpus_path)
     questions = _select_questions(load_questions(questions_path), args.limit, args.case_id)
-    selected_methods = list(METHODS) if args.method == "all" else [args.method]
+    selected_methods = list(DEFAULT_METHODS) if args.method == "all" else [args.method]
     estimated_calls = len(questions) * len(selected_methods) if args.mode == "vertex" else 0
     prompt_estimates = estimate_prompt_sizes(selected_methods, corpus, questions, args.top_k)
 
     print(f"Mode: {args.mode}")
     print(f"Validator: {args.validator}")
     print(f"Methods: {', '.join(selected_methods)}")
+    print(
+        "Embedding config: "
+        f"model={os.getenv('CHRONORAG_EMBED_MODEL', 'BAAI/bge-small-en-v1.5')}; "
+        f"dim={os.getenv('CHRONORAG_EMBED_DIM', '384')}"
+    )
     print(f"Selected cases: {len(questions)}")
     print(f"Estimated Vertex calls: {estimated_calls}")
     if args.mode == "vertex":
@@ -110,7 +134,7 @@ def main() -> None:
             mode=args.mode,
             top_k=args.top_k,
             dry_run_prompts=args.dry_run_prompts,
-            max_output_tokens=args.max_output_tokens,
+            max_output_tokens=answer_max_output_tokens,
             suffix=suffix,
             request_sleep_seconds=args.request_sleep_seconds,
             retry_max_attempts=args.retry_max_attempts,
@@ -159,12 +183,12 @@ def run_method(
     validator: str = "deterministic",
     judge_runs: int = 3,
     judge_temperature: float = 0.3,
-    judge_max_output_tokens: int = 1000,
+    judge_max_output_tokens: int = 4000,
     judge_request_sleep_seconds: float = 6.0,
     judge_retry_max_attempts: int = 4,
     judge_retry_base_sleep_seconds: float = 8.0,
     judge_retry_max_sleep_seconds: float = 90.0,
-    judge_json_retry_max_attempts: int = 1,
+    judge_json_retry_max_attempts: int = 3,
     judge_provider: Any | None = None,
     write_partial: bool = True,
     json_path: Path | None = None,
@@ -176,7 +200,7 @@ def run_method(
     completed_case_ids = _completed_case_ids(results)
     started = time.perf_counter()
     active_judge_provider = judge_provider
-    if validator == "llm_judge" and not dry_run_prompts and active_judge_provider is None:
+    if validator == "llm_judge" and not dry_run_prompts and mode != "dry_run" and active_judge_provider is None:
         active_judge_provider = _build_vertex_provider()
     for case in questions:
         if case.id in completed_case_ids:
@@ -186,9 +210,13 @@ def run_method(
         prompt = method_payload["prompt"]
         evidence_rows = method_payload["evidence_rows"]
         truncated = bool(method_payload.get("prompt_truncated"))
-        method_metadata = dict(method_payload.get("metadata") or {})
+        method_metadata = {
+            **dict(method_payload.get("metadata") or {}),
+            "answer_max_output_tokens": max_output_tokens,
+            "judge_max_output_tokens": judge_max_output_tokens if validator == "llm_judge" else None,
+        }
         case_started = time.perf_counter()
-        if dry_run_prompts:
+        if dry_run_prompts or mode == "dry_run":
             answer = _dry_run_answer(prompt)
         elif mode == "light":
             answer = _light_answer(case, evidence_rows)
@@ -244,9 +272,10 @@ def run_method(
                 _sleep_after_vertex_call(mode, dry_run_prompts, request_sleep_seconds)
                 continue
         latency_ms = (time.perf_counter() - case_started) * 1000.0
+        answer_recovery_metadata = _pop_answer_recovery_metadata(answer)
         answer, postprocess_metadata = _postprocess_answer_with_cited_evidence(answer, evidence_rows)
         model_answer = ModelAnswer.from_dict(answer).to_dict()
-        if validator == "llm_judge" and not dry_run_prompts:
+        if validator == "llm_judge" and not dry_run_prompts and mode != "dry_run":
             validation = validate_case_v3(
                 case,
                 model_answer,
@@ -275,17 +304,20 @@ def run_method(
                 "prompt_truncated": truncated,
                 "provider_mode": mode,
                 "latency_ms": round(latency_ms, 2),
-                "prompt_preview": prompt[:1200] if dry_run_prompts else None,
+                "prompt_preview": prompt[:1200] if dry_run_prompts or mode == "dry_run" else None,
                 "answer": model_answer,
                 "validation": validation,
                 "validator": validator,
                 "status": "completed",
                 "infrastructure_failure": False,
+                "provider_output_contract_failure": False,
                 "provider_error": None,
                 "metadata": {
                     **method_metadata,
+                    **answer_recovery_metadata,
                     **postprocess_metadata,
                     "dry_run_prompts": dry_run_prompts,
+                    "retrieval_only_dry_run": mode == "dry_run",
                 },
             }
         )
@@ -317,9 +349,19 @@ def _build_payload(
         {
             "infrastructure_failure_count": sum(1 for row in results if row.get("infrastructure_failure")),
             "provider_error_count": sum(1 for row in results if row.get("provider_error")),
+            "provider_output_contract_failure_count": sum(
+                1 for row in results if row.get("provider_output_contract_failure")
+            ),
             "retry_attempts_total": sum(int((row.get("metadata") or {}).get("retry_attempts", 0)) for row in results),
-            "json_parse_failure_count": sum(1 for row in results if row.get("failure_type") == "JSON Parse Failure"),
+            "json_parse_failure_count": sum(
+                int((row.get("metadata") or {}).get("json_parse_failures", 0)) for row in results
+            ),
             "scored_case_count": sum(1 for row in results if not row.get("infrastructure_failure")),
+            "answer_max_output_tokens": _first_metadata_value(results, "answer_max_output_tokens"),
+            "judge_max_output_tokens": _first_metadata_value(results, "judge_max_output_tokens"),
+            "answer_json_recovered_count": sum(
+                1 for row in results if (row.get("metadata") or {}).get("answer_json_recovered")
+            ),
         }
     )
     return {
@@ -332,6 +374,8 @@ def _build_payload(
         "question_count": len(questions),
         "estimated_calls": len(questions) if mode == "vertex" and not dry_run_prompts else 0,
         "top_k": top_k,
+        "embedding_model": os.getenv("CHRONORAG_EMBED_MODEL", "BAAI/bge-small-en-v1.5"),
+        "embedding_dim": int(os.getenv("CHRONORAG_EMBED_DIM", "384")),
         "prompt_truncation_count": sum(1 for row in results if row["prompt_truncated"]),
         "average_selected_evidence": (
             sum(len(row["selected_evidence_ids"]) for row in results) / len(results) if results else 0.0
@@ -349,6 +393,8 @@ def _method_module(method: str):
         from benchmarks.layer2_crossdomain.methods.metadata_temporal_rag import runner
     elif method == "chronorag_full":
         from benchmarks.layer2_crossdomain.methods.chronorag_full import runner
+    elif method == "chronorag_gsm":
+        from benchmarks.layer2_crossdomain.methods.chronorag_gsm import runner
     else:
         raise ValueError(f"Unknown method: {method}")
     return runner
@@ -407,7 +453,13 @@ def _vertex_answer(prompt: str, max_output_tokens: int) -> dict[str, Any]:
         detail = " ".join(item for item in (result.provider_error, result.debug) if item)
         raise ProviderCallError(detail or "Vertex provider failed.")
     try:
-        return json.loads(_extract_json_object(result.text))
+        json_text, recovery = _extract_json_object_with_metadata(result.text)
+        payload = json.loads(json_text)
+        _validate_answer_payload(payload)
+        payload["__answer_json_recovered"] = recovery["answer_json_recovered"]
+        payload["__answer_json_recovery_method"] = recovery["answer_json_recovery_method"]
+        payload["__raw_response_preview"] = _preview(result.text)
+        return payload
     except Exception as exc:
         raise ProviderJSONError(f"{exc}; raw_response_preview={_preview(result.text)}") from exc
 
@@ -475,6 +527,14 @@ def _postprocess_answer_with_cited_evidence(
     metadata["answer_fact_postprocessed"] = True
     metadata["answer_fact_postprocess_source_id"] = row.id
     return updated, metadata
+
+
+def _pop_answer_recovery_metadata(answer: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "answer_json_recovered": bool(answer.pop("__answer_json_recovered", False)),
+        "answer_json_recovery_method": answer.pop("__answer_json_recovery_method", None),
+        "raw_response_preview": answer.pop("__raw_response_preview", None),
+    }
 
 
 def _repair_valid_time_from_cited_row(
@@ -549,14 +609,32 @@ def estimate_prompt_sizes(
 
 
 def _extract_json_object(text: str) -> str:
-    start = text.find("{")
+    return _extract_json_object_with_metadata(text)[0]
+
+
+def _extract_json_object_with_metadata(text: str) -> tuple[str, dict[str, Any]]:
+    # Recovery here is provider-format robustness only: use complete JSON
+    # objects inside fences/prose, but never invent missing braces or fields.
+    stripped = text.strip()
+    method = "raw_json"
+    if stripped.startswith("```"):
+        lines = stripped.splitlines()
+        if lines and lines[0].lstrip().startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip().startswith("```"):
+            lines = lines[:-1]
+        stripped = "\n".join(lines).strip()
+        method = "fenced_json"
+    start = stripped.find("{")
     if start < 0:
         raise ValueError("Vertex response did not contain a JSON object.")
+    if start > 0 and method == "raw_json":
+        method = "prose_wrapped_json"
     depth = 0
     in_string = False
     escaped = False
-    for idx in range(start, len(text)):
-        char = text[idx]
+    for idx in range(start, len(stripped)):
+        char = stripped[idx]
         if escaped:
             escaped = False
             continue
@@ -573,8 +651,30 @@ def _extract_json_object(text: str) -> str:
         elif char == "}":
             depth -= 1
             if depth == 0:
-                return text[start : idx + 1]
+                if idx < len(stripped) - 1 and stripped[idx + 1 :].strip():
+                    method = "json_with_trailing_text" if method == "raw_json" else method
+                return stripped[start : idx + 1], {
+                    "answer_json_recovered": method != "raw_json",
+                    "answer_json_recovery_method": method,
+                }
     raise ValueError("Vertex response contained incomplete JSON.")
+
+
+def _validate_answer_payload(payload: dict[str, Any]) -> None:
+    required = {
+        "answer",
+        "behavior",
+        "cited_evidence_ids",
+        "valid_time_used",
+        "transaction_time_used_as_valid_time",
+        "conflict_warning",
+        "partial_or_refusal",
+        "clarification_requested",
+        "confidence",
+    }
+    missing = sorted(required.difference(payload))
+    if missing:
+        raise ValueError(f"Vertex response missing required answer fields: {', '.join(missing)}")
 
 
 def _select_questions(questions: list[QuestionCase], limit: int | None, case_id: str | None) -> list[QuestionCase]:
@@ -610,7 +710,8 @@ def _provider_error_result(
     retry_attempts: int,
     json_parse_failures: int = 0,
 ) -> dict[str, Any]:
-    failure_type = "JSON Parse Failure" if isinstance(error, ProviderJSONError) else "Provider Infrastructure Failure"
+    output_contract_failure = isinstance(error, ProviderJSONError)
+    failure_type = "answer_generation_incomplete_json" if output_contract_failure else "Provider Infrastructure Failure"
     return {
         "method": method,
         "case_id": case.id,
@@ -637,12 +738,15 @@ def _provider_error_result(
         "validation": _infrastructure_validation(failure_type),
         "status": "provider_error",
         "infrastructure_failure": True,
+        "provider_output_contract_failure": output_contract_failure,
         "provider_error": _preview(str(error), limit=800),
         "failure_type": failure_type,
         "metadata": {
             **method_metadata,
             "retry_attempts": retry_attempts,
             "json_parse_failures": json_parse_failures,
+            "provider_output_contract_failure": output_contract_failure,
+            "raw_response_preview": _preview(str(error), limit=800),
             "provider_error_preview": _preview(str(error), limit=800),
         },
     }
@@ -665,8 +769,17 @@ def _infrastructure_validation(failure_type: str) -> dict[str, Any]:
         "cross_domain_dependency_correct": False,
         "overall_pass": False,
         "infrastructure_failure": True,
+        "provider_output_contract_failure": failure_type == "answer_generation_incomplete_json",
         "failure_reasons": [failure_type],
     }
+
+
+def _first_metadata_value(results: list[dict[str, Any]], key: str) -> Any:
+    for row in results:
+        value = (row.get("metadata") or {}).get(key)
+        if value is not None:
+            return value
+    return None
 
 
 def _judge_skipped_validation(case_id: str, reason: str) -> dict[str, Any]:
@@ -702,6 +815,7 @@ def _judge_skipped_validation(case_id: str, reason: str) -> dict[str, Any]:
         "judge_retry_attempts": 0,
         "judge_scored_runs": 0,
         "judge_unscored_runs": 0,
+        "judge_recovered_partial_json_count": 0,
         "judge_runs": 0,
         "overall_pass": False,
         "failure_reasons": [reason],

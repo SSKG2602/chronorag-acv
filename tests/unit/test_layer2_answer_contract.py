@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from benchmarks.layer2_crossdomain.prompts import build_evidence_fact_sentence, build_grounded_prompt
+from benchmarks.layer2_crossdomain import run_layer2_comparison as runner
 from benchmarks.layer2_crossdomain.run_layer2_comparison import _postprocess_answer_with_cited_evidence
 from benchmarks.layer2_crossdomain.schemas import CorpusRow, QuestionCase
 
@@ -103,6 +104,11 @@ def test_prompt_instructs_answer_field_to_include_required_evidence_facts():
     assert "Do not refuse merely because multiple same-year rows exist." in prompt
     assert "If an exact date is asked, prefer exact-date evidence over same-year evidence." in prompt
     assert "Do not treat transaction_time, publication time, filing time, or release time as valid_time" in prompt
+    assert "Keep answer short but complete." in prompt
+    assert "Prefer one complete sentence." in prompt
+    assert "Cite at most 1 evidence ID for simple exact, metric, or year cases." in prompt
+    assert "Do not mistake different dates in a time series for conflict." in prompt
+    assert "Conflict means disagreement for the same entity, metric, and valid time" in prompt
     assert "chain-of-thought" not in prompt.lower()
 
 
@@ -204,6 +210,57 @@ def test_prompt_same_year_policy_does_not_force_refusal():
     prompt = build_grounded_prompt(_case(), [_fred_row(), _github_row()], "chronorag_full")
     assert "Do not refuse merely because multiple same-year rows exist." in prompt
     assert "choose the highest-ranked selected evidence" in prompt
+
+
+def test_prompt_contains_hard_category_rules():
+    prompt = build_grounded_prompt(_case(), [_fred_row()], "chronorag_full")
+    for category in (
+        "conflict_detection",
+        "partial_or_insufficient_evidence",
+        "source_specific_temporal_query",
+        "metric_specific_query",
+        "cross_domain_temporal_comparison",
+        "ambiguous_time_query",
+    ):
+        assert category in prompt
+
+
+def test_answer_provider_receives_answer_max_output_tokens(monkeypatch, tmp_path):
+    seen = {"tokens": None}
+
+    def fake_vertex_answer(_prompt: str, max_output_tokens: int):
+        seen["tokens"] = max_output_tokens
+        return {
+            "answer": "United States 10-year Treasury 10-year Treasury yield was 3.98 percent on 1962-08-15.",
+            "behavior": "answer",
+            "cited_evidence_ids": ["l2:macro_fred:dgs10:1962-08-15"],
+            "valid_time_used": ["1962-08-15"],
+            "transaction_time_used_as_valid_time": False,
+            "conflict_warning": False,
+            "partial_or_refusal": False,
+            "clarification_requested": False,
+            "confidence": "high",
+        }
+
+    monkeypatch.setattr(runner, "_vertex_answer", fake_vertex_answer)
+    payload = runner.run_method(
+        method="chronorag_full",
+        corpus=[_fred_row()],
+        questions=[_case()],
+        mode="vertex",
+        top_k=1,
+        dry_run_prompts=False,
+        max_output_tokens=4000,
+        suffix="pytest_tokens",
+        request_sleep_seconds=0,
+        retry_base_sleep_seconds=0,
+        retry_max_sleep_seconds=0,
+        write_partial=True,
+        json_path=tmp_path / "tokens.json",
+        md_path=tmp_path / "tokens.md",
+    )
+    assert seen["tokens"] == 4000
+    assert payload["summary"]["answer_max_output_tokens"] == 4000
 
 
 def test_postprocessor_does_not_run_for_partial_refuse_or_clarify():

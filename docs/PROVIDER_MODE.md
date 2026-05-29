@@ -17,9 +17,17 @@ provider is not used to invent missing timestamps; uncertain or missing temporal
 metadata should stay uncertain.
 
 The default local embedding model is `BAAI/bge-small-en-v1.5` with 384
-dimensions for laptop-friendly runs. If you change the embedding model or
-dimension, purge and reingest because old vectors are incompatible with the new
-dimension.
+dimensions for laptop-friendly runs. For Layer 2A cloud retrieval runs, prefer
+`BAAI/bge-base-en-v1.5` with 768 dimensions:
+
+```bash
+export CHRONORAG_EMBED_MODEL=BAAI/bge-base-en-v1.5
+export CHRONORAG_EMBED_DIM=768
+```
+
+If you change the embedding model or dimension, purge and reingest because old
+vectors are incompatible with the new dimension. Persisted indexes record model
+and dimension and fail clearly on mismatch instead of silently mixing vectors.
 
 ## Vertex AI Gemini
 

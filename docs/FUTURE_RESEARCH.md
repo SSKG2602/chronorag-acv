@@ -41,10 +41,12 @@ Candidate domains:
 - medical guideline changes
 - legal case history
 
-The Layer 2 comparison target is direct Gemini full-context, an independent
-metadata temporal RAG baseline, and ChronoRAG full through an adapter around the
-existing TCC/retrieval framework. No result claim exists until the full
-cross-domain benchmark is built and run.
+The Layer 2A comparison target is an independent metadata temporal RAG baseline
+against ChronoRAG-GSM, which adds deterministic temporal intent planning to the
+existing TCC/retrieval framework. Direct Gemini full-context is deprecated for
+serious 5,000-row Layer 2A because it is not retrieval-based and can truncate
+heavily. No result claim exists until the full cross-domain benchmark is built
+and run.
 
 A small diagnostic pilot exposed an exact-date retrieval weakness on dense FRED
 daily series, where year-level scoring could retrieve wrong same-year rows.

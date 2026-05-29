@@ -72,6 +72,11 @@ def test_json_extraction_handles_text_before_and_after_json():
     assert runner._extract_json_object(text) == '{"answer": "ok", "behavior": "answer"}'
 
 
+def test_json_extraction_accepts_valid_json_with_trailing_text():
+    text = '{"answer": "ok", "behavior": "answer"}\nDone.'
+    assert runner._extract_json_object(text) == '{"answer": "ok", "behavior": "answer"}'
+
+
 def test_json_parse_failure_retry_cap_is_lower_than_provider_retry_cap(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     calls = {"count": 0}
 
@@ -99,9 +104,10 @@ def test_json_parse_failure_retry_cap_is_lower_than_provider_retry_cap(monkeypat
         md_path=tmp_path / "json.md",
     )
     assert calls["count"] == 2
-    assert payload["results"][0]["failure_type"] == "JSON Parse Failure"
+    assert payload["results"][0]["failure_type"] == "answer_generation_incomplete_json"
+    assert payload["results"][0]["provider_output_contract_failure"] is True
     assert payload["results"][0]["metadata"]["json_parse_failures"] == 2
-    assert payload["summary"]["json_parse_failure_count"] == 1
+    assert payload["summary"]["provider_output_contract_failure_count"] == 1
 
 
 def test_plain_english_response_does_not_crash_whole_run(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
@@ -131,4 +137,5 @@ def test_plain_english_response_does_not_crash_whole_run(monkeypatch: pytest.Mon
     assert row["status"] == "provider_error"
     assert row["infrastructure_failure"] is True
     assert row["validation"]["infrastructure_failure"] is True
+    assert row["validation"]["provider_output_contract_failure"] is True
     assert payload["summary"]["scored_case_count"] == 0

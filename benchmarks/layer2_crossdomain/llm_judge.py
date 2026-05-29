@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import random
+import re
 import time
 from collections.abc import Mapping, Sequence
 from math import ceil
@@ -32,9 +33,11 @@ ABSOLUTE RULES:
 - A refusal when sufficient evidence exists is a FAIL.
 - A confident specific value when evidence is missing is a FAIL.
 - Answer phrasing may vary freely. Truth against cards may not.
+- Different dates in a time series are not conflict.
+- Transaction/publication time is not valid time unless the question asks for it.
 - Do not return markdown.
 - Do not include prose before or after JSON.
-- Give only one short reason, not step-by-step reasoning.
+- Give one short reason under 20 words, not step-by-step reasoning.
 """
 
 JUDGE_OUTPUT_SCHEMA = {
@@ -46,6 +49,7 @@ REQUIRED_SCHEMA_FIELDS = {"answer", "behavior", "cited_evidence_ids", "valid_tim
 
 
 def evidence_cards_from_rows(rows: Sequence[Any]) -> list[dict[str, Any]]:
+    """Build compact judge cards; large raw text made prior Vertex judge JSON truncate."""
     cards: list[dict[str, Any]] = []
     for row in rows:
         cards.append(
@@ -62,7 +66,7 @@ def evidence_cards_from_rows(rows: Sequence[Any]) -> list[dict[str, Any]]:
                 "valid_to": _get(row, "valid_to"),
                 "transaction_time": _get(row, "transaction_time"),
                 "temporal_type": _get(row, "temporal_type"),
-                "raw_text": _get(row, "raw_text"),
+                "raw_text": _truncate(str(_get(row, "raw_text") or ""), 360),
             }
         )
     return cards
@@ -102,6 +106,7 @@ Score mapping:
 
 Return ONLY one valid JSON object.
 Do not include markdown, code fences, prose, or explanation outside JSON.
+Do not return nested reasons.
 Use this compact output schema:
 {json.dumps(JUDGE_OUTPUT_SCHEMA, sort_keys=True, indent=2)}
 """
@@ -145,8 +150,11 @@ def run_judge(
         judge_provider_failures += diagnostics["provider_failures"]
         judge_retry_attempts += diagnostics["retry_attempts"]
 
+    # Majority vote uses only parsed judge runs. Parse/provider failures are
+    # infrastructure gaps, not semantic zeroes for the answer under test.
     scored_runs = [run for run in raw_run_scores if run.get("judge_run_status") == "scored"]
     unscored_runs = len(raw_run_scores) - len(scored_runs)
+    recovered_runs = sum(1 for run in scored_runs if run.get("judge_recovered_partial_json"))
     if not scored_runs:
         criteria_scores = {criterion: 0 for criterion in CRITERIA}
         criteria_reasons = {
@@ -164,6 +172,7 @@ def run_judge(
             "judge_runs": max(1, runs),
             "judge_scored_runs": 0,
             "judge_unscored_runs": unscored_runs,
+            "judge_recovered_partial_json_count": 0,
             "judge_infrastructure_failure": True,
             "judge_reason": "unscored_due_to_judge_failure",
             "judge_overall_pass": False,
@@ -190,6 +199,7 @@ def run_judge(
         "judge_runs": max(1, runs),
         "judge_scored_runs": len(scored_runs),
         "judge_unscored_runs": unscored_runs,
+        "judge_recovered_partial_json_count": recovered_runs,
         "judge_infrastructure_failure": False,
         "judge_reason": _first_scored_reason(scored_runs),
         "judge_overall_pass": criteria_passed >= 4,
@@ -249,6 +259,7 @@ def validate_case_v3(
         "judge_retry_attempts": judge["judge_retry_attempts"],
         "judge_scored_runs": judge["judge_scored_runs"],
         "judge_unscored_runs": judge["judge_unscored_runs"],
+        "judge_recovered_partial_json_count": judge["judge_recovered_partial_json_count"],
         "judge_runs": judge["judge_runs"],
         "overall_pass": strict_overall_pass,
         "failure_reasons": [*failed_criteria, *failed_diagnostics],
@@ -283,6 +294,13 @@ def _run_single_judge(
                     "retry_attempts": retry_attempts,
                 }
             except Exception as exc:
+                recovered = _recover_scores_from_partial_text(raw_text)
+                if recovered is not None:
+                    return recovered, {
+                        "parse_failures": parse_failures,
+                        "provider_failures": provider_failures,
+                        "retry_attempts": retry_attempts,
+                    }
                 parse_failures += 1
                 if parse_failures >= json_limit:
                     return _unscored_run("parse_failure", f"Judge JSON parse failure: {exc}"), {
@@ -345,9 +363,10 @@ def _normalize_judge_json(payload: Mapping[str, Any]) -> dict[str, Any]:
         normalized.update(
             {
                 "scores": [normalized[criterion] for criterion in CRITERIA],
-                "reason": reason,
+                "reason": _compact_reason(reason),
                 "reasons": {criterion: reason for criterion in CRITERIA},
                 "judge_run_status": "scored",
+                "judge_recovered_partial_json": False,
             }
         )
         return normalized
@@ -362,8 +381,35 @@ def _normalize_judge_json(payload: Mapping[str, Any]) -> dict[str, Any]:
         for criterion in CRITERIA
     }
     normalized["scores"] = [normalized[criterion] for criterion in CRITERIA]
-    normalized["reason"] = _first_reason(normalized["reasons"])
+    normalized["reason"] = _compact_reason(_first_reason(normalized["reasons"]))
     normalized["judge_run_status"] = "scored"
+    normalized["judge_recovered_partial_json"] = False
+    return normalized
+
+
+def _recover_scores_from_partial_text(text: str) -> dict[str, Any] | None:
+    match = re.search(r'"scores"\s*:\s*\[([^\]]+)\]', text, flags=re.IGNORECASE | re.DOTALL)
+    if not match:
+        return None
+    raw_items = [item.strip().strip('"').strip("'") for item in match.group(1).split(",")]
+    if len(raw_items) != len(CRITERIA):
+        return None
+    scores = [_as_binary(item) for item in raw_items]
+    normalized = {
+        criterion: scores[index]
+        for index, criterion in enumerate(CRITERIA)
+    }
+    reason_match = re.search(r'"reason"\s*:\s*"([^"]{1,160})"', text, flags=re.IGNORECASE | re.DOTALL)
+    reason = _compact_reason(reason_match.group(1)) if reason_match else "recovered scores from partial JSON"
+    normalized.update(
+        {
+            "scores": scores,
+            "reason": reason,
+            "reasons": {criterion: reason for criterion in CRITERIA},
+            "judge_run_status": "scored",
+            "judge_recovered_partial_json": True,
+        }
+    )
     return normalized
 
 
@@ -471,6 +517,15 @@ def _as_binary(value: Any) -> int:
     if isinstance(value, str):
         return 1 if value.strip().lower() in {"1", "true", "pass", "passed", "yes"} else 0
     return 0
+
+
+def _compact_reason(reason: str) -> str:
+    words = str(reason).replace("\n", " ").split()
+    return " ".join(words[:20]) or "No reason supplied."
+
+
+def _truncate(text: str, limit: int) -> str:
+    return text if len(text) <= limit else f"{text[: limit - 3]}..."
 
 
 def _get(item: Any, key: str) -> Any:

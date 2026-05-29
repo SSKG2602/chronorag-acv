@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 
 from app.utils.fusion import monotone_temporal_fusion
@@ -120,6 +121,8 @@ def retrieve_with_chronorag_adapter(case: QuestionCase, corpus: list[CorpusRow],
         "exact_timestamp_query": has_exact_timestamp_query(temporal_constraints),
         "temporal_granularity": temporal_constraints[0].granularity if temporal_constraints else "none",
         "temporal_role_detected": temporal_constraints[0].temporal_role if temporal_constraints else "unknown",
+        "embedding_model": os.getenv("CHRONORAG_EMBED_MODEL", "BAAI/bge-small-en-v1.5"),
+        "embedding_dim": int(os.getenv("CHRONORAG_EMBED_DIM", "384")),
         "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
         "selected_scores": {item.row.id: round(item.score, 4) for item in scored[:top_k]},
         "selected_tcc_precision": {

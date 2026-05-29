@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from app.utils.time_windows import TimeWindow, hard_mode_pre_mask, intelligent_decay
-from core.retrieval.vector_ann import InMemoryANNIndex
+from core.retrieval.vector_ann import InMemoryANNIndex, resolve_embedding_config
 from .models import ChunkRecord, DocumentRecord
 
 
@@ -19,10 +19,11 @@ class PVDB:
         self.documents: Dict[str, DocumentRecord] = {}
         self.chunks: Dict[str, ChunkRecord] = {}
         embeddings_cfg = model_cfg.get("embeddings", {})
-        self.ann = InMemoryANNIndex(
+        self.embedding_config = resolve_embedding_config(
             embeddings_cfg.get("name", "BAAI/bge-small-en-v1.5"),
-            dim=int(embeddings_cfg.get("dim", 384)),
+            embeddings_cfg.get("dim", 384),
         )
+        self.ann = InMemoryANNIndex(self.embedding_config.model_name, dim=self.embedding_config.dim)
         self.external_index: Dict[str, str] = {}
         self._dirty: bool = False
         self.persist_path = persist_path
@@ -189,6 +190,7 @@ class PVDB:
         if not self._dirty and not force:
             return
         snapshot = {
+            "embedding": {"model": self.embedding_config.model_name, "dim": self.embedding_config.dim},
             "documents": [doc.to_dict() for doc in self.documents.values()],
             "chunks": [chunk.to_dict() for chunk in self.chunks.values()],
             "external_index": self.external_index,
@@ -205,10 +207,31 @@ class PVDB:
             payload = json.loads(self.persist_path.read_text(encoding="utf-8"))
         except Exception:
             return
+        persisted_embedding = payload.get("embedding") or {}
+        persisted_dim = persisted_embedding.get("dim")
+        persisted_model = persisted_embedding.get("model")
+        if persisted_dim is not None and int(persisted_dim) != self.embedding_config.dim:
+            raise ValueError(
+                "Stored PVDB embedding dimension mismatch: "
+                f"persisted dim={persisted_dim}, configured dim={self.embedding_config.dim}. "
+                "Purge and reingest before changing CHRONORAG_EMBED_DIM."
+            )
+        if persisted_model and persisted_model != self.embedding_config.model_name:
+            raise ValueError(
+                "Stored PVDB embedding model mismatch: "
+                f"persisted model={persisted_model}, configured model={self.embedding_config.model_name}. "
+                "Purge and reingest before changing CHRONORAG_EMBED_MODEL."
+            )
         docs = {item["doc_id"]: DocumentRecord.from_dict(item) for item in payload.get("documents", [])}
         chunks = {}
         for item in payload.get("chunks", []):
             chunk = ChunkRecord.from_dict(item)
+            if chunk.embedding is not None and len(chunk.embedding) != self.embedding_config.dim:
+                raise ValueError(
+                    "Stored PVDB vector dimension mismatch: "
+                    f"chunk={chunk.chunk_id} vector dim={len(chunk.embedding)}, configured dim={self.embedding_config.dim}. "
+                    "Purge and reingest before mixing embedding dimensions."
+                )
             chunks[chunk.chunk_id] = chunk
             vector = self.ann.add(
                 chunk.chunk_id,

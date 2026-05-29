@@ -4,9 +4,9 @@ retrieval_profiles:
     embeddings: {name: BAAI/bge-small-en-v1.5, dim: 384}
     note: "Default lightweight profile. Exact-time ranking still depends on symbolic temporal precision scoring."
   strong:
-    embeddings: {name: BAAI/bge-m3}
+    embeddings: {name: BAAI/bge-base-en-v1.5, dim: 768}
     reranker: {name: BAAI/bge-reranker-v2-m3}
-    note: "Optional profile for later experiments; not required by tests or default runs."
+    note: "Recommended Layer 2A cloud retrieval profile. Exact-time ranking still depends on symbolic temporal precision scoring."
   experimental_heavy:
     embeddings: {name: Qwen/Qwen3-Embedding-0.6B}
     reranker: {name: Qwen/Qwen3-Reranker-0.6B}

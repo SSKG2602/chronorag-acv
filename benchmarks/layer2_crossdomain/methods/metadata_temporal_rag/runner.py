@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+
 from benchmarks.layer2_crossdomain.methods.metadata_temporal_rag.retrieval import retrieve
 from benchmarks.layer2_crossdomain.prompts import build_grounded_prompt
 from benchmarks.layer2_crossdomain.schemas import CorpusRow, QuestionCase
@@ -24,6 +26,8 @@ def build_prompt(case: QuestionCase, corpus: list[CorpusRow], top_k: int) -> dic
             "uses_retrieval": True,
             "uses_tcc": False,
             "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+            "embedding_model": os.getenv("CHRONORAG_EMBED_MODEL", "BAAI/bge-small-en-v1.5"),
+            "embedding_dim": int(os.getenv("CHRONORAG_EMBED_DIM", "384")),
             "prompt_chars": len(prompt),
         },
     }

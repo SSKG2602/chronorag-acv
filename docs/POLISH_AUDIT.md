@@ -64,9 +64,10 @@ candidate domains include policy revisions, software documentation versions,
 company filings, or scientific guideline updates.
 
 The comparison framework now exists under `benchmarks/layer2_crossdomain/`.
-It supports direct LLM full-context, independent metadata temporal RAG, and
-ChronoRAG full comparisons with a generated local 5,000-row / 200-question data
-path. It does not establish a result claim yet.
+It supports independent metadata temporal RAG and ChronoRAG-GSM comparisons with
+a generated local 5,000-row / 200-question data path. Direct full-context is
+kept only as a historical/small-context diagnostic. It does not establish a
+result claim yet.
 
 A limited Vertex pilot was diagnostic only. It showed that ChronoRAG's adapter
 could fail dense FRED daily exact-date retrieval when time was reduced to year

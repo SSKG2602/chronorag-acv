@@ -32,11 +32,19 @@ JSON_ONLY_RULES = """Output contract:
 """
 
 ANSWER_FIELD_RULES = """Answer field contract:
+- Keep answer short but complete.
+- Prefer one complete sentence.
+- Use at most two sentences unless the question explicitly asks for comparison, conflict, or multiple records.
+- Keep the answer field under roughly 80 words unless conflict or comparison truly requires more.
 - For answerable exact retrieval cases, the JSON "answer" field MUST include the entity, metric_or_claim, value, unit if available, and exact valid_from/valid_to date or timestamp from the cited evidence.
 - For numeric macro/market rows, use this style: "{entity} {metric_or_claim} was {value} {unit} on {valid_from}."
 - For GitHub release rows, use this style: "{entity} {metric_or_claim} was {value} on {valid_from}."
 - For SEC filing rows, use valid_from if present, otherwise transaction_time.
 - Do not answer with only a number and unit.
+- Do not list all evidence rows unless the question requires it.
+- Cite at most 1 evidence ID for simple exact, metric, or year cases.
+- Cite 2 evidence IDs only when conflict or comparison requires it.
+- Cite at most 3 evidence IDs for SEC or source-specific multi-record cases.
 """
 
 HARD_TEMPORAL_RULES = """Hard temporal decision rules:
@@ -45,6 +53,10 @@ HARD_TEMPORAL_RULES = """Hard temporal decision rules:
 - If the question asks for a year and evidence has multiple exact dates in that year, choose the highest-ranked selected evidence satisfying entity, metric, and valid-time constraints.
 - If an exact date is asked, prefer exact-date evidence over same-year evidence.
 - If an exact year is asked, an exact date inside that year can satisfy the year query unless the question explicitly asks for one annual aggregate.
+- If the question asks for a year and multiple daily/monthly records exist, answer with one representative evidence row and state the specific valid date used.
+- If many rows exist for a year, choose one representative exact valid-time row unless the question asks for all records.
+- Do not mistake different dates in a time series for conflict.
+- Conflict means disagreement for the same entity, metric, and valid time, not ordinary different values on different dates.
 - If wording says "not YEAR" but repeats the same year as the target, treat the positive target year as intended and select the best matching evidence from that year.
 - Refuse only when no selected evidence supports the requested entity, metric, and time.
 - Clarify only when the question itself lacks enough target entity, metric, or time and selected evidence does not resolve it.
@@ -52,6 +64,16 @@ HARD_TEMPORAL_RULES = """Hard temporal decision rules:
 - For market and FRED rows, answer with entity, metric, value, unit, and exact valid date.
 - For GitHub releases, answer with repository/project, release/tag/version, and release date.
 - Do not treat transaction_time, publication time, filing time, or release time as valid_time unless the question explicitly asks for that timing.
+- For ambiguous time expressions like "recent period" or "around", avoid arbitrary confident selection. Clarify or return partial evidence.
+"""
+
+HARD_CATEGORY_RULES = """Hard category behavior:
+- conflict_detection: if the same valid time has conflicting values, answer with a short conflict warning and cite conflicting IDs. If evidence only shows different dates, say there is no same-valid-time conflict.
+- partial_or_insufficient_evidence: if exact evidence is missing, use partial/refusal and do not invent exact values. If representative evidence exists inside a broad year, say it is not an aggregate for the whole year.
+- source_specific_temporal_query: use only evidence from the requested source/domain, cite 1-3 IDs max, and do not list every matching filing/date.
+- metric_specific_query: answer only the requested metric/form and exclude unrelated metrics.
+- cross_domain_temporal_comparison: include both domains only if evidence for both is selected; otherwise use partial and state which side is missing.
+- ambiguous_time_query: do not pick an arbitrary date confidently; clarify or provide partial evidence with low/medium confidence.
 """
 
 
@@ -87,6 +109,9 @@ def build_candidate_fact_hint(rows: list[CorpusRow]) -> str:
 
 def build_grounded_prompt(case: QuestionCase, rows: list[CorpusRow], method_name: str) -> str:
     evidence = "\n".join(compact_row(row) for row in rows)
+    # Layer 2 hard cases previously produced semantically useful but overlong
+    # provider outputs that were truncated before JSON closed. The prompt keeps
+    # answers compact while preserving the evidence facts needed for validation.
     return f"""You are evaluating a temporal QA method named {method_name}.
 
 Use only the supplied evidence rows.
@@ -103,6 +128,7 @@ Each evidence row below is a JSON evidence packet with id, domain, entity, metri
 {JSON_ONLY_RULES}
 {ANSWER_FIELD_RULES}
 {HARD_TEMPORAL_RULES}
+{HARD_CATEGORY_RULES}
 {build_candidate_fact_hint(rows)}
 Required JSON schema and allowed values:
 {json.dumps(ANSWER_SCHEMA, sort_keys=True)}

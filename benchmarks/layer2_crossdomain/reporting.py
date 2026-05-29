@@ -32,6 +32,7 @@ JUDGE_METRICS = [
     ("judge_infrastructure_failure_count", "Judge Infrastructure Failure Count"),
     ("judge_scored_runs", "Judge Scored Runs"),
     ("judge_unscored_runs", "Judge Unscored Runs"),
+    ("judge_recovered_partial_json_count", "Judge Recovered Partial JSON Count"),
 ]
 
 
@@ -75,6 +76,20 @@ def _judge_metric_summary(results: list[dict[str, Any]]) -> dict[str, float]:
     )
     summary["judge_scored_runs"] = sum(int(row["validation"].get("judge_scored_runs", 0)) for row in results)
     summary["judge_unscored_runs"] = sum(int(row["validation"].get("judge_unscored_runs", 0)) for row in results)
+    summary["judge_recovered_partial_json_count"] = sum(
+        int(row["validation"].get("judge_recovered_partial_json_count", 0)) for row in results
+    )
+    summary["judge_scored_case_count"] = sum(1 for row in results if int(row["validation"].get("judge_scored_runs", 0)) > 0)
+    if summary["judge_scored_case_count"]:
+        summary["strict_passes_per_judge_scored_case"] = float(
+            mean(
+                1.0 if row["validation"].get("strict_overall_pass") else 0.0
+                for row in results
+                if int(row["validation"].get("judge_scored_runs", 0)) > 0
+            )
+        )
+    else:
+        summary["strict_passes_per_judge_scored_case"] = 0.0
     return summary
 
 
@@ -144,7 +159,11 @@ def _method_markdown(payload: dict[str, Any]) -> str:
         f"- Scored cases: {payload.get('summary', {}).get('scored_case_count', len(payload.get('results', [])))}",
         f"- Provider/infrastructure failures: {payload.get('summary', {}).get('infrastructure_failure_count', 0)}",
         f"- Provider errors: {payload.get('summary', {}).get('provider_error_count', 0)}",
+        f"- Provider output-contract failures: {payload.get('summary', {}).get('provider_output_contract_failure_count', 0)}",
+        f"- Answer JSON recovered count: {payload.get('summary', {}).get('answer_json_recovered_count', 0)}",
         f"- Retry attempts: {payload.get('summary', {}).get('retry_attempts_total', 0)}",
+        "",
+        "Provider output-contract failures are reported separately from retrieval or reasoning failures.",
         "",
         "| Metric | Score |",
         "|---|---:|",
@@ -203,6 +222,16 @@ def _judge_method_markdown(payload: dict[str, Any]) -> str:
         f"- Judge infrastructure failure count: {summary.get('judge_infrastructure_failure_count', 0)}",
         f"- Judge scored runs: {summary.get('judge_scored_runs', 0)}",
         f"- Judge unscored runs: {summary.get('judge_unscored_runs', 0)}",
+        f"- Judge recovered partial JSON count: {summary.get('judge_recovered_partial_json_count', 0)}",
+        f"- Judge-scored cases / total cases: {summary.get('judge_scored_case_count', 0)} / {payload['question_count']}",
+        f"- Strict passes / total cases: {summary.get('strict_overall_pass', 0.0):.2f}",
+        f"- Strict passes / judge-scored cases: {summary.get('strict_passes_per_judge_scored_case', 0.0):.2f}",
+        f"- Provider output-contract failures: {summary.get('provider_output_contract_failure_count', 0)}",
+        f"- Answer JSON recovered count: {summary.get('answer_json_recovered_count', 0)}",
+        "",
+        "Unscored judge-infrastructure cases are not semantic failures.",
+        "Provider output-contract failures are reported separately from retrieval or reasoning failures.",
+        "ChronoRAG-vs-metadata comparison is valid only when both methods use the same corpus, question set, model, and judge settings.",
         "",
         "| Metric | Score |",
         "|---|---:|",
