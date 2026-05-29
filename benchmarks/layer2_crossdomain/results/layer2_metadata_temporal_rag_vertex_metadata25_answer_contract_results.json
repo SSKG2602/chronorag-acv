@@ -1,0 +1,1630 @@
+{
+  "benchmark": "layer2_crossdomain",
+  "method": "metadata_temporal_rag",
+  "mode": "vertex",
+  "result_suffix": "vertex_metadata25_answer_contract",
+  "corpus_rows": 5000,
+  "question_count": 25,
+  "estimated_calls": 25,
+  "top_k": 5,
+  "prompt_truncation_count": 0,
+  "average_selected_evidence": 5.0,
+  "latency_ms": 558658.02,
+  "summary": {
+    "overall_pass": 0.68,
+    "behavior_correct": 1.0,
+    "evidence_correct": 0.84,
+    "valid_time_correct": 1.0,
+    "transaction_time_not_misused": 1.0,
+    "conflict_warning_correct": 1.0,
+    "partial_refusal_correct": 1.0,
+    "clarification_correct": 1.0,
+    "cross_domain_dependency_correct": 1.0,
+    "infrastructure_failure_count": 0,
+    "provider_error_count": 0,
+    "retry_attempts_total": 1,
+    "json_parse_failure_count": 0,
+    "scored_case_count": 25
+  },
+  "results": [
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0000:exact_valid_time_retrieval",
+      "question": "What was kubernetes release v1.30.6 on 2024-10-23?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:github_releases:kubernetes:181360153",
+        "l2:github_releases:kubernetes:190042332",
+        "l2:github_releases:kubernetes:181442196",
+        "l2:github_releases:kubernetes:186532670",
+        "l2:github_releases:kubernetes:190042097"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 22968.25,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "kubernetes release v1.30.6 was v1.30.6 on 2024-10-23.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:github_releases:kubernetes:181360153"
+        ],
+        "valid_time_used": [
+          "2024-10-23"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 7134,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0001:exact_valid_time_retrieval",
+      "question": "What was pandas release v0.20.2 on 2017-06-04?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:github_releases:pandas:6599258",
+        "l2:github_releases:pandas:6287033",
+        "l2:github_releases:pandas:6294696",
+        "l2:github_releases:pandas:6968275",
+        "l2:github_releases:pandas:8290248"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2036.15,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "pandas release v0.20.2 was v0.20.2 on 2017-06-04.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:github_releases:pandas:6599258"
+        ],
+        "valid_time_used": [
+          "2017"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 7213,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0002:exact_valid_time_retrieval",
+      "question": "What was United States 10-year Treasury 10-year Treasury yield on 1962-08-15?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:1962-08-15",
+        "l2:macro_fred:dgs10:1962-05-15",
+        "l2:macro_fred:dgs10:1962-01-18",
+        "l2:macro_fred:dgs10:1962-02-09",
+        "l2:macro_fred:dgs10:1962-03-07"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2036.18,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "United States 10-year Treasury 10-year Treasury yield was 3.98 percent on 1962-08-15.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:dgs10:1962-08-15"
+        ],
+        "valid_time_used": [
+          "1962-08-15"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5539,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0003:exact_valid_time_retrieval",
+      "question": "What was United States 10-year Treasury 10-year Treasury yield on 1974-06-20?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:1974-06-20",
+        "l2:macro_fred:dgs10:1974-03-20",
+        "l2:macro_fred:dgs10:1974-05-06",
+        "l2:macro_fred:dgs10:1974-08-06",
+        "l2:macro_fred:dgs10:1974-09-20"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2041.56,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "United States 10-year Treasury 10-year Treasury yield was 7.55 percent on 1974-06-20.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:dgs10:1974-06-20"
+        ],
+        "valid_time_used": [
+          "1974-06-20"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5539,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0004:exact_valid_time_retrieval",
+      "question": "What was United States 10-year Treasury 10-year Treasury yield on 1986-05-22?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:1986-05-22",
+        "l2:macro_fred:dgs10:1986-08-22",
+        "l2:macro_fred:dgs10:1986-01-02",
+        "l2:macro_fred:dgs10:1986-01-27",
+        "l2:macro_fred:dgs10:1986-02-19"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2632.6,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "United States 10-year Treasury 10-year Treasury yield was 7.88 percent on 1986-05-22.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:dgs10:1986-05-22"
+        ],
+        "valid_time_used": [
+          "1986-05-22"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5539,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0005:exact_valid_time_retrieval",
+      "question": "What was United States 10-year Treasury 10-year Treasury yield on 1998-03-11?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:1998-03-11",
+        "l2:macro_fred:dgs10:1998-04-03",
+        "l2:macro_fred:dgs10:1998-11-23",
+        "l2:macro_fred:dgs10:1998-01-23",
+        "l2:macro_fred:dgs10:1998-02-17"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2636.76,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "United States 10-year Treasury 10-year Treasury yield was 5.63 percent on 1998-03-11.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:dgs10:1998-03-11"
+        ],
+        "valid_time_used": [
+          "1998-03-11"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5539,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0006:exact_valid_time_retrieval",
+      "question": "What was United States 10-year Treasury 10-year Treasury yield on 2010-01-21?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:2010-01-21",
+        "l2:macro_fred:dgs10:2010-07-01",
+        "l2:macro_fred:dgs10:2010-10-01",
+        "l2:macro_fred:dgs10:2010-02-12",
+        "l2:macro_fred:dgs10:2010-03-09"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 23003.74,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "United States 10-year Treasury 10-year Treasury yield was 3.62 percent on 2010-01-21.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:dgs10:2010-01-21"
+        ],
+        "valid_time_used": [
+          "2010-01-21"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5539,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0007:exact_valid_time_retrieval",
+      "question": "What was United States 10-year Treasury 10-year Treasury yield on 2021-11-04?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:2021-11-04",
+        "l2:macro_fred:dgs10:2021-04-12",
+        "l2:macro_fred:dgs10:2021-05-04",
+        "l2:macro_fred:dgs10:2021-08-04",
+        "l2:macro_fred:dgs10:2021-11-30"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2085.84,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "United States 10-year Treasury 10-year Treasury yield was 1.53 percent on 2021-11-04.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:dgs10:2021-11-04"
+        ],
+        "valid_time_used": [
+          "2021-11-04"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5539,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0008:exact_valid_time_retrieval",
+      "question": "What was Dow Jones Industrial Average index close on 2016-06-21?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:market_index:djia:2016-06-21",
+        "l2:market_index:djia:2016-05-27",
+        "l2:market_index:djia:2016-07-14",
+        "l2:market_index:djia:2016-08-05",
+        "l2:market_index:djia:2016-08-30"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 26435.55,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "Dow Jones Industrial Average index close was 17829.73 index_points on 2016-06-21.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:market_index:djia:2016-06-21"
+        ],
+        "valid_time_used": [
+          "2016-06-21"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5502,
+        "retry_attempts": 1,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0009:exact_valid_time_retrieval",
+      "question": "What was NASDAQ Composite index close on 1972-12-26?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:market_index:nasdaqcom:1972-12-26",
+        "l2:market_index:nasdaqcom:1972-04-12",
+        "l2:market_index:nasdaqcom:1972-12-01",
+        "l2:market_index:nasdaqcom:1972-01-11",
+        "l2:market_index:nasdaqcom:1972-02-02"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 18899.24,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "NASDAQ Composite index close was 131.180 index_points on 1972-12-26.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:market_index:nasdaqcom:1972-12-26"
+        ],
+        "valid_time_used": [
+          "1972-12-26"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5447,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0010:exact_valid_time_retrieval",
+      "question": "What was NASDAQ Composite index close on 1984-10-24?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:market_index:nasdaqcom:1984-10-24",
+        "l2:market_index:nasdaqcom:1984-09-10",
+        "l2:market_index:nasdaqcom:1984-10-02",
+        "l2:market_index:nasdaqcom:1984-01-19",
+        "l2:market_index:nasdaqcom:1984-02-13"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2340.76,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "NASDAQ Composite index close was 250.830 index_points on 1984-10-24.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:market_index:nasdaqcom:1984-10-24"
+        ],
+        "valid_time_used": [
+          "1984"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5447,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0011:exact_valid_time_retrieval",
+      "question": "What was NASDAQ Composite index close on 1996-07-30?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:market_index:nasdaqcom:1996-07-30",
+        "l2:market_index:nasdaqcom:1996-07-08",
+        "l2:market_index:nasdaqcom:1996-10-30",
+        "l2:market_index:nasdaqcom:1996-01-03",
+        "l2:market_index:nasdaqcom:1996-01-25"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2333.49,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "NASDAQ Composite index close was 1071.950 index_points on 1996-07-30.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:market_index:nasdaqcom:1996-07-30"
+        ],
+        "valid_time_used": [
+          "1996-07-30"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5458,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0012:exact_valid_time_retrieval",
+      "question": "What was NASDAQ Composite index close on 2008-06-16?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:market_index:nasdaqcom:2008-06-16",
+        "l2:market_index:nasdaqcom:2008-01-03",
+        "l2:market_index:nasdaqcom:2008-01-29",
+        "l2:market_index:nasdaqcom:2008-02-21",
+        "l2:market_index:nasdaqcom:2008-03-14"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 19525.89,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "NASDAQ Composite index close was 2474.780 index_points on 2008-06-16.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:market_index:nasdaqcom:2008-06-16"
+        ],
+        "valid_time_used": [
+          "2008"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5458,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0013:exact_valid_time_retrieval",
+      "question": "What was NASDAQ Composite index close on 2020-04-06?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:market_index:nasdaqcom:2020-04-06",
+        "l2:market_index:nasdaqcom:2020-04-30",
+        "l2:market_index:nasdaqcom:2020-06-16",
+        "l2:market_index:nasdaqcom:2020-01-03",
+        "l2:market_index:nasdaqcom:2020-01-28"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 1966.4,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "NASDAQ Composite index close was 7913.240 index_points on 2020-04-06.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:market_index:nasdaqcom:2020-04-06"
+        ],
+        "valid_time_used": [
+          "2020-04-06"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5458,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0014:exact_valid_time_retrieval",
+      "question": "What was S&P 500 index close on 2022-02-22?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:market_index:sp500:2022-02-22",
+        "l2:market_index:sp500:2022-05-02",
+        "l2:market_index:sp500:2022-01-04",
+        "l2:market_index:sp500:2022-01-27",
+        "l2:market_index:sp500:2022-03-16"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2556.44,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "S&P 500 index close was 4304.76 index_points on 2022-02-22.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:market_index:sp500:2022-02-22"
+        ],
+        "valid_time_used": [
+          "2022-02-22"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5259,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0015:exact_valid_time_retrieval",
+      "question": "What was Apple Inc. 8-K filing on 2015-10-27?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:sec_submissions:aapl:0001193125-15-354756",
+        "l2:sec_submissions:aapl:0001193125-15-273023",
+        "l2:sec_submissions:aapl:0001193125-15-259935",
+        "l2:sec_submissions:aapl:0001181431-15-007653",
+        "l2:sec_submissions:aapl:0001209191-15-073531"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2796.5,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "Apple Inc. 8-K filing was 8-K on 2015-10-27.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:sec_submissions:aapl:0001193125-15-354756"
+        ],
+        "valid_time_used": [
+          "2015-10-27"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5762,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0016:exact_valid_time_retrieval",
+      "question": "What was Alphabet Inc. 4 filing on 2024-02-07?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:sec_submissions:googl:0000950170-24-080932",
+        "l2:sec_submissions:googl:0001209191-24-003063",
+        "l2:sec_submissions:googl:0000950170-24-081905",
+        "l2:sec_submissions:googl:0000950170-24-084027",
+        "l2:sec_submissions:googl:0000950170-24-094779"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 19836.1,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "Alphabet Inc. 4 filing was 4 on 2024-02-07.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:sec_submissions:googl:0001209191-24-003063"
+        ],
+        "valid_time_used": [
+          "2024"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": false,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "forbidden_facts_absent"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5902,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0017:exact_valid_time_retrieval",
+      "question": "What was MICROSOFT CORP 8-K filing on 2020-06-26?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:sec_submissions:msft:0001193125-20-180036",
+        "l2:sec_submissions:msft:0001193125-20-128779",
+        "l2:sec_submissions:msft:0001193125-20-207517",
+        "l2:sec_submissions:msft:0001193125-20-278410",
+        "l2:sec_submissions:msft:0001193125-21-198810"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 3229.15,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "MICROSOFT CORP 8-K filing was 8-K on 2020-06-26.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:sec_submissions:msft:0001193125-20-180036"
+        ],
+        "valid_time_used": [
+          "2020-06-26"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5828,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0018:exact_valid_time_retrieval",
+      "question": "What was NVIDIA CORP 8-K filing on 2026-01-20?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:sec_submissions:nvda:0001045810-26-000003",
+        "l2:sec_submissions:nvda:0001045810-26-000019",
+        "l2:sec_submissions:nvda:0001045810-26-000028",
+        "l2:sec_submissions:nvda:0001347842-26-000002",
+        "l2:sec_submissions:nvda:0001347842-26-000011"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 17159.54,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "NVIDIA CORP 8-K filing was 8-K on 2026-01-20.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:sec_submissions:nvda:0001045810-26-000003"
+        ],
+        "valid_time_used": [
+          "2026"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": false,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "forbidden_facts_absent"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5782,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0019:exact_valid_time_retrieval",
+      "question": "What was Tesla, Inc. 4 filing on 2025-06-12?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:sec_submissions:tsla:0001972928-25-000003",
+        "l2:sec_submissions:tsla:0000950170-25-003585",
+        "l2:sec_submissions:tsla:0001104659-25-057932",
+        "l2:sec_submissions:tsla:0001104659-25-089693",
+        "l2:sec_submissions:tsla:0001104659-25-110597"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2901.77,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "Tesla, Inc. 4 filing was 4 on 2025-06-12.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:sec_submissions:tsla:0001972928-25-000003"
+        ],
+        "valid_time_used": [
+          "2025-06-12"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": false,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "forbidden_facts_absent"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5828,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0020:same_entity_wrong_year_trap",
+      "question": "For United States CPI, answer CPI index for 1948, not 1947.",
+      "category": "same_entity_wrong_year_trap",
+      "selected_evidence_ids": [
+        "l2:macro_fred:cpi:1948-05-01",
+        "l2:macro_fred:cpi:1947-01-01",
+        "l2:macro_fred:unrate:1948-09-01",
+        "l2:macro_fred:cpi:1949-09-01",
+        "l2:macro_fred:cpi:1951-01-01"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 4241.38,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "United States CPI CPI index was 24.010 index_1982_84 on 1948-05-01.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:cpi:1948-05-01"
+        ],
+        "valid_time_used": [
+          "1948-05-01"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": false,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "forbidden_facts_absent"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5341,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0021:same_entity_wrong_year_trap",
+      "question": "For United States 10-year Treasury, answer 10-year Treasury yield for 1968, not 1968.",
+      "category": "same_entity_wrong_year_trap",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:1968-01-12",
+        "l2:macro_fred:dgs10:1968-02-05",
+        "l2:macro_fred:dgs10:1968-02-29",
+        "l2:macro_fred:dgs10:1968-03-22",
+        "l2:macro_fred:dgs10:1968-04-17"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 4354.27,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "United States 10-year Treasury 10-year Treasury yield was 5.43 percent on 1968-01-12.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:dgs10:1968-01-12"
+        ],
+        "valid_time_used": [
+          "1968-01-12"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": false,
+        "evidence_correct": false,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "required_facts_present",
+          "forbidden_facts_absent",
+          "evidence_correct"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5547,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0022:same_entity_wrong_year_trap",
+      "question": "For United States 10-year Treasury, answer 10-year Treasury yield for 1979, not 1979.",
+      "category": "same_entity_wrong_year_trap",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:1979-01-17",
+        "l2:macro_fred:dgs10:1979-02-08",
+        "l2:macro_fred:dgs10:1979-03-06",
+        "l2:macro_fred:dgs10:1979-03-28",
+        "l2:macro_fred:dgs10:1979-04-20"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 5986.52,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "United States 10-year Treasury 10-year Treasury yield was 9.18 percent on 1979-01-17.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:dgs10:1979-01-17"
+        ],
+        "valid_time_used": [
+          "1979-01-17"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": false,
+        "evidence_correct": false,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "required_facts_present",
+          "forbidden_facts_absent",
+          "evidence_correct"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5547,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0023:same_entity_wrong_year_trap",
+      "question": "For United States 10-year Treasury, answer 10-year Treasury yield for 1990, not 1990.",
+      "category": "same_entity_wrong_year_trap",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:1990-01-18",
+        "l2:macro_fred:dgs10:1990-02-09",
+        "l2:macro_fred:dgs10:1990-03-06",
+        "l2:macro_fred:dgs10:1990-03-28",
+        "l2:macro_fred:dgs10:1990-04-20"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 51797.48,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "United States 10-year Treasury 10-year Treasury yield was 8.32 percent on 1990-01-18.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:dgs10:1990-01-18"
+        ],
+        "valid_time_used": [
+          "1990-01-18"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": false,
+        "evidence_correct": false,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "required_facts_present",
+          "forbidden_facts_absent",
+          "evidence_correct"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5547,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "metadata_temporal_rag",
+      "case_id": "l2q:0024:same_entity_wrong_year_trap",
+      "question": "For United States 10-year Treasury, answer 10-year Treasury yield for 2000, not 2000.",
+      "category": "same_entity_wrong_year_trap",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:2000-01-19",
+        "l2:macro_fred:dgs10:2000-02-10",
+        "l2:macro_fred:dgs10:2000-03-06",
+        "l2:macro_fred:dgs10:2000-03-28",
+        "l2:macro_fred:dgs10:2000-04-19"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 10008.73,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "United States 10-year Treasury 10-year Treasury yield was 6.73 percent on 2000-01-19.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:dgs10:2000-01-19"
+        ],
+        "valid_time_used": [
+          "2000-01-19"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": false,
+        "evidence_correct": false,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "required_facts_present",
+          "forbidden_facts_absent",
+          "evidence_correct"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "metadata_temporal_rag",
+        "uses_retrieval": true,
+        "uses_tcc": false,
+        "retrieval_note": "Independent raw_text plus metadata baseline; no ChronoRAG temporal fusion or ChronoSanity.",
+        "prompt_chars": 5547,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "dry_run_prompts": false
+      }
+    }
+  ]
+}

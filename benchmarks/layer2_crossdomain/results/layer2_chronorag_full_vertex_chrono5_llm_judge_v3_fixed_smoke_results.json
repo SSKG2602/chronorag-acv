@@ -1,0 +1,885 @@
+{
+  "benchmark": "layer2_crossdomain",
+  "method": "chronorag_full",
+  "mode": "vertex",
+  "validator": "llm_judge",
+  "result_suffix": "vertex_chrono5_llm_judge_v3_fixed_smoke",
+  "corpus_rows": 5000,
+  "question_count": 5,
+  "estimated_calls": 5,
+  "top_k": 5,
+  "prompt_truncation_count": 0,
+  "average_selected_evidence": 5.0,
+  "latency_ms": 124651.21,
+  "summary": {
+    "judge_overall_pass": 1.0,
+    "strict_overall_pass": 1.0,
+    "behavior_label_accuracy": 1.0,
+    "citation_grounding_accuracy": 1.0,
+    "schema_field_presence": 1.0,
+    "temporal_scope_correct": 1.0,
+    "factual_grounding": 1.0,
+    "behavior_justified": 1.0,
+    "transaction_time_clean": 1.0,
+    "no_overconfidence": 1.0,
+    "overall_pass": 1.0,
+    "judge_parse_failures": 0,
+    "judge_provider_failures": 0,
+    "judge_retry_attempts": 0,
+    "judge_infrastructure_failure_count": 0,
+    "judge_scored_runs": 5,
+    "judge_unscored_runs": 0,
+    "infrastructure_failure_count": 0,
+    "provider_error_count": 0,
+    "retry_attempts_total": 0,
+    "json_parse_failure_count": 0,
+    "scored_case_count": 5
+  },
+  "results": [
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0000:exact_valid_time_retrieval",
+      "question": "What was kubernetes release v1.30.6 on 2024-10-23?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:github_releases:kubernetes:181360153",
+        "l2:github_releases:kubernetes:181442196",
+        "l2:github_releases:kubernetes:182555499",
+        "l2:github_releases:pandas:137829288",
+        "l2:github_releases:pandas:143372919"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 23480.63,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "kubernetes release v1.30.6 was v1.30.6 on 2024-10-23.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:github_releases:kubernetes:181360153"
+        ],
+        "valid_time_used": [
+          "2024-10-23"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "case_id": "l2q:0000:exact_valid_time_retrieval",
+        "judge_overall_pass": true,
+        "strict_overall_pass": true,
+        "criteria_passed": 5,
+        "criteria_scores": {
+          "temporal_scope_correct": 1,
+          "factual_grounding": 1,
+          "behavior_justified": 1,
+          "transaction_time_clean": 1,
+          "no_overconfidence": 1
+        },
+        "criteria_reasons": {
+          "temporal_scope_correct": "The answer directly confirms the release of v1.30.6 on the specified date, which is explicitly stated in the cited evidence card.",
+          "factual_grounding": "The answer directly confirms the release of v1.30.6 on the specified date, which is explicitly stated in the cited evidence card.",
+          "behavior_justified": "The answer directly confirms the release of v1.30.6 on the specified date, which is explicitly stated in the cited evidence card.",
+          "transaction_time_clean": "The answer directly confirms the release of v1.30.6 on the specified date, which is explicitly stated in the cited evidence card.",
+          "no_overconfidence": "The answer directly confirms the release of v1.30.6 on the specified date, which is explicitly stated in the cited evidence card."
+        },
+        "judge_infrastructure_failure": false,
+        "judge_reason": "The answer directly confirms the release of v1.30.6 on the specified date, which is explicitly stated in the cited evidence card.",
+        "diagnostics": {
+          "behavior_label_match": true,
+          "cited_ids_grounded": true,
+          "schema_fields_present": true
+        },
+        "raw_run_scores": [
+          {
+            "temporal_scope_correct": 1,
+            "factual_grounding": 1,
+            "behavior_justified": 1,
+            "transaction_time_clean": 1,
+            "no_overconfidence": 1,
+            "scores": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "reason": "The answer directly confirms the release of v1.30.6 on the specified date, which is explicitly stated in the cited evidence card.",
+            "reasons": {
+              "temporal_scope_correct": "The answer directly confirms the release of v1.30.6 on the specified date, which is explicitly stated in the cited evidence card.",
+              "factual_grounding": "The answer directly confirms the release of v1.30.6 on the specified date, which is explicitly stated in the cited evidence card.",
+              "behavior_justified": "The answer directly confirms the release of v1.30.6 on the specified date, which is explicitly stated in the cited evidence card.",
+              "transaction_time_clean": "The answer directly confirms the release of v1.30.6 on the specified date, which is explicitly stated in the cited evidence card.",
+              "no_overconfidence": "The answer directly confirms the release of v1.30.6 on the specified date, which is explicitly stated in the cited evidence card."
+            },
+            "judge_run_status": "scored"
+          }
+        ],
+        "judge_parse_failures": 0,
+        "judge_provider_failures": 0,
+        "judge_retry_attempts": 0,
+        "judge_scored_runs": 1,
+        "judge_unscored_runs": 0,
+        "judge_runs": 1,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "validator": "llm_judge",
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "2024-10-23",
+            "normalized_start": "2024-10-23",
+            "normalized_end": "2024-10-23",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "release_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "release_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:github_releases:kubernetes:181360153": 0.9,
+          "l2:github_releases:kubernetes:181442196": 0.5847,
+          "l2:github_releases:kubernetes:182555499": 0.3537,
+          "l2:github_releases:pandas:137829288": 0.3232,
+          "l2:github_releases:pandas:143372919": 0.3232
+        },
+        "selected_tcc_precision": {
+          "l2:github_releases:kubernetes:181360153": {
+            "normalized_start": "2024-10-23",
+            "normalized_end": "2024-10-23",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:github_releases:kubernetes:181442196": {
+            "normalized_start": "2024-10-23",
+            "normalized_end": "2024-10-23",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:github_releases:kubernetes:182555499": {
+            "normalized_start": "2024-10-29",
+            "normalized_end": "2024-10-29",
+            "precision": "range",
+            "temporal_role": "valid_time"
+          },
+          "l2:github_releases:pandas:137829288": {
+            "normalized_start": "2024-01-20",
+            "normalized_end": "2024-01-20",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:github_releases:pandas:143372919": {
+            "normalized_start": "2024-02-23",
+            "normalized_end": "2024-02-23",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 8780,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "valid_time_fact_postprocessed": true,
+        "citation_fact_postprocessed": false,
+        "valid_time_fact_postprocess_source_id": "l2:github_releases:kubernetes:181360153",
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0001:exact_valid_time_retrieval",
+      "question": "What was pandas release v0.20.2 on 2017-06-04?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:github_releases:pandas:6599258",
+        "l2:github_releases:pandas:56527417",
+        "l2:github_releases:pandas:134944237",
+        "l2:github_releases:pandas:278660115",
+        "l2:github_releases:pandas:116106514"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2098.14,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "pandas release v0.20.2 was v0.20.2 on 2017-06-04.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:github_releases:pandas:6599258"
+        ],
+        "valid_time_used": [
+          "2017-06-04"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "case_id": "l2q:0001:exact_valid_time_retrieval",
+        "judge_overall_pass": true,
+        "strict_overall_pass": true,
+        "criteria_passed": 5,
+        "criteria_scores": {
+          "temporal_scope_correct": 1,
+          "factual_grounding": 1,
+          "behavior_justified": 1,
+          "transaction_time_clean": 1,
+          "no_overconfidence": 1
+        },
+        "criteria_reasons": {
+          "temporal_scope_correct": "The answer directly confirms the release version and date as stated in the question, which is explicitly supported by the cited evidence card.",
+          "factual_grounding": "The answer directly confirms the release version and date as stated in the question, which is explicitly supported by the cited evidence card.",
+          "behavior_justified": "The answer directly confirms the release version and date as stated in the question, which is explicitly supported by the cited evidence card.",
+          "transaction_time_clean": "The answer directly confirms the release version and date as stated in the question, which is explicitly supported by the cited evidence card.",
+          "no_overconfidence": "The answer directly confirms the release version and date as stated in the question, which is explicitly supported by the cited evidence card."
+        },
+        "judge_infrastructure_failure": false,
+        "judge_reason": "The answer directly confirms the release version and date as stated in the question, which is explicitly supported by the cited evidence card.",
+        "diagnostics": {
+          "behavior_label_match": true,
+          "cited_ids_grounded": true,
+          "schema_fields_present": true
+        },
+        "raw_run_scores": [
+          {
+            "temporal_scope_correct": 1,
+            "factual_grounding": 1,
+            "behavior_justified": 1,
+            "transaction_time_clean": 1,
+            "no_overconfidence": 1,
+            "scores": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "reason": "The answer directly confirms the release version and date as stated in the question, which is explicitly supported by the cited evidence card.",
+            "reasons": {
+              "temporal_scope_correct": "The answer directly confirms the release version and date as stated in the question, which is explicitly supported by the cited evidence card.",
+              "factual_grounding": "The answer directly confirms the release version and date as stated in the question, which is explicitly supported by the cited evidence card.",
+              "behavior_justified": "The answer directly confirms the release version and date as stated in the question, which is explicitly supported by the cited evidence card.",
+              "transaction_time_clean": "The answer directly confirms the release version and date as stated in the question, which is explicitly supported by the cited evidence card.",
+              "no_overconfidence": "The answer directly confirms the release version and date as stated in the question, which is explicitly supported by the cited evidence card."
+            },
+            "judge_run_status": "scored"
+          }
+        ],
+        "judge_parse_failures": 0,
+        "judge_provider_failures": 0,
+        "judge_retry_attempts": 0,
+        "judge_scored_runs": 1,
+        "judge_unscored_runs": 0,
+        "judge_runs": 1,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "validator": "llm_judge",
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "2017-06-04",
+            "normalized_start": "2017-06-04",
+            "normalized_end": "2017-06-04",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "release_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "release_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:github_releases:pandas:6599258": 0.9,
+          "l2:github_releases:pandas:56527417": 0.528,
+          "l2:github_releases:pandas:134944237": 0.5267,
+          "l2:github_releases:pandas:278660115": 0.5254,
+          "l2:github_releases:pandas:116106514": 0.5119
+        },
+        "selected_tcc_precision": {
+          "l2:github_releases:pandas:6599258": {
+            "normalized_start": "2017-06-04",
+            "normalized_end": "2017-06-04",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:github_releases:pandas:56527417": {
+            "normalized_start": "2022-01-06",
+            "normalized_end": "2022-01-06",
+            "precision": "range",
+            "temporal_role": "valid_time"
+          },
+          "l2:github_releases:pandas:134944237": {
+            "normalized_start": "2023-12-22",
+            "normalized_end": "2023-12-22",
+            "precision": "range",
+            "temporal_role": "valid_time"
+          },
+          "l2:github_releases:pandas:278660115": {
+            "normalized_start": "2026-01-21",
+            "normalized_end": "2026-01-21",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:github_releases:pandas:116106514": {
+            "normalized_start": "2023-08-11",
+            "normalized_end": "2023-08-11",
+            "precision": "range",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 8838,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "valid_time_fact_postprocessed": true,
+        "citation_fact_postprocessed": false,
+        "valid_time_fact_postprocess_source_id": "l2:github_releases:pandas:6599258",
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0002:exact_valid_time_retrieval",
+      "question": "What was United States 10-year Treasury 10-year Treasury yield on 1962-08-15?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:1962-08-15",
+        "l2:macro_fred:dgs10:1962-01-18",
+        "l2:macro_fred:dgs10:1962-02-09",
+        "l2:macro_fred:dgs10:1962-03-07",
+        "l2:macro_fred:dgs10:1962-03-29"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2353.15,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "United States 10-year Treasury 10-year Treasury yield was 3.98 percent on 1962-08-15.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:dgs10:1962-08-15"
+        ],
+        "valid_time_used": [
+          "1962-08-15"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "case_id": "l2q:0002:exact_valid_time_retrieval",
+        "judge_overall_pass": true,
+        "strict_overall_pass": true,
+        "criteria_passed": 5,
+        "criteria_scores": {
+          "temporal_scope_correct": 1,
+          "factual_grounding": 1,
+          "behavior_justified": 1,
+          "transaction_time_clean": 1,
+          "no_overconfidence": 1
+        },
+        "criteria_reasons": {
+          "temporal_scope_correct": "The answer accurately provides the 10-year Treasury yield for the specified date, directly matching the provided evidence card.",
+          "factual_grounding": "The answer accurately provides the 10-year Treasury yield for the specified date, directly matching the provided evidence card.",
+          "behavior_justified": "The answer accurately provides the 10-year Treasury yield for the specified date, directly matching the provided evidence card.",
+          "transaction_time_clean": "The answer accurately provides the 10-year Treasury yield for the specified date, directly matching the provided evidence card.",
+          "no_overconfidence": "The answer accurately provides the 10-year Treasury yield for the specified date, directly matching the provided evidence card."
+        },
+        "judge_infrastructure_failure": false,
+        "judge_reason": "The answer accurately provides the 10-year Treasury yield for the specified date, directly matching the provided evidence card.",
+        "diagnostics": {
+          "behavior_label_match": true,
+          "cited_ids_grounded": true,
+          "schema_fields_present": true
+        },
+        "raw_run_scores": [
+          {
+            "temporal_scope_correct": 1,
+            "factual_grounding": 1,
+            "behavior_justified": 1,
+            "transaction_time_clean": 1,
+            "no_overconfidence": 1,
+            "scores": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "reason": "The answer accurately provides the 10-year Treasury yield for the specified date, directly matching the provided evidence card.",
+            "reasons": {
+              "temporal_scope_correct": "The answer accurately provides the 10-year Treasury yield for the specified date, directly matching the provided evidence card.",
+              "factual_grounding": "The answer accurately provides the 10-year Treasury yield for the specified date, directly matching the provided evidence card.",
+              "behavior_justified": "The answer accurately provides the 10-year Treasury yield for the specified date, directly matching the provided evidence card.",
+              "transaction_time_clean": "The answer accurately provides the 10-year Treasury yield for the specified date, directly matching the provided evidence card.",
+              "no_overconfidence": "The answer accurately provides the 10-year Treasury yield for the specified date, directly matching the provided evidence card."
+            },
+            "judge_run_status": "scored"
+          }
+        ],
+        "judge_parse_failures": 0,
+        "judge_provider_failures": 0,
+        "judge_retry_attempts": 0,
+        "judge_scored_runs": 1,
+        "judge_unscored_runs": 0,
+        "judge_runs": 1,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "validator": "llm_judge",
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "1962-08-15",
+            "normalized_start": "1962-08-15",
+            "normalized_end": "1962-08-15",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:macro_fred:dgs10:1962-08-15": 0.9,
+          "l2:macro_fred:dgs10:1962-01-18": 0.613,
+          "l2:macro_fred:dgs10:1962-02-09": 0.613,
+          "l2:macro_fred:dgs10:1962-03-07": 0.613,
+          "l2:macro_fred:dgs10:1962-03-29": 0.613
+        },
+        "selected_tcc_precision": {
+          "l2:macro_fred:dgs10:1962-08-15": {
+            "normalized_start": "1962-08-15",
+            "normalized_end": "1962-08-15",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1962-01-18": {
+            "normalized_start": "1962-01-18",
+            "normalized_end": "1962-01-18",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1962-02-09": {
+            "normalized_start": "1962-02-09",
+            "normalized_end": "1962-02-09",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1962-03-07": {
+            "normalized_start": "1962-03-07",
+            "normalized_end": "1962-03-07",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1962-03-29": {
+            "normalized_start": "1962-03-29",
+            "normalized_end": "1962-03-29",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 7067,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "valid_time_fact_postprocessed": true,
+        "citation_fact_postprocessed": false,
+        "valid_time_fact_postprocess_source_id": "l2:macro_fred:dgs10:1962-08-15",
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0003:exact_valid_time_retrieval",
+      "question": "What was United States 10-year Treasury 10-year Treasury yield on 1974-06-20?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:1974-06-20",
+        "l2:macro_fred:dgs10:1974-01-08",
+        "l2:macro_fred:dgs10:1974-01-31",
+        "l2:macro_fred:dgs10:1974-02-26",
+        "l2:macro_fred:dgs10:1974-03-20"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2681.86,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "United States 10-year Treasury 10-year Treasury yield was 7.55 percent on 1974-06-20.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:dgs10:1974-06-20"
+        ],
+        "valid_time_used": [
+          "1974-06-20"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "case_id": "l2q:0003:exact_valid_time_retrieval",
+        "judge_overall_pass": true,
+        "strict_overall_pass": true,
+        "criteria_passed": 5,
+        "criteria_scores": {
+          "temporal_scope_correct": 1,
+          "factual_grounding": 1,
+          "behavior_justified": 1,
+          "transaction_time_clean": 1,
+          "no_overconfidence": 1
+        },
+        "criteria_reasons": {
+          "temporal_scope_correct": "The answer directly and accurately states the 10-year Treasury yield for the requested date, which is explicitly supported by the cited evidence card.",
+          "factual_grounding": "The answer directly and accurately states the 10-year Treasury yield for the requested date, which is explicitly supported by the cited evidence card.",
+          "behavior_justified": "The answer directly and accurately states the 10-year Treasury yield for the requested date, which is explicitly supported by the cited evidence card.",
+          "transaction_time_clean": "The answer directly and accurately states the 10-year Treasury yield for the requested date, which is explicitly supported by the cited evidence card.",
+          "no_overconfidence": "The answer directly and accurately states the 10-year Treasury yield for the requested date, which is explicitly supported by the cited evidence card."
+        },
+        "judge_infrastructure_failure": false,
+        "judge_reason": "The answer directly and accurately states the 10-year Treasury yield for the requested date, which is explicitly supported by the cited evidence card.",
+        "diagnostics": {
+          "behavior_label_match": true,
+          "cited_ids_grounded": true,
+          "schema_fields_present": true
+        },
+        "raw_run_scores": [
+          {
+            "temporal_scope_correct": 1,
+            "factual_grounding": 1,
+            "behavior_justified": 1,
+            "transaction_time_clean": 1,
+            "no_overconfidence": 1,
+            "scores": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "reason": "The answer directly and accurately states the 10-year Treasury yield for the requested date, which is explicitly supported by the cited evidence card.",
+            "reasons": {
+              "temporal_scope_correct": "The answer directly and accurately states the 10-year Treasury yield for the requested date, which is explicitly supported by the cited evidence card.",
+              "factual_grounding": "The answer directly and accurately states the 10-year Treasury yield for the requested date, which is explicitly supported by the cited evidence card.",
+              "behavior_justified": "The answer directly and accurately states the 10-year Treasury yield for the requested date, which is explicitly supported by the cited evidence card.",
+              "transaction_time_clean": "The answer directly and accurately states the 10-year Treasury yield for the requested date, which is explicitly supported by the cited evidence card.",
+              "no_overconfidence": "The answer directly and accurately states the 10-year Treasury yield for the requested date, which is explicitly supported by the cited evidence card."
+            },
+            "judge_run_status": "scored"
+          }
+        ],
+        "judge_parse_failures": 0,
+        "judge_provider_failures": 0,
+        "judge_retry_attempts": 0,
+        "judge_scored_runs": 1,
+        "judge_unscored_runs": 0,
+        "judge_runs": 1,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "validator": "llm_judge",
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "1974-06-20",
+            "normalized_start": "1974-06-20",
+            "normalized_end": "1974-06-20",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:macro_fred:dgs10:1974-06-20": 0.9,
+          "l2:macro_fred:dgs10:1974-01-08": 0.613,
+          "l2:macro_fred:dgs10:1974-01-31": 0.613,
+          "l2:macro_fred:dgs10:1974-02-26": 0.613,
+          "l2:macro_fred:dgs10:1974-03-20": 0.613
+        },
+        "selected_tcc_precision": {
+          "l2:macro_fred:dgs10:1974-06-20": {
+            "normalized_start": "1974-06-20",
+            "normalized_end": "1974-06-20",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1974-01-08": {
+            "normalized_start": "1974-01-08",
+            "normalized_end": "1974-01-08",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1974-01-31": {
+            "normalized_start": "1974-01-31",
+            "normalized_end": "1974-01-31",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1974-02-26": {
+            "normalized_start": "1974-02-26",
+            "normalized_end": "1974-02-26",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1974-03-20": {
+            "normalized_start": "1974-03-20",
+            "normalized_end": "1974-03-20",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 7067,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "valid_time_fact_postprocessed": true,
+        "citation_fact_postprocessed": false,
+        "valid_time_fact_postprocess_source_id": "l2:macro_fred:dgs10:1974-06-20",
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0004:exact_valid_time_retrieval",
+      "question": "What was United States 10-year Treasury 10-year Treasury yield on 1986-05-22?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:1986-05-22",
+        "l2:macro_fred:dgs10:1986-01-02",
+        "l2:macro_fred:dgs10:1986-01-27",
+        "l2:macro_fred:dgs10:1986-02-19",
+        "l2:macro_fred:dgs10:1986-03-14"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2298.62,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "United States 10-year Treasury 10-year Treasury yield was 7.88 percent on 1986-05-22.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:dgs10:1986-05-22"
+        ],
+        "valid_time_used": [
+          "1986-05-22"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "case_id": "l2q:0004:exact_valid_time_retrieval",
+        "judge_overall_pass": true,
+        "strict_overall_pass": true,
+        "criteria_passed": 5,
+        "criteria_scores": {
+          "temporal_scope_correct": 1,
+          "factual_grounding": 1,
+          "behavior_justified": 1,
+          "transaction_time_clean": 1,
+          "no_overconfidence": 1
+        },
+        "criteria_reasons": {
+          "temporal_scope_correct": "grounded and temporally correct",
+          "factual_grounding": "grounded and temporally correct",
+          "behavior_justified": "grounded and temporally correct",
+          "transaction_time_clean": "grounded and temporally correct",
+          "no_overconfidence": "grounded and temporally correct"
+        },
+        "judge_infrastructure_failure": false,
+        "judge_reason": "grounded and temporally correct",
+        "diagnostics": {
+          "behavior_label_match": true,
+          "cited_ids_grounded": true,
+          "schema_fields_present": true
+        },
+        "raw_run_scores": [
+          {
+            "temporal_scope_correct": 1,
+            "factual_grounding": 1,
+            "behavior_justified": 1,
+            "transaction_time_clean": 1,
+            "no_overconfidence": 1,
+            "scores": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "reason": "grounded and temporally correct",
+            "reasons": {
+              "temporal_scope_correct": "grounded and temporally correct",
+              "factual_grounding": "grounded and temporally correct",
+              "behavior_justified": "grounded and temporally correct",
+              "transaction_time_clean": "grounded and temporally correct",
+              "no_overconfidence": "grounded and temporally correct"
+            },
+            "judge_run_status": "scored"
+          }
+        ],
+        "judge_parse_failures": 0,
+        "judge_provider_failures": 0,
+        "judge_retry_attempts": 0,
+        "judge_scored_runs": 1,
+        "judge_unscored_runs": 0,
+        "judge_runs": 1,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "validator": "llm_judge",
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "1986-05-22",
+            "normalized_start": "1986-05-22",
+            "normalized_end": "1986-05-22",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:macro_fred:dgs10:1986-05-22": 0.9,
+          "l2:macro_fred:dgs10:1986-01-02": 0.613,
+          "l2:macro_fred:dgs10:1986-01-27": 0.613,
+          "l2:macro_fred:dgs10:1986-02-19": 0.613,
+          "l2:macro_fred:dgs10:1986-03-14": 0.613
+        },
+        "selected_tcc_precision": {
+          "l2:macro_fred:dgs10:1986-05-22": {
+            "normalized_start": "1986-05-22",
+            "normalized_end": "1986-05-22",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1986-01-02": {
+            "normalized_start": "1986-01-02",
+            "normalized_end": "1986-01-02",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1986-01-27": {
+            "normalized_start": "1986-01-27",
+            "normalized_end": "1986-01-27",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1986-02-19": {
+            "normalized_start": "1986-02-19",
+            "normalized_end": "1986-02-19",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1986-03-14": {
+            "normalized_start": "1986-03-14",
+            "normalized_end": "1986-03-14",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 7067,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "answer_fact_postprocessed": false,
+        "valid_time_fact_postprocessed": true,
+        "citation_fact_postprocessed": false,
+        "valid_time_fact_postprocess_source_id": "l2:macro_fred:dgs10:1986-05-22",
+        "dry_run_prompts": false
+      }
+    }
+  ]
+}
