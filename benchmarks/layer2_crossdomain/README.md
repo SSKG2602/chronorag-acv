@@ -19,7 +19,6 @@ differences.
 | `direct_llm_full_context` | Deprecated for serious 5,000-row Layer 2A comparison. It is not a retrieval baseline and can truncate heavily; keep only for historical/small-context diagnostics. |
 | `metadata_temporal_rag` | Independent metadata/time-aware RAG baseline. It uses raw text plus metadata scoring, but no ChronoRAG TCC `retrieval_text`, temporal fusion, or ChronoSanity code. |
 | `chronorag_full` | Adapter around the existing ChronoRAG framework. The fixture adapter maps Layer 2 rows through ChronoRAG TCC and monotone temporal fusion utilities without creating a second ChronoRAG implementation. |
-| `chronorag_gsm` | ChronoRAG full plus Guided Semantic Mode, a deterministic temporal intent planner for hard temporal queries before evidence selection. |
 
 ChronoRAG should be evaluated on valid-time correctness, transaction-time trap
 avoidance, conflict/refusal behavior, and grounding, not only generic answer
@@ -40,7 +39,6 @@ No final Layer 2 results exist yet. This table is a placeholder for the
 |---|---:|---:|---|---:|---:|---:|---:|---:|---:|---|
 | Metadata temporal RAG | pending | pending | pending | pending | pending | pending | pending | pending | pending | framework ready |
 | ChronoRAG full | pending | pending | pending | pending | pending | pending | pending | pending | pending | framework ready |
-| ChronoRAG-GSM | pending | pending | pending | pending | pending | pending | pending | pending | pending | retrieval planner ready |
 
 ## Temporal Precision Repair
 
@@ -104,28 +102,9 @@ prove SOTA or publication-grade performance. It audits existing result JSONs so
 retrieval policy and benchmark-question fixes can be decided after the scoring
 semantics are clean.
 
-## Guided Semantic Mode
+## GSM Detachment
 
-GSM is part of ChronoRAG's retrieval path. It is activated for hard temporal
-queries such as wrong-year traps, transaction-time vs valid-time traps,
-conflict/disagreement questions, source-specific questions, metric/form-specific
-questions, cross-domain comparisons, missing-exact-evidence questions, and
-ambiguous temporal language. GSM is deterministic and does not use an LLM
-planner.
-
-TCC solves temporal evidence representation. GSM is an experimental retrieval-planning branch, not the next Layer 2A direction. Current evaluator repair focuses on `metadata_temporal_rag` vs `chronorag_full` before any retrieval-policy change.
-
-GSM does not replace TCC or temporal fusion. TCC represents evidence; GSM plans
-retrieval. For simple exact valid-time questions, `chronorag_gsm` leaves the
-existing exact-date ChronoRAG path intact so exact-date retrieval does not
-regress. For cross-domain comparisons, GSM retrieves per slot and then merges
-evidence so one domain cannot dominate global top-k.
-
-No-Vertex retrieval check:
-
-```bash
-python3 benchmarks/layer2_crossdomain/debug_chronorag_retrieval.py --first-n 5 --top-k 5
-```
+The experimental `chronorag_gsm` Layer 2A path has been removed from the active benchmark surface. Layer 2A now compares only `metadata_temporal_rag` and `chronorag_full`. GSM is not the next direction for this benchmark checkpoint.
 
 ## Output-Contract Hardening
 
@@ -160,20 +139,20 @@ python3 benchmarks/layer2_crossdomain/run_layer2_comparison.py \
   --result-suffix smoke
 ```
 
-No-Vertex retrieval-only run for ChronoRAG-GSM:
+No-Vertex retrieval-only run for ChronoRAG full:
 
 ```bash
 python3 benchmarks/layer2_crossdomain/run_layer2_comparison.py \
-  --method chronorag_gsm \
+  --method chronorag_full \
   --mode dry_run \
   --dataset real \
   --limit 200 \
-  --result-suffix retrieval_only_chronorag_gsm_bge_base \
+  --result-suffix retrieval_only_chronorag_full_bge_base \
   --embedding-model BAAI/bge-base-en-v1.5 \
   --embedding-dim 768
 
 python3 benchmarks/layer2_crossdomain/evaluate_retrieval_only.py \
-  --results benchmarks/layer2_crossdomain/results/layer2_chronorag_gsm_retrieval_only_chronorag_gsm_bge_base_results.json \
+  --results benchmarks/layer2_crossdomain/results/layer2_chronorag_full_retrieval_only_chronorag_full_bge_base_results.json \
   --questions benchmarks/layer2_crossdomain/data/layer2_questions.jsonl
 ```
 
@@ -192,7 +171,7 @@ Estimate Vertex calls without running Gemini:
 
 ```bash
 python3 benchmarks/layer2_crossdomain/run_layer2_comparison.py \
-  --method chronorag_gsm \
+  --method chronorag_full \
   --mode vertex \
   --limit 1 \
   --estimate-only
@@ -215,21 +194,21 @@ Estimate-only commands:
 
 ```bash
 python3 benchmarks/layer2_crossdomain/run_layer2_comparison.py --method metadata_temporal_rag --mode vertex --limit 1 --estimate-only
-python3 benchmarks/layer2_crossdomain/run_layer2_comparison.py --method chronorag_gsm --mode vertex --limit 1 --estimate-only
+python3 benchmarks/layer2_crossdomain/run_layer2_comparison.py --method chronorag_full --mode vertex --limit 1 --estimate-only
 ```
 
 One-case dry-run prompt commands:
 
 ```bash
 python3 benchmarks/layer2_crossdomain/run_layer2_comparison.py --method metadata_temporal_rag --mode vertex --limit 1 --dry-run-prompts --result-suffix metadata_dryrun
-python3 benchmarks/layer2_crossdomain/run_layer2_comparison.py --method chronorag_gsm --mode vertex --limit 1 --dry-run-prompts --result-suffix chrono_gsm_dryrun
+python3 benchmarks/layer2_crossdomain/run_layer2_comparison.py --method chronorag_full --mode vertex --limit 1 --dry-run-prompts --result-suffix chronorag_full_dryrun
 ```
 
 Optional paid/provider-backed one-case commands:
 
 ```bash
 python3 benchmarks/layer2_crossdomain/run_layer2_comparison.py --method metadata_temporal_rag --mode vertex --limit 1 --result-suffix metadata_vertex_1
-python3 benchmarks/layer2_crossdomain/run_layer2_comparison.py --method chronorag_gsm --mode vertex --limit 1 --result-suffix chrono_gsm_vertex_1
+python3 benchmarks/layer2_crossdomain/run_layer2_comparison.py --method chronorag_full --mode vertex --limit 1 --result-suffix chronorag_full_vertex_1
 ```
 
 Recommended controlled GCP 25-case pilot with retry, resume, and traffic
@@ -241,7 +220,7 @@ python benchmarks/layer2_crossdomain/run_layer2_comparison.py \
   --mode vertex \
   --dataset real \
   --limit 25 \
-  --result-suffix vertex_pilot25_gsm \
+  --result-suffix vertex_pilot25_chronorag_full \
   --vertex-location global \
   --request-sleep-seconds 8 \
   --retry-max-attempts 6 \
@@ -252,16 +231,16 @@ python benchmarks/layer2_crossdomain/run_layer2_comparison.py \
   --resume
 ```
 
-Method-isolated ChronoRAG-GSM run, only after retrieval-only metrics meet the
+Method-isolated ChronoRAG full run, only after retrieval-only metrics meet the
 target:
 
 ```bash
 python benchmarks/layer2_crossdomain/run_layer2_comparison.py \
-  --method chronorag_gsm \
+  --method chronorag_full \
   --mode vertex \
   --dataset real \
   --limit 25 \
-  --result-suffix vertex_chrono_gsm25 \
+  --result-suffix vertex_chronorag_full25 \
   --vertex-location global \
   --request-sleep-seconds 8 \
   --retry-max-attempts 6 \
@@ -284,8 +263,9 @@ explicitly being published as result artifacts.
 Only tiny fixture data is included in smoke paths. Do not use smoke outputs as
 evidence that ChronoRAG outperforms baselines. Retrieval-only metrics must be
 reported separately from answer-judge metrics. Do not run full Vertex answer or
-judge comparisons until retrieval-only `chronorag_gsm` improves over
-`chronorag_full`; no SOTA or public benchmark proof is claimed here.
+judge comparisons until the benchmark questions, validation cards, and
+retrieval-only evaluator artifacts are trustworthy; no SOTA or public benchmark
+proof is claimed here.
 
 ## Raw Pool
 
@@ -296,7 +276,7 @@ downloaded scale and domain breakdown.
 
 ## Public Communication Rule
 
-It is acceptable to say this framework compares ChronoRAG-GSM against a
+It is acceptable to say this framework compares ChronoRAG full against a
 metadata-aware temporal RAG baseline. It is not acceptable to claim ChronoRAG
 wins until full benchmark results are produced. LinkedIn or project visuals
 must use real generated result files only. The raw source pool scale can be

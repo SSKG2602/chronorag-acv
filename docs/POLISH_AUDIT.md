@@ -64,7 +64,7 @@ candidate domains include policy revisions, software documentation versions,
 company filings, or scientific guideline updates.
 
 The comparison framework now exists under `benchmarks/layer2_crossdomain/`.
-It supports independent metadata temporal RAG and ChronoRAG-GSM comparisons with
+It supports independent metadata temporal RAG and ChronoRAG full comparisons with
 a generated local 5,000-row / 200-question data path. Direct full-context is
 kept only as a historical/small-context diagnostic. It does not establish a
 result claim yet.
@@ -102,13 +102,9 @@ degradation behavior against manually labeled cases.
   consumed by `app/services/answer_service.py`, and covered by
   `tests/unit/test_dhqc_caps.py`. It affects controller planning telemetry, but
   it is not the main Layer 1B contribution.
-- GSM status: active auxiliary module. It is used in
-  `app/services/ingest_service.py`, `app/services/retrieve_service.py`, and
-  `core/router/temporal_router.py` for source-risk, intent, and temporal
-  normalization heuristics.
 - Graph path status: stub-only. `core/retrieval/graph_paths.py` only raises
   `GraphNotConfigured`, so graph retrieval is not implemented in the current
   proof path.
 - Not part of current proof: graph retrieval, external baseline comparison,
-  Layer 2 cross-domain generalization, and any claim that DHQC or GSM are the
+  Layer 2 cross-domain generalization, and any claim that DHQC is the
   main architectural novelty.

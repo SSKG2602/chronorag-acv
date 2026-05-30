@@ -20,10 +20,10 @@ from benchmarks.layer2_crossdomain.vertex_retry import call_with_backoff
 from benchmarks.layer2_crossdomain.prompts import build_evidence_fact_sentence
 from benchmarks.layer2_crossdomain.llm_judge import evidence_cards_from_rows, validate_case_v3
 
-METHODS = ("direct_llm_full_context", "metadata_temporal_rag", "chronorag_full", "chronorag_gsm")
+METHODS = ("direct_llm_full_context", "metadata_temporal_rag", "chronorag_full")
 # Direct full-context remains callable for historical diagnostics, but it is
 # not a retrieval baseline and can truncate on the 5,000-row Layer 2A corpus.
-DEFAULT_METHODS = ("metadata_temporal_rag", "chronorag_gsm")
+DEFAULT_METHODS = ("metadata_temporal_rag", "chronorag_full")
 DEFAULT_CORPUS = "benchmarks/layer2_crossdomain/data/layer2_corpus.sample.jsonl"
 DEFAULT_QUESTIONS = "benchmarks/layer2_crossdomain/data/layer2_questions.sample.jsonl"
 REAL_CORPUS = "benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl"
@@ -393,8 +393,6 @@ def _method_module(method: str):
         from benchmarks.layer2_crossdomain.methods.metadata_temporal_rag import runner
     elif method == "chronorag_full":
         from benchmarks.layer2_crossdomain.methods.chronorag_full import runner
-    elif method == "chronorag_gsm":
-        from benchmarks.layer2_crossdomain.methods.chronorag_gsm import runner
     else:
         raise ValueError(f"Unknown method: {method}")
     return runner

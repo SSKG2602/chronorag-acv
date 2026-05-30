@@ -22,8 +22,8 @@ Minimum retrieval target before a full Vertex rerun:
 
 | Metric | Target |
 |---|---:|
-| `chronorag_gsm` overall Hit@5 | > 0.70 |
-| `chronorag_gsm` forbidden_absent@5 | > 0.90 |
+| `chronorag_full` overall Hit@5 | > 0.70 |
+| `chronorag_full` forbidden_absent@5 | > 0.90 |
 | transaction_time_vs_valid_time forbidden_absent@5 | > 0.80 |
 | same_entity_wrong_year_trap forbidden_absent@5 | > 0.80 |
 | exact_valid_time_retrieval Hit@5 | 1.00 |

@@ -79,7 +79,6 @@ chronorag/
 ├── core/                   # Temporal reasoning, retrieval, routing, generation modules
 │   ├── dhqc/               # Retrieval-hop planning helper used by answer orchestration
 │   ├── generator/          # Prompting, backend loading, answer generation
-│   ├── gsm/                # Intent, source-risk, and metadata heuristics
 │   ├── retrieval/          # BM25, reranking, LLM judge hooks
 │   └── router/             # Temporal query routing
 ├── storage/                # Cache, graph, and PVDB persistence layers
@@ -112,9 +111,6 @@ chronorag/
 - Controller telemetry: hop plan, executed hops, latency, token counts, degradation reason, retrieval weights, and router metrics.
 - DHQC remains in the runtime path as a small retrieval-hop planning helper, but
   it is not the main architectural contribution of the current checkpoint.
-- GSM remains in the runtime path for intent detection, temporal hint
-  normalization, and source-risk heuristics, but it is a supporting layer around
-  the TCC plus retrieval pipeline rather than the headline mechanism.
 - Config-driven model and policy selection through YAML files.
 - Lightweight mode for tests/smoke runs and full mode for model-backed execution.
 
@@ -142,9 +138,9 @@ chronorag/
 ## Scope Note
 
 Temporal Contextual Chunking, temporal retrieval, and grounded answer
-validation are the core of the current ChronoRAG checkpoint. DHQC and GSM are
-still part of the active code path, but they should be described as supporting
-heuristic/controller modules rather than the main architectural contribution.
+validation are the core of the current ChronoRAG checkpoint. DHQC is
+still part of the active code path, but it should be described as a supporting
+heuristic/controller module rather than the main architectural contribution.
 Graph-based retrieval is not part of the current working path.
 
 ## Setup
@@ -460,7 +456,7 @@ question set, same Gemini/Vertex model in provider mode, and same final
 validator:
 
 1. Metadata-aware temporal RAG baseline.
-2. ChronoRAG-GSM: ChronoRAG full plus deterministic Guided Semantic Mode.
+2. ChronoRAG full adapter using TCC, temporal precision, and monotone temporal fusion.
 
 Direct LLM full-context remains available only as a historical/small-context
 diagnostic. It is deprecated for serious 5,000-row Layer 2A because it is not a
@@ -482,7 +478,6 @@ synthesis. This is capability hardening, not a superiority claim.
 |---|---:|---:|---|---:|---:|---:|---:|---:|---:|---|
 | Metadata temporal RAG | pending | pending | pending | pending | pending | pending | pending | pending | pending | framework ready |
 | ChronoRAG full | pending | pending | pending | pending | pending | pending | pending | pending | pending | framework ready |
-| ChronoRAG-GSM | pending | pending | pending | pending | pending | pending | pending | pending | pending | retrieval planner ready |
 
 Current Layer 1A light-mode retrieval result:
 
@@ -518,7 +513,7 @@ python benchmarks/run_temporal_eval_v2.py --light
 
 1. **Layer 2 controlled comparison**
    - Run the 5,000-row / 200-question cross-domain comparison against
-     metadata-aware temporal RAG, with ChronoRAG-GSM as the ChronoRAG method.
+     metadata-aware temporal RAG, with ChronoRAG full as the ChronoRAG method.
    - Treat diagnostic pilots as debugging evidence, not final benchmark wins.
 
 2. **Temporal retrieval ablations**

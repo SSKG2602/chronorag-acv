@@ -6,7 +6,7 @@ should broaden evidence, domains, and baselines without claiming SOTA or
 publication-grade proof prematurely.
 
 Temporal Contextual Chunking is the current architectural center. Older helper
-layers such as DHQC and GSM may still be useful for controller and heuristic
+layers such as DHQC may still be useful for controller and heuristic
 support, but they are not the main research claim of the present checkpoint.
 Graph retrieval is still future work rather than an active subsystem.
 
@@ -42,8 +42,7 @@ Candidate domains:
 - legal case history
 
 The Layer 2A comparison target is an independent metadata temporal RAG baseline
-against ChronoRAG-GSM, which adds deterministic temporal intent planning to the
-existing TCC/retrieval framework. Direct Gemini full-context is deprecated for
+against ChronoRAG full, using the existing TCC/retrieval framework. Direct Gemini full-context is deprecated for
 serious 5,000-row Layer 2A because it is not retrieval-based and can truncate
 heavily. No result claim exists until the full cross-domain benchmark is built
 and run.

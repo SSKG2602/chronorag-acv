@@ -40,7 +40,6 @@ The core layer holds reusable research modules.
 | `core/dhqc/` | Plans retrieval hops from coverage/authority signals inside answer orchestration. This is active, but auxiliary to the main TCC plus retrieval path. |
 | `core/retrieval/` | BM25, cross-encoder, and LLM judge retrieval components. |
 | `core/generator/` | Prompt construction, backend selection, structured answer generation. |
-| `core/gsm/` | Source-risk, intent, and temporal-normalization heuristics used during ingest, routing, and retrieval. Active, but not the central contribution of the current checkpoint. |
 
 ### 4. Storage Layer: `storage/`
 
@@ -159,8 +158,8 @@ sequenceDiagram
   benchmark is still required.
 - Temporal Contextual Chunking is implemented and wired into ingestion. Broader
   external validation and multi-domain benchmarking remain future work.
-- DHQC and GSM are active support modules, but the current proof does not depend
-  on them as novel research claims.
+- DHQC is an active support module, but the current proof does not depend
+  on it as a novel research claim.
 - Graph path retrieval is not implemented beyond a disabled stub.
 - No UI/demo surface yet.
 - No external observability stack yet.

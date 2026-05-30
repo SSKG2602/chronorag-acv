@@ -46,10 +46,9 @@ The system is organized into:
 
 Supporting modules still exist around this main path. DHQC is an active
 controller helper that plans retrieval-hop budgets from simple coverage and
-authority signals. GSM is an active heuristics layer for intent detection,
-temporal hint normalization, and source-risk scoring. Both are part of the
-working system, but neither is the main contribution of the current TCC plus
-Layer 1B checkpoint.
+authority signals. The experimental GSM Layer 2A path is removed from the active
+benchmark surface and is not part of the current TCC plus Layer 1B checkpoint
+claim.
 
 ## 4. Retrieval Pipeline
 

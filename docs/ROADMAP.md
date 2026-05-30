@@ -49,11 +49,11 @@ without overclaiming diagnostic pilots.
 - Maintain the 5,000-row / 200-question generated dataset path before claiming
   cross-domain performance.
 - Evaluate generalization across domains using independent metadata temporal
-  RAG and ChronoRAG-GSM under the same corpus, model, and validator.
+  RAG and ChronoRAG full under the same corpus, model, and validator.
 - Treat small Vertex pilots as diagnostics, not final benchmark results.
 - Separate retrieval metrics from provider-backed answer synthesis quality.
 - Use the new `benchmarks/layer2_crossdomain/` framework to compare metadata
-  temporal RAG and ChronoRAG-GSM under the same corpus, model, and validator.
+  temporal RAG and ChronoRAG full under the same corpus, model, and validator.
 - Use multi-granularity symbolic temporal precision for dense time-series rows:
   exact dates/timestamps must outrank same-year wrong-date evidence before
   embedding similarity is considered sufficient.
@@ -72,7 +72,8 @@ without overclaiming diagnostic pilots.
 
 - Temporal Contextual Chunking, temporal retrieval, and grounded answer
   validation define the current core path.
-- DHQC and GSM remain active support modules and may continue to evolve, but
-  they are not the main claim of the current checkpoint.
+- DHQC remains an active support module and may continue to evolve, but it is
+  not the main claim of the current checkpoint. The experimental GSM Layer 2A
+  path is detached from the active benchmark surface.
 - Graph retrieval remains future work until `graph_paths.py` is replaced with a
   real implementation.
