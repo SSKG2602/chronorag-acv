@@ -141,5 +141,75 @@ def test_dataset_validator_catches_malformed_wrong_year_and_forbidden_overlap(tm
     )
 
     assert completed.returncode == 1
-    assert "malformed wrong-year wording" in completed.stdout
+    assert "malformed wrong-time wording" in completed.stdout
     assert "both allowed and forbidden" in completed.stdout
+
+
+def test_dataset_validator_allows_same_year_when_full_dates_differ(tmp_path: Path) -> None:
+    corpus_path = tmp_path / "corpus.jsonl"
+    questions_path = tmp_path / "questions.jsonl"
+    row = {
+        "id": "target",
+        "domain": "fixture",
+        "source_family": "fixture",
+        "source_file": "fixture.jsonl",
+        "source_kind": "fixture",
+        "entity": "GDP",
+        "related_entities": [],
+        "metric_or_claim": "value",
+        "value": 1,
+        "unit": "index",
+        "valid_from": "1968-12-30",
+        "valid_to": "1968-12-30",
+        "transaction_time": None,
+        "temporal_type": "valid_time_exact",
+        "raw_text": "GDP value on 1968-12-30 was 1.",
+        "metadata": {},
+        "tags": [],
+    }
+    corpus_path.write_text(json.dumps(row) + "\n", encoding="utf-8")
+    questions_path.write_text(
+        json.dumps(
+            {
+                "id": "date_trap",
+                "domain": "fixture",
+                "question": "For GDP, answer value for 1968-12-30, not 1968-12-05.",
+                "category": "same_entity_wrong_year_trap",
+                "expected_behavior": "answer",
+                "expected_evidence_ids": ["target"],
+                "acceptable_evidence_ids": [],
+                "forbidden_evidence_ids": [],
+                "required_facts": ["1968-12-30"],
+                "forbidden_facts": ["1968-12-05"],
+                "expected_valid_time": ["1968-12-30"],
+                "notes": "fixture",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(VALIDATOR),
+            "--corpus",
+            str(corpus_path),
+            "--questions",
+            str(questions_path),
+            "--expected-corpus-rows",
+            "1",
+            "--expected-questions",
+            "1",
+            "--methods",
+            "metadata_temporal_rag",
+            "chronorag_full",
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+    )
+
+    assert completed.returncode == 1
+    assert "malformed wrong-time wording" not in completed.stdout
+    assert "Corpus domain distribution collapsed" in completed.stdout

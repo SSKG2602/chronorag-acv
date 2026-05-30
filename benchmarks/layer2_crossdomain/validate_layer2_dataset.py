@@ -16,8 +16,8 @@ from benchmarks.layer2_crossdomain.schemas import load_corpus, load_questions
 
 ACTIVE_RETRIEVAL_METHODS = {"metadata_temporal_rag", "chronorag_full"}
 DEFAULT_METHODS = sorted(ACTIVE_RETRIEVAL_METHODS)
-MALFORMED_WRONG_YEAR_RE = re.compile(
-    r"\b(?:for|in|on)\s+(?P<target>\d{4})(?:-\d{2}-\d{2})?\b.*?\bnot\s+(?:for|in|on\s+)?(?P=target)(?:-\d{2}-\d{2})?\b",
+WRONG_TIME_RE = re.compile(
+    r"\b(?:for|in|on)\s+(?P<target>\d{4}(?:-\d{2}-\d{2})?)\b.*?\bnot\s+(?:for|in|on\s+)?(?P<forbidden>\d{4}(?:-\d{2}-\d{2})?)\b",
     re.IGNORECASE,
 )
 
@@ -115,15 +115,28 @@ def _check_question_integrity(case, corpus_ids: set[str], synthetic_ids: set[str
 
     if case.category == "same_entity_wrong_year_trap":
         _expect(
-            not MALFORMED_WRONG_YEAR_RE.search(case.question),
+            not _has_malformed_wrong_time_wording(case.question),
             errors,
-            f"{case.id} has malformed wrong-year wording: target year and forbidden year are identical.",
+            f"{case.id} has malformed wrong-time wording: target time and forbidden time are identical or only repeat the same year.",
         )
 
     if case.expected_behavior in {"answer", "compare", "prefer_exact", "conflict_warning"}:
         _expect(bool(case.required_facts), errors, f"{case.id} answerable case has empty required_facts.")
     if "partial" in case.category or "insufficient" in case.category:
         _expect(case.expected_behavior in {"partial", "refuse", "clarify"}, errors, f"{case.id} partial category has wrong behavior.")
+
+def _has_malformed_wrong_time_wording(question: str) -> bool:
+    match = WRONG_TIME_RE.search(question)
+    if not match:
+        return False
+    target = match.group("target")
+    forbidden = match.group("forbidden")
+    if target == forbidden:
+        return True
+    # Same-year traps are valid only when the wording gives full different dates.
+    # Year-only repeats such as "for 1968, not 1968" are ambiguous and invalid.
+    return len(target) == 4 and len(forbidden) == 4 and target == forbidden
+
 
 def _check_date(value: str | None, errors: list[str], label: str) -> None:
     if not value:
