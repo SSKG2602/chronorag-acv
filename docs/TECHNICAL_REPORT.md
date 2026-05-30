@@ -46,9 +46,8 @@ The system is organized into:
 
 Supporting modules still exist around this main path. DHQC is an active
 controller helper that plans retrieval-hop budgets from simple coverage and
-authority signals. The experimental GSM Layer 2A path is removed from the active
-benchmark surface and is not part of the current TCC plus Layer 1B checkpoint
-claim.
+authority signals. Historical experimental Layer 2A paths are outside the
+current TCC plus Layer 1B checkpoint claim.
 
 ## 4. Retrieval Pipeline
 

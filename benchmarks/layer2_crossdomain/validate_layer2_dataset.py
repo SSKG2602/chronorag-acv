@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import importlib
+import re
 import sys
 from collections import Counter
 from pathlib import Path
@@ -11,6 +13,13 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from benchmarks.layer2_crossdomain.schemas import load_corpus, load_questions
+
+ACTIVE_RETRIEVAL_METHODS = {"metadata_temporal_rag", "chronorag_full"}
+DEFAULT_METHODS = sorted(ACTIVE_RETRIEVAL_METHODS)
+MALFORMED_WRONG_YEAR_RE = re.compile(
+    r"\b(?:for|in|on)\s+(?P<target>\d{4})(?:-\d{2}-\d{2})?\b.*?\bnot\s+(?:for|in|on\s+)?(?P=target)(?:-\d{2}-\d{2})?\b",
+    re.IGNORECASE,
+)
 
 DEFAULT_CORPUS = Path("benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl")
 DEFAULT_QUESTIONS = Path("benchmarks/layer2_crossdomain/data/layer2_questions.jsonl")
@@ -22,11 +31,18 @@ def main() -> None:
     parser.add_argument("--questions", default=str(DEFAULT_QUESTIONS))
     parser.add_argument("--expected-corpus-rows", type=int, default=5000)
     parser.add_argument("--expected-questions", type=int, default=200)
+    parser.add_argument(
+        "--methods",
+        nargs="+",
+        default=DEFAULT_METHODS,
+        help="Active retrieval methods that must be importable before a full run.",
+    )
     args = parser.parse_args()
 
     corpus_path = Path(args.corpus)
     questions_path = Path(args.questions)
     errors: list[str] = []
+    _check_active_methods(args.methods, errors)
     if not corpus_path.exists():
         errors.append(f"Missing corpus file: {corpus_path}")
     if not questions_path.exists():
@@ -56,16 +72,7 @@ def main() -> None:
             _expect(not row.valid_from and not row.valid_to, errors, f"{row.id} is transaction_time_only but has valid-time fields.")
 
     for case in questions:
-        all_ids = case.expected_evidence_ids + case.acceptable_evidence_ids + case.forbidden_evidence_ids
-        for evidence_id in all_ids:
-            if evidence_id not in corpus_ids and evidence_id not in synthetic_ids and not evidence_id.startswith("synthetic:"):
-                errors.append(f"{case.id} references missing evidence ID: {evidence_id}")
-        for token in ("expected_evidence_ids", "required_facts", "forbidden_facts", "acceptable_evidence_ids"):
-            _expect(token not in case.question, errors, f"{case.id} leaks answer-key token in question text: {token}")
-        if case.expected_behavior in {"answer", "compare", "prefer_exact", "conflict_warning"}:
-            _expect(bool(case.required_facts), errors, f"{case.id} answerable case has empty required_facts.")
-        if "partial" in case.category or "insufficient" in case.category:
-            _expect(case.expected_behavior in {"partial", "refuse", "clarify"}, errors, f"{case.id} partial category has wrong behavior.")
+        _check_question_integrity(case, corpus_ids, synthetic_ids, errors)
 
     domain_counts = Counter(row.domain for row in corpus)
     category_counts = Counter(case.category for case in questions)
@@ -74,6 +81,49 @@ def main() -> None:
 
     _finish(errors, domain_counts, category_counts)
 
+
+
+def _check_active_methods(methods: list[str], errors: list[str]) -> None:
+    for method in methods:
+        if method not in ACTIVE_RETRIEVAL_METHODS:
+            errors.append(f"Inactive or unknown Layer 2A method requested: {method}")
+            continue
+        try:
+            # Import only the runner module. This catches broken registry paths
+            # without running retrieval or calling Vertex.
+            importlib.import_module(f"benchmarks.layer2_crossdomain.methods.{method}.runner")
+        except Exception as exc:  # pragma: no cover - message is what matters.
+            errors.append(f"Cannot import Layer 2A method {method}: {exc}")
+
+
+def _check_question_integrity(case, corpus_ids: set[str], synthetic_ids: set[str], errors: list[str]) -> None:
+    expected = set(case.expected_evidence_ids)
+    acceptable = set(case.acceptable_evidence_ids)
+    forbidden = set(case.forbidden_evidence_ids)
+    all_ids = case.expected_evidence_ids + case.acceptable_evidence_ids + case.forbidden_evidence_ids
+
+    for evidence_id in all_ids:
+        if evidence_id not in corpus_ids and evidence_id not in synthetic_ids and not evidence_id.startswith("synthetic:"):
+            errors.append(f"{case.id} references missing evidence ID: {evidence_id}")
+
+    # Expected/acceptable evidence may overlap; forbidden evidence must not.
+    forbidden_overlap = sorted((expected | acceptable) & forbidden)
+    _expect(not forbidden_overlap, errors, f"{case.id} has evidence both allowed and forbidden: {', '.join(forbidden_overlap)}")
+
+    for token in ("expected_evidence_ids", "required_facts", "forbidden_facts", "acceptable_evidence_ids"):
+        _expect(token not in case.question, errors, f"{case.id} leaks answer-key token in question text: {token}")
+
+    if case.category == "same_entity_wrong_year_trap":
+        _expect(
+            not MALFORMED_WRONG_YEAR_RE.search(case.question),
+            errors,
+            f"{case.id} has malformed wrong-year wording: target year and forbidden year are identical.",
+        )
+
+    if case.expected_behavior in {"answer", "compare", "prefer_exact", "conflict_warning"}:
+        _expect(bool(case.required_facts), errors, f"{case.id} answerable case has empty required_facts.")
+    if "partial" in case.category or "insufficient" in case.category:
+        _expect(case.expected_behavior in {"partial", "refuse", "clarify"}, errors, f"{case.id} partial category has wrong behavior.")
 
 def _check_date(value: str | None, errors: list[str], label: str) -> None:
     if not value:

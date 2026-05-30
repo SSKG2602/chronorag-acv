@@ -102,9 +102,9 @@ prove SOTA or publication-grade performance. It audits existing result JSONs so
 retrieval policy and benchmark-question fixes can be decided after the scoring
 semantics are clean.
 
-## GSM Detachment
+## Active Method Surface
 
-The experimental `chronorag_gsm` Layer 2A path has been removed from the active benchmark surface. Layer 2A now compares only `metadata_temporal_rag` and `chronorag_full`. GSM is not the next direction for this benchmark checkpoint.
+Layer 2A now compares only `metadata_temporal_rag` and `chronorag_full`. Historical experimental method paths are not part of the active benchmark surface.
 
 ## Output-Contract Hardening
 

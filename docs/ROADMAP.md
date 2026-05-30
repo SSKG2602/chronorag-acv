@@ -73,7 +73,7 @@ without overclaiming diagnostic pilots.
 - Temporal Contextual Chunking, temporal retrieval, and grounded answer
   validation define the current core path.
 - DHQC remains an active support module and may continue to evolve, but it is
-  not the main claim of the current checkpoint. The experimental GSM Layer 2A
-  path is detached from the active benchmark surface.
+  not the main claim of the current checkpoint. Historical Layer 2A experiments
+  are outside the active benchmark surface.
 - Graph retrieval remains future work until `graph_paths.py` is replaced with a
   real implementation.

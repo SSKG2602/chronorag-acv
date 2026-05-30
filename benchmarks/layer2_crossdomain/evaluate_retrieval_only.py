@@ -246,6 +246,12 @@ def score_case(case: QuestionCase, selected: list[str]) -> dict[str, Any]:
         "category": case.category,
         "expected_behavior": case.expected_behavior,
         "selected_evidence_ids": selected,
+        "expected_evidence_ids": list(case.expected_evidence_ids),
+        "acceptable_evidence_ids": list(case.acceptable_evidence_ids),
+        "forbidden_evidence_ids": list(case.forbidden_evidence_ids),
+        "selected_expected_overlap": sorted(top5_set & expected),
+        "selected_acceptable_overlap": sorted(top5_set & acceptable),
+        "selected_forbidden_overlap": sorted(top5_set & forbidden),
         "scores": scores,
         "warnings": warnings,
     }
@@ -328,11 +334,44 @@ def render_markdown(reports: list[dict[str, Any]], comparison: dict[str, Any] | 
             lines.extend(["", "### Warnings", "", "| Warning | Count |", "|---|---:|"])
             for warning, count in report["warning_counts"].items():
                 lines.append(f"| {warning} | {count} |")
+        lines.extend(_render_validation_cards(report))
 
     if comparison is not None:
         lines.extend(_render_pairwise_markdown(comparison))
     return "\n".join(lines)
 
+
+
+def _render_validation_cards(report: dict[str, Any]) -> list[str]:
+    # These cards use scored evaluator rows, not raw method rows.
+    # Raw result rows only tell what the method selected; scoring lives here.
+    lines = [
+        "",
+        "### Validation cards",
+        "",
+        "Each card reads `selected_evidence_ids` from the method result and then attaches the evaluator's expected/acceptable/forbidden overlaps. This prevents raw-result fields from being mistaken for scored fields.",
+        "",
+        "| Case | Category | Selected evidence | Expected hit | Acceptable hit | Forbidden hit | Primary pass | Warnings |",
+        "|---|---|---|---|---|---|---:|---|",
+    ]
+    for case in report.get("case_reports", []):
+        scores = case.get("scores", {})
+        lines.append(
+            f"| {case['case_id']} | {case['category']} | {_join(case.get('selected_evidence_ids'))} | "
+            f"{_join(case.get('selected_expected_overlap'))} | {_join(case.get('selected_acceptable_overlap'))} | "
+            f"{_join(case.get('selected_forbidden_overlap'))} | {_fmt(scores, 'category_primary_pass')} | "
+            f"{_join(case.get('warnings'))} |"
+        )
+    return lines
+
+
+def _join(values: Any) -> str:
+    # Keep markdown compact and deterministic.
+    if not values:
+        return "—"
+    if isinstance(values, str):
+        return values
+    return ", ".join(str(item) for item in values)
 
 def _render_pairwise_markdown(comparison: dict[str, Any]) -> list[str]:
     left, right = comparison["methods"]
