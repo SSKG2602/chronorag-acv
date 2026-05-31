@@ -35,6 +35,9 @@ or publication-grade proof.
 - Layer 2 ChronoRAG adapter retrieval applies symbolic multi-granularity
   temporal precision for dense exact-date/timestamp cases, and core TCC now
   preserves the same precision metadata.
+- Layer 2A retrieval scoring now includes polarity-aware temporal intent:
+  requested temporal mentions are positive constraints, while locally excluded
+  mentions such as `not 1990-03-28` are negative constraints.
 - The primary stored Vertex result is
   `benchmarks/results/temporal_answer_validation_v2_vertex_topk5_results.md`.
 - The dynamic top-k result is stored separately as a diagnostic at
@@ -69,14 +72,17 @@ a generated local 5,000-row / 200-question data path. Direct full-context is
 kept only as a historical/small-context diagnostic. It does not establish a
 result claim yet.
 
-A limited Vertex pilot was diagnostic only. It showed that ChronoRAG's adapter
-could fail dense FRED daily exact-date retrieval when time was reduced to year
-granularity. Adapter-side precision fixed the ChronoRAG-only pilot from 2/5 to
-5/5, and the reusable parser was moved into `core/ingestion/temporal_precision.py`.
-Core TCC now preserves year, month, day, hour, minute, second, range, fuzzy,
-daypart, and role metadata while keeping valid time separate from
-transaction/publication/filing/release time. This repair should not be presented
-as a benchmark win.
+Layer 2A diagnostic work has clarified the need for exact temporal intent in
+dense daily series. The reusable parser now lives in
+`core/ingestion/temporal_precision.py`. Core TCC preserves year, month, day,
+hour, minute, second, range, fuzzy, and daypart metadata while carrying role and
+polarity in temporal constraints. Valid time remains separate from
+transaction/publication/filing/release time. This is retrieval precision
+hardening, not a benchmark win.
+
+Next planned step: rerun 50-case and 200-case retrieval-only Layer 2A with
+polarity-aware temporal scoring. Active hybrid retrieval with embeddings should
+remain a separate patch if the retrieval-only rerun shows it is needed.
 
 ### P2: External Baselines
 

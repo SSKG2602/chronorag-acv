@@ -103,6 +103,9 @@ chronorag/
 - Hybrid retrieval using BM25 lexical search plus vector retrieval.
 - Domain-aware retrieval fan-out for world-economy queries.
 - Temporal filtering before final ranking.
+- Polarity-aware temporal intent handling for contrastive queries, so requested
+  dates and explicitly excluded dates can be scored differently during
+  retrieval.
 - Cross-encoder reranking and optional LLM judge reranking.
 - Monotone temporal fusion, so time compliance is part of the final ranking score.
 - ChronoSanity-style conflict detection over overlapping evidence.
@@ -431,17 +434,18 @@ Primary top-k 5 Vertex result:
 | Grounding Validation Pass | 1.00 |
 | Temporal Rule Validation Pass | 0.93 |
 
-The failed top-k 5 cases are q08, q11, and q14. They remain documented as real
+The non-passing top-k 5 cases are q08, q11, and q14. They remain documented as
 answer-behavior limitations. The diagnostic dynamic-top-k run also scores 0.80
 overall, but it is exploratory and not the primary result.
 
-The current repair simplified the prompt, added schema normalization, preserved
-usable initial provider JSON when repair fails, kept default `--top-k 5`, and
-left the embedding model unchanged. Optional `--dynamic-top-k` can expand only
-complex cases for experiments. The final cleanup also made q02/q11/q13
-validation more behavior-aware: correct valid-time windows, true refusals, and
-provider flag shape drift are accepted without weakening grounding or temporal
-checks. Latest generated results are stored in `benchmarks/results/`.
+The current validation refinement simplified the prompt, added schema
+normalization, preserved usable initial provider JSON when a retry does not
+produce a usable response, kept default `--top-k 5`, and left the embedding
+model unchanged. Optional `--dynamic-top-k` can expand only complex cases for
+experiments. The final cleanup also made q02/q11/q13 validation more
+behavior-aware: correct valid-time windows, true refusals, and provider flag
+shape drift are accepted without weakening grounding or temporal checks. Latest
+generated results are stored in `benchmarks/results/`.
 
 ## Layer 2 Cross-Domain Comparison Framework
 
@@ -467,12 +471,13 @@ controlled benchmark construction, estimate-only checks, dry-run prompt review,
 and limited provider-backed runs. See `benchmarks/layer2_crossdomain/`.
 
 The current generated Layer 2 corpus path targets 5,000 processed rows and 200
-questions. A small diagnostic Vertex pilot exposed a real dense time-series
-failure: year-level scoring could retrieve wrong same-year FRED rows for exact
-daily Treasury-yield questions. Adapter-side temporal precision fixed the
-ChronoRAG-only 5-case pilot from 2/5 to 5/5, and the reusable precision parser
-now lives in core TCC so exact dates/timestamps can be preserved before answer
-synthesis. This is capability hardening, not a superiority claim.
+questions. Layer 2A has added temporal precision hardening for dense
+time-series rows and contrastive temporal intent. Target temporal mentions are
+treated as positive constraints, while locally excluded mentions such as
+`not 1990-03-28` are treated as negative constraints during retrieval scoring.
+This supports queries such as `use 1990-04-20, not 1990-03-28` without changing
+answer-generation validation. This is capability hardening, not a superiority
+claim.
 
 | Method | Corpus | Questions | Mode | Overall | Evidence | Valid-time | Transaction trap | Conflict | Refusal/partial | Status |
 |---|---:|---:|---|---:|---:|---:|---:|---:|---:|---|
@@ -502,6 +507,9 @@ python benchmarks/run_temporal_eval_v2.py --light
 - Temporal extraction is partly heuristic and depends on document formatting.
 - Layer 2 exact-time precision is now preserved in core TCC metadata and used by
   the comparison adapter; broader full-benchmark validation remains pending.
+- Polarity-aware temporal scoring is implemented for retrieval precision, but
+  new Layer 2A result claims should wait for fresh 50-case and 200-case
+  retrieval-only reruns.
 - Domain support is strongest for the world-economy/Maddison-style path; other domains need dedicated policy sets and evaluation.
 - Cross-encoder and LLM reranking can be expensive in full mode.
 - Local model execution depends on CPU/GPU memory and Hugging Face model access.
@@ -515,6 +523,9 @@ python benchmarks/run_temporal_eval_v2.py --light
    - Run the 5,000-row / 200-question cross-domain comparison against
      metadata-aware temporal RAG, with ChronoRAG full as the ChronoRAG method.
    - Treat diagnostic pilots as debugging evidence, not final benchmark wins.
+   - Next planned step: rerun 50-case and 200-case retrieval-only Layer 2A with
+     polarity-aware temporal scoring, then evaluate active hybrid retrieval
+     with embeddings as a separate patch if needed.
 
 2. **Temporal retrieval ablations**
    - BM25 only vs ANN only vs hybrid.

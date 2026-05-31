@@ -67,6 +67,8 @@ SOTA claim or publication-grade proof.
 - Keep core TCC precision metadata backward-compatible while extending
   `normalized_start`, `normalized_end`, `precision`, `temporal_role`, and
   ambiguity fields across ingestion paths.
+- Next planned step: rerun 50-case and 200-case retrieval-only Layer 2A, then
+  add active hybrid retrieval with embeddings as a separate patch if needed.
 
 ## P4: ChronoSanity Strengthening
 

@@ -174,11 +174,11 @@ is allowed only for provider-contract failures; grounding and temporal-rule
 failures are not retried away. A failed retry cannot overwrite a usable initial
 response.
 
-A full Vertex 15-case run has been executed. Its failure analysis showed
+A full Vertex 15-case run has been executed. Its analysis showed
 answer-completeness and provider-output contract issues rather than grounding or
-temporal-rule failures. The follow-up repair simplified the prompt, added
-schema normalization, preserved usable initial output across failed retries, and
-kept default `--top-k 5` and the embedding model unchanged while preserving the
+temporal-rule failures. The follow-up refinement simplified the prompt, added
+schema normalization, preserved usable initial output across retries, and kept
+default `--top-k 5` and the embedding model unchanged while preserving the
 controlled benchmark framing. Comparative runs can be stored with
 `--result-suffix` without changing default result paths. The final cleanup
 accepts correct q02/q11/q13 behavior via deterministic validation while keeping
@@ -189,8 +189,8 @@ The stored primary Layer 1B result is
 It uses top-k 5 and reports 0.80 answer overall pass, 1.00 expected evidence
 citation, 1.00 valid-time correctness, 1.00 transaction-time trap avoidance,
 1.00 provider-contract pass, 1.00 grounding validation pass, and 0.93 temporal
-rule validation pass. The failed cases are q08, q11, and q14. The dynamic top-k
-run is stored separately as a diagnostic result and is not the primary
+rule validation pass. The non-passing cases are q08, q11, and q14. The dynamic
+top-k run is stored separately as a diagnostic result and is not the primary
 benchmark claim.
 
 Layer 2A extends the controlled setting to a generated cross-domain local
@@ -202,10 +202,12 @@ temporal checks such as wrong-time/date trap avoidance, transaction-time trap
 avoidance, broad-window distractor avoidance, conflict-side coverage, and
 source/metric constraints.
 
-Temporal constraints are polarity-aware in retrieval scoring. Dates or times
-governed by local phrases such as `not`, `rather than`, or `instead of` are
-treated as negative constraints so explicitly forbidden dates do not receive the
-same temporal reward as the target date.
+Temporal constraints are polarity-aware in retrieval scoring. Target temporal
+mentions are positive constraints. Dates or times governed by local phrases such
+as `not`, `rather than`, `instead of`, `excluding`, or `as opposed to` are
+negative constraints. This supports contrastive temporal queries such as `use
+1990-04-20, not 1990-03-28` while keeping deterministic Layer 2A validation
+focused on selected evidence IDs.
 
 Layer 2A deterministic validation does not judge generated answer wording,
 behavior labels, required or forbidden fact strings in the answer,
@@ -215,6 +217,10 @@ placeholder answers such as `DRY RUN: prompt generated without provider call.`
 must not be interpreted as answer-quality results. Generated answer quality is
 reserved for a separate provider-backed grounded answer judge. Current Layer 2A
 status is controlled benchmark/debugging, not a public performance proof.
+
+The next planned Layer 2A step is a fresh 50-case and 200-case retrieval-only
+rerun. Active hybrid retrieval with embeddings remains a separate future patch
+if the retrieval-only results show it is needed.
 
 ## 9. Metrics
 

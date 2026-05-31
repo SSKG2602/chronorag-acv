@@ -44,21 +44,24 @@ No final Layer 2 results exist yet. This table is a placeholder for the
 | Metadata temporal RAG | pending | pending | pending | pending | pending | pending | pending | pending | pending | framework ready |
 | ChronoRAG full | pending | pending | pending | pending | pending | pending | pending | pending | pending | framework ready |
 
-## Temporal Precision Repair
+## Temporal Precision Hardening
 
-A limited Vertex pilot was diagnostic only, but it exposed a real retrieval
-issue in the ChronoRAG adapter on dense daily FRED series. The adapter was
-scoring expected time at year granularity, so exact-date queries such as
-`1962-08-15` could retrieve same-year wrong-date rows. Adapter-side precision
-fixed the ChronoRAG-only pilot from 2/5 to 5/5. The reusable parser now lives in
+Layer 2A now includes temporal precision hardening for dense daily series and
+contrastive temporal intent. The reusable parser lives in
 `core/ingestion/temporal_precision.py`, and
-`benchmarks/layer2_crossdomain/temporal_precision.py` is a compatibility wrapper
-for Layer 2 scoring.
+`benchmarks/layer2_crossdomain/temporal_precision.py` remains a compatibility
+wrapper for Layer 2 scoring.
 
 Supported retrieval precision includes year, month, day, hour, minute, second,
 ranges, fuzzy ranges, quarters, dayparts, and phrases such as `early 2024` or
 `around 2024-10-23`. Valid time and transaction/publication/filing/release time
 remain separate. Exact-time precision is not delegated only to embeddings.
+Temporal constraints are polarity-aware: target temporal mentions are positive
+constraints, and locally excluded mentions after phrases such as `not`, `rather
+than`, `instead of`, `excluding`, or `as opposed to` are negative constraints.
+This lets retrieval scoring handle contrastive queries such as `use
+1990-04-20, not 1990-03-28` without treating dry-run answer text as a quality
+signal.
 
 `config/models.yaml` documents optional retrieval profiles. `light` keeps
 `BAAI/bge-small-en-v1.5` at 384 dimensions for laptop-friendly runs. For Layer
@@ -107,8 +110,9 @@ clarification target. Retrieval hits for those categories are diagnostics only.
 
 This evaluator does not call Vertex, does not rerun retrieval, does not score
 generated answers, and does not prove SOTA or publication-grade performance. It
-audits existing result JSONs so retrieval policy and benchmark-question fixes
-can be decided after the scoring semantics are clean. Dry-run outputs such as
+audits existing result JSONs so retrieval policy and benchmark-question
+refinements can be decided after the scoring semantics are clean. Dry-run
+outputs such as
 `DRY RUN: prompt generated without provider call.` must not be interpreted as
 answer-quality results.
 
@@ -116,6 +120,10 @@ ChronoRAG temporal scoring now treats locally negated dates and times as
 negative constraints. For example, in `for 1990-04-20, not 1990-03-28`, the
 first date is the positive retrieval target and the second date is penalized as
 explicitly forbidden evidence.
+
+Next planned step: rerun 50-case and 200-case retrieval-only Layer 2A with this
+temporal-intent handling, then add active hybrid retrieval with embeddings as a
+separate patch if the retrieval-only results show it is needed.
 
 ## Grounded Answer Judge Boundary
 
