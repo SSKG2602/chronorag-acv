@@ -39,10 +39,41 @@ def test_exact_valid_time_scoring_keeps_generic_and_category_metrics():
     report = score_case(_case(expected=["target"], forbidden=["bad"]), ["target", "bad"])
     scores = report["scores"]
     assert scores["generic_hit@1"] is True
-    assert scores["expected_hit@1"] is True
-    assert scores["expected_hit@5"] is True
+    assert scores["expected_hit_at_1"] is True
+    assert scores["expected_hit_at_k"] is True
     assert scores["generic_forbidden_absent@5"] is False
-    assert scores["category_primary_pass"] is True
+    assert scores["forbidden_absent_at_k"] is False
+    assert scores["category_primary_pass"] is False
+    assert report["retrieval_pass_reason"] == "fail: forbidden_absent_at_k"
+
+
+def test_selected_evidence_ids_drive_scoring_not_answer_text(tmp_path: Path):
+    questions = {"case_ok": _case(case_id="case_ok", expected=["target"], forbidden=["bad"])}
+    path = tmp_path / "results.json"
+    path.write_text(
+        json.dumps(
+            {
+                "method": "fixture_method",
+                "results": [
+                    {
+                        "case_id": "case_ok",
+                        "selected_evidence_ids": ["target"],
+                        "answer": {
+                            "answer": "DRY RUN: prompt generated without provider call.",
+                            "cited_evidence_ids": ["bad"],
+                            "behavior": "partial",
+                        },
+                    },
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    report = evaluate_result_file(path, questions)
+    case_report = report["case_reports"][0]
+    assert case_report["scores"]["expected_hit_at_k"] is True
+    assert case_report["scores"]["forbidden_absent_at_k"] is True
+    assert case_report["retrieval_pass"] is True
 
 
 def test_transaction_time_scoring_requires_valid_hit_and_forbidden_absence():
@@ -51,8 +82,8 @@ def test_transaction_time_scoring_requires_valid_hit_and_forbidden_absence():
         ["valid", "transaction_only"],
     )
     scores = report["scores"]
-    assert scores["valid_time_hit@5"] is True
-    assert scores["transaction_forbidden_absent@5"] is False
+    assert scores["valid_time_hit_at_k"] is True
+    assert scores["transaction_time_trap_avoidance"] is False
     assert scores["category_primary_pass"] is False
 
 
@@ -91,8 +122,8 @@ def test_behavior_target_categories_do_not_use_primary_retrieval_pass():
         ["unrelated"],
     )
     assert report["scores"]["category_primary_pass"] is None
-    assert report["scores"]["behavior_target_clarify"] is True
-    assert "behavior_target_category_not_primary_retrieval_pass" in report["warnings"]
+    assert "behavior_target_clarify" not in report["scores"]
+    assert "answer_semantics_not_scored_by_retrieval_validator" in report["warnings"]
 
 
 def test_evaluate_result_file_reports_skips_and_missing_cases(tmp_path: Path):

@@ -1,16 +1,19 @@
 # Layer 2 Cross-Domain Comparison Framework
 
-Layer 2 is a comparison framework for future cross-domain temporal QA. It is
-not a result claim yet. The downloaded raw pool currently has 17 files, about
-7.04 MB, and 46,503 detected rows/items across FRED macro data, market/index
-data, SEC submissions, Federal Register regulations, and GitHub software
-releases. The generated local benchmark target is 5,000 processed evidence rows
-and 200 questions. The sample fixture files remain small plumbing tests.
+Layer 2 is a controlled benchmark/debugging layer for cross-domain temporal
+retrieval and grounding. It is not a result claim yet. ChronoRAG is evaluated
+primarily as a temporal retrieval and grounding framework, not as a model-weight
+improvement system. The downloaded raw pool currently has 17 files, about 7.04
+MB, and 46,503 detected rows/items across FRED macro data, market/index data,
+SEC submissions, Federal Register regulations, and GitHub software releases.
+The generated local benchmark target is 5,000 processed evidence rows and 200
+questions. The sample fixture files remain small plumbing tests.
 
-The framework uses the same processed corpus, the same questions, the same
-Gemini/Vertex model in full mode, and the same final validator for each method.
-That keeps the comparison focused on method behavior rather than data or judge
-differences.
+The active Layer 2A retrieval comparison is `metadata_temporal_rag` vs
+`chronorag_full`. The framework uses the same processed corpus, questions, and
+provider settings when provider-backed runs are used. Deterministic validation
+is retrieval-only; generated answer quality belongs to a separate grounded
+answer judge.
 
 ## Methods
 
@@ -21,8 +24,9 @@ differences.
 | `chronorag_full` | Adapter around the existing ChronoRAG framework. The fixture adapter maps Layer 2 rows through ChronoRAG TCC and monotone temporal fusion utilities without creating a second ChronoRAG implementation. |
 
 ChronoRAG should be evaluated on valid-time correctness, transaction-time trap
-avoidance, conflict/refusal behavior, and grounding, not only generic answer
-accuracy.
+avoidance, conflict evidence coverage, and grounding. Deterministic Layer 2A
+validation must not score answer wording, behavior labels, refusal wording,
+confidence, formatting, or explanation quality.
 
 The same processed corpus, same question set, same Gemini/Vertex model, and same
 validator must be used for every provider-backed method. The active Layer
@@ -73,21 +77,25 @@ candidate quality, but exact-time precision remains symbolic.
 
 ## Retrieval-only evaluator status
 
-Layer 2 retrieval-only evaluation is diagnostic and category-aware. Generic
+Layer 2 retrieval-only evaluation is deterministic, diagnostic, and
+category-aware. It reads `selected_evidence_ids` as the source of truth. Generic
 Hit@1/Hit@5 is still reported, but it is not the primary truth for all
-categories. Wrong-year traps, transaction-time traps, broad-window distractors,
-conflict questions, source-specific questions, metric-specific questions,
-cross-domain comparisons, ambiguous queries, and partial/refusal cases have
-different scoring semantics.
+categories. Wrong-time/date traps, transaction-time traps, broad-window
+distractors, conflict questions, source-specific questions, metric-specific
+questions, cross-domain comparisons, ambiguous queries, and partial/refusal
+cases have different retrieval scoring semantics.
 
 The evaluator therefore reports:
 
 - total benchmark cases, result rows, evaluated cases, skipped cases, and skip
   reasons per method;
-- generic retrieval diagnostics: Hit@1, Hit@5, and forbidden evidence absent@5;
+- evidence diagnostics: expected evidence Hit@1, expected evidence Hit@k,
+  acceptable evidence Hit@k, and forbidden evidence absent@k;
 - category-specific diagnostics such as valid-time hit, wrong-year forbidden
   absence, broad-window forbidden absence, conflict-side coverage, source/metric
   constraint checks, and both-side comparison coverage;
+- retrieval validation cards showing selected, expected, acceptable, and
+  forbidden evidence IDs plus the expected/acceptable/forbidden overlaps;
 - same-case pairwise comparison for two methods: both hit, left-only,
   right-only, neither, per-category deltas, forbidden evidence comparison, and
   malformed/skipped warnings.
@@ -97,10 +105,20 @@ evidence was retrieved. `partial_or_insufficient_evidence` is primarily an
 answer-behavior/refusal target. `ambiguous_time_query` is primarily a
 clarification target. Retrieval hits for those categories are diagnostics only.
 
-This evaluator does not call Vertex, does not rerun retrieval, and does not
-prove SOTA or publication-grade performance. It audits existing result JSONs so
-retrieval policy and benchmark-question fixes can be decided after the scoring
-semantics are clean.
+This evaluator does not call Vertex, does not rerun retrieval, does not score
+generated answers, and does not prove SOTA or publication-grade performance. It
+audits existing result JSONs so retrieval policy and benchmark-question fixes
+can be decided after the scoring semantics are clean. Dry-run outputs such as
+`DRY RUN: prompt generated without provider call.` must not be interpreted as
+answer-quality results.
+
+## Grounded Answer Judge Boundary
+
+Generated answer quality belongs to the provider-backed grounded answer judge,
+not to deterministic retrieval validation. The judge may evaluate semantic
+grounding, answer completeness, behavior justification, transaction-time
+cleanliness, and overconfidence when it is explicitly run. Until then, Layer 2A
+deterministic scores are retrieval scores only.
 
 ## Active Method Surface
 
@@ -129,7 +147,8 @@ failures are reported separately from retrieval or reasoning failures.
 
 ## Commands
 
-Smoke the default serious methods in deterministic light mode:
+Smoke the default serious methods in deterministic light mode. The generated
+method report is retrieval-only unless `--validator llm_judge` is selected:
 
 ```bash
 python3 benchmarks/layer2_crossdomain/run_layer2_comparison.py \
@@ -262,8 +281,9 @@ explicitly being published as result artifacts.
 
 Only tiny fixture data is included in smoke paths. Do not use smoke outputs as
 evidence that ChronoRAG outperforms baselines. Retrieval-only metrics must be
-reported separately from answer-judge metrics. Do not run full Vertex answer or
-judge comparisons until the benchmark questions, validation cards, and
+reported separately from answer-judge metrics. Dry-run outputs are valid only
+for retrieval scoring through `selected_evidence_ids`. Do not run full Vertex
+answer or judge comparisons until the benchmark questions, retrieval cards, and
 retrieval-only evaluator artifacts are trustworthy; no SOTA or public benchmark
 proof is claimed here.
 

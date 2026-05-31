@@ -15,7 +15,7 @@ if str(ROOT) not in sys.path:
 
 from benchmarks.layer2_crossdomain.reporting import metric_summary, write_comparison_report, write_method_results
 from benchmarks.layer2_crossdomain.schemas import CorpusRow, ModelAnswer, QuestionCase, load_corpus, load_questions
-from benchmarks.layer2_crossdomain.validator import validate_answer
+from benchmarks.layer2_crossdomain.evaluate_retrieval_only import score_case
 from benchmarks.layer2_crossdomain.vertex_retry import call_with_backoff
 from benchmarks.layer2_crossdomain.prompts import build_evidence_fact_sentence
 from benchmarks.layer2_crossdomain.llm_judge import evidence_cards_from_rows, validate_case_v3
@@ -275,6 +275,7 @@ def run_method(
         answer_recovery_metadata = _pop_answer_recovery_metadata(answer)
         answer, postprocess_metadata = _postprocess_answer_with_cited_evidence(answer, evidence_rows)
         model_answer = ModelAnswer.from_dict(answer).to_dict()
+        selected_evidence_ids = [row.id for row in evidence_rows]
         if validator == "llm_judge" and not dry_run_prompts and mode != "dry_run":
             validation = validate_case_v3(
                 case,
@@ -293,14 +294,14 @@ def run_method(
         elif validator == "llm_judge":
             validation = _judge_skipped_validation(case.id, "Judge skipped for dry-run prompts.")
         else:
-            validation = validate_answer(case, answer, corpus).to_dict()
+            validation = _retrieval_validation_result(case, selected_evidence_ids)
         results.append(
             {
                 "method": method,
                 "case_id": case.id,
                 "question": case.question,
                 "category": case.category,
-                "selected_evidence_ids": [row.id for row in evidence_rows],
+                "selected_evidence_ids": selected_evidence_ids,
                 "prompt_truncated": truncated,
                 "provider_mode": mode,
                 "latency_ms": round(latency_ms, 2),
@@ -675,6 +676,33 @@ def _validate_answer_payload(payload: dict[str, Any]) -> None:
         raise ValueError(f"Vertex response missing required answer fields: {', '.join(missing)}")
 
 
+def _retrieval_validation_result(case: QuestionCase, selected_evidence_ids: list[str]) -> dict[str, Any]:
+    case_report = score_case(case, selected_evidence_ids)
+    scores = dict(case_report["scores"])
+    retrieval_pass = case_report.get("retrieval_pass")
+    failure_reasons = []
+    if retrieval_pass is False:
+        failure_reasons.append(str(case_report["retrieval_pass_reason"]))
+    return {
+        "validator_type": "temporal_retrieval",
+        "retrieval_only": True,
+        "overall_pass": retrieval_pass,
+        "retrieval_pass": retrieval_pass,
+        "category_primary_pass": retrieval_pass,
+        "retrieval_pass_reason": case_report["retrieval_pass_reason"],
+        "scores": scores,
+        "selected_evidence_ids": case_report["selected_evidence_ids"],
+        "expected_evidence_ids": case_report["expected_evidence_ids"],
+        "acceptable_evidence_ids": case_report["acceptable_evidence_ids"],
+        "forbidden_evidence_ids": case_report["forbidden_evidence_ids"],
+        "selected_expected_overlap": case_report["selected_expected_overlap"],
+        "selected_acceptable_overlap": case_report["selected_acceptable_overlap"],
+        "selected_forbidden_overlap": case_report["selected_forbidden_overlap"],
+        "warnings": case_report["warnings"],
+        "failure_reasons": failure_reasons,
+    }
+
+
 def _select_questions(questions: list[QuestionCase], limit: int | None, case_id: str | None) -> list[QuestionCase]:
     if case_id:
         questions = [case for case in questions if case.id == case_id]
@@ -752,19 +780,15 @@ def _provider_error_result(
 
 def _infrastructure_validation(failure_type: str) -> dict[str, Any]:
     return {
-        "required_facts_present": False,
-        "forbidden_facts_absent": True,
-        "evidence_correct": False,
-        "forbidden_evidence_absent": True,
-        "valid_time_correct": False,
-        "transaction_time_not_misused": True,
-        "conflict_warning_correct": False,
-        "partial_refusal_correct": False,
-        "clarification_correct": False,
-        "confidence_correct": True,
-        "behavior_correct": False,
-        "grounding_correct": True,
-        "cross_domain_dependency_correct": False,
+        "validator_type": "temporal_retrieval",
+        "retrieval_only": True,
+        "retrieval_pass": False,
+        "category_primary_pass": False,
+        "retrieval_pass_reason": f"fail: {failure_type}",
+        "scores": {},
+        "selected_expected_overlap": [],
+        "selected_acceptable_overlap": [],
+        "selected_forbidden_overlap": [],
         "overall_pass": False,
         "infrastructure_failure": True,
         "provider_output_contract_failure": failure_type == "answer_generation_incomplete_json",

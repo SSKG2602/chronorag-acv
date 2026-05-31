@@ -23,6 +23,10 @@ WRONG_TIME_RE = re.compile(
 
 DEFAULT_CORPUS = Path("benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl")
 DEFAULT_QUESTIONS = Path("benchmarks/layer2_crossdomain/data/layer2_questions.jsonl")
+LAYER2_ROOT = ROOT / "benchmarks/layer2_crossdomain"
+LAYER2_DOCS = (ROOT / "docs/ROADMAP.md", ROOT / "docs/TECHNICAL_REPORT.md")
+DETACHED_METHOD_LABEL = "".join(["g", "s", "m"])
+DETACHED_METHOD_RE = re.compile(rf"\b{DETACHED_METHOD_LABEL}\b|chronorag_{DETACHED_METHOD_LABEL}", re.IGNORECASE)
 
 
 def main() -> None:
@@ -43,6 +47,7 @@ def main() -> None:
     questions_path = Path(args.questions)
     errors: list[str] = []
     _check_active_methods(args.methods, errors)
+    _check_no_detached_method_references(errors)
     if not corpus_path.exists():
         errors.append(f"Missing corpus file: {corpus_path}")
     if not questions_path.exists():
@@ -106,9 +111,18 @@ def _check_question_integrity(case, corpus_ids: set[str], synthetic_ids: set[str
         if evidence_id not in corpus_ids and evidence_id not in synthetic_ids and not evidence_id.startswith("synthetic:"):
             errors.append(f"{case.id} references missing evidence ID: {evidence_id}")
 
-    # Expected/acceptable evidence may overlap; forbidden evidence must not.
-    forbidden_overlap = sorted((expected | acceptable) & forbidden)
-    _expect(not forbidden_overlap, errors, f"{case.id} has evidence both allowed and forbidden: {', '.join(forbidden_overlap)}")
+    expected_forbidden_overlap = sorted(expected & forbidden)
+    acceptable_forbidden_overlap = sorted(acceptable & forbidden)
+    _expect(
+        not expected_forbidden_overlap,
+        errors,
+        f"{case.id} has evidence both expected and forbidden: {', '.join(expected_forbidden_overlap)}",
+    )
+    _expect(
+        not acceptable_forbidden_overlap,
+        errors,
+        f"{case.id} has evidence both acceptable and forbidden: {', '.join(acceptable_forbidden_overlap)}",
+    )
 
     for token in ("expected_evidence_ids", "required_facts", "forbidden_facts", "acceptable_evidence_ids"):
         _expect(token not in case.question, errors, f"{case.id} leaks answer-key token in question text: {token}")
@@ -136,6 +150,22 @@ def _has_malformed_wrong_time_wording(question: str) -> bool:
     # Same-year traps are valid only when the wording gives full different dates.
     # Year-only repeats such as "for 1968, not 1968" are ambiguous and invalid.
     return len(target) == 4 and len(forbidden) == 4 and target == forbidden
+
+
+def _check_no_detached_method_references(errors: list[str]) -> None:
+    paths: list[Path] = []
+    for suffix in ("*.py", "*.md"):
+        paths.extend(path for path in LAYER2_ROOT.rglob(suffix) if "results" not in path.parts)
+    paths.extend(path for path in LAYER2_DOCS if path.exists())
+    for path in sorted(set(paths)):
+        try:
+            text = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        if DETACHED_METHOD_RE.search(text):
+            errors.append(
+                f"Layer 2A active docs/code reference {DETACHED_METHOD_LABEL.upper()}: {path.relative_to(ROOT)}"
+            )
 
 
 def _check_date(value: str | None, errors: list[str], label: str) -> None:

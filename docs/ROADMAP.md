@@ -1,11 +1,10 @@
 # ChronoRAG Roadmap
 
 ChronoRAG is a research scaffold for temporal RAG. It implements bitemporal
-retrieval concepts and validates them with Temporal Eval v2, a controlled
-multi-source retrieval diagnostic. Layer 1B answer validation is implemented.
-The Layer 2 multi-domain comparison framework and generated local dataset path
-now exist; the next benchmark step is controlled provider-backed comparison
-without overclaiming diagnostic pilots.
+retrieval concepts and validates them with controlled retrieval and grounding
+diagnostics. Layer 1B answer validation is implemented. Layer 2A is currently a
+controlled benchmark/debugging layer for temporal retrieval and grounding, not a
+SOTA claim or publication-grade proof.
 
 ## P0: Credibility Cleanup
 
@@ -49,11 +48,17 @@ without overclaiming diagnostic pilots.
 - Maintain the 5,000-row / 200-question generated dataset path before claiming
   cross-domain performance.
 - Evaluate generalization across domains using independent metadata temporal
-  RAG and ChronoRAG full under the same corpus, model, and validator.
+  RAG and ChronoRAG full under the same corpus and questions.
 - Treat small Vertex pilots as diagnostics, not final benchmark results.
-- Separate retrieval metrics from provider-backed answer synthesis quality.
-- Use the new `benchmarks/layer2_crossdomain/` framework to compare metadata
-  temporal RAG and ChronoRAG full under the same corpus, model, and validator.
+- Keep deterministic Layer 2A validation retrieval-only. It reads
+  `selected_evidence_ids` and scores expected evidence Hit@1/Hit@k, acceptable
+  evidence Hit@k, forbidden evidence absent@k, and category-specific temporal
+  trap checks.
+- Do not interpret dry-run answer placeholders as answer-quality results.
+- Keep generated answer quality in a separate provider-backed grounded answer
+  judge.
+- Use the `benchmarks/layer2_crossdomain/` framework to compare metadata
+  temporal RAG and ChronoRAG full under the same corpus and questions.
 - Use multi-granularity symbolic temporal precision for dense time-series rows:
   exact dates/timestamps must outrank same-year wrong-date evidence before
   embedding similarity is considered sufficient.

@@ -62,15 +62,22 @@ def test_validation_cards_read_selected_evidence_ids_from_result_rows(tmp_path: 
     case_report = report["case_reports"][0]
     assert case_report["selected_evidence_ids"] == ["target", "bad"]
     assert case_report["selected_expected_overlap"] == ["target"]
+    assert case_report["selected_acceptable_overlap"] == []
     assert case_report["selected_forbidden_overlap"] == ["bad"]
 
     markdown = render_markdown([report])
-    assert "### Validation cards" in markdown
+    assert "### Retrieval validation cards" in markdown
+    assert "Expected evidence" in markdown
+    assert "Acceptable evidence" in markdown
+    assert "Forbidden evidence" in markdown
+    assert "Expected overlap" in markdown
+    assert "Acceptable overlap" in markdown
+    assert "Forbidden overlap" in markdown
     assert "target, bad" in markdown
-    assert "This prevents raw-result fields from being mistaken for scored fields." in markdown
+    assert "Answer text is not scored here." in markdown
 
 
-def test_dataset_validator_catches_malformed_wrong_year_and_forbidden_overlap(tmp_path: Path) -> None:
+def test_dataset_validator_catches_malformed_same_date_trap_and_forbidden_overlap(tmp_path: Path) -> None:
     corpus_path = tmp_path / "corpus.jsonl"
     questions_path = tmp_path / "questions.jsonl"
     corpus_path.write_text(
@@ -103,15 +110,15 @@ def test_dataset_validator_catches_malformed_wrong_year_and_forbidden_overlap(tm
             {
                 "id": "bad_wrong_year",
                 "domain": "fixture",
-                "question": "For GDP in 1968, answer for 1968, not 1968.",
+                "question": "For GDP, answer value for 1968-12-30, not 1968-12-30.",
                 "category": "same_entity_wrong_year_trap",
                 "expected_behavior": "answer",
                 "expected_evidence_ids": ["target"],
                 "acceptable_evidence_ids": [],
                 "forbidden_evidence_ids": ["target"],
-                "required_facts": ["1968"],
+                "required_facts": ["1968-12-30"],
                 "forbidden_facts": [],
-                "expected_valid_time": ["1968"],
+                "expected_valid_time": ["1968-12-30"],
                 "notes": "fixture",
             }
         )
@@ -142,7 +149,7 @@ def test_dataset_validator_catches_malformed_wrong_year_and_forbidden_overlap(tm
 
     assert completed.returncode == 1
     assert "malformed wrong-time wording" in completed.stdout
-    assert "both allowed and forbidden" in completed.stdout
+    assert "both expected and forbidden" in completed.stdout
 
 
 def test_dataset_validator_allows_same_year_when_full_dates_differ(tmp_path: Path) -> None:
@@ -213,3 +220,23 @@ def test_dataset_validator_allows_same_year_when_full_dates_differ(tmp_path: Pat
     assert completed.returncode == 1
     assert "malformed wrong-time wording" not in completed.stdout
     assert "Corpus domain distribution collapsed" in completed.stdout
+
+
+def test_layer2_docs_and_code_do_not_reference_gsm() -> None:
+    scan_roots = [
+        ROOT / "benchmarks/layer2_crossdomain",
+        ROOT / "docs/ROADMAP.md",
+        ROOT / "docs/TECHNICAL_REPORT.md",
+    ]
+    paths: list[Path] = []
+    for root in scan_roots:
+        if root.is_file():
+            paths.append(root)
+        else:
+            paths.extend(path for pattern in ("*.py", "*.md") for path in root.rglob(pattern) if "results" not in path.parts)
+    offenders = []
+    for path in paths:
+        text = path.read_text(encoding="utf-8")
+        if "chronorag_gsm" in text.lower() or "GSM" in text:
+            offenders.append(path.relative_to(ROOT).as_posix())
+    assert offenders == []

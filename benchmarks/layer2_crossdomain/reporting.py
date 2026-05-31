@@ -6,16 +6,13 @@ from statistics import mean
 from typing import Any
 
 
-METRICS = [
-    ("overall_pass", "Overall Pass"),
-    ("behavior_correct", "Behavior Correct"),
-    ("evidence_correct", "Evidence Correct"),
-    ("valid_time_correct", "Valid-Time Correct"),
-    ("transaction_time_not_misused", "Transaction-Time Trap Avoided"),
-    ("conflict_warning_correct", "Conflict Warning Correct"),
-    ("partial_refusal_correct", "Partial/Refusal Correct"),
-    ("clarification_correct", "Clarification Correct"),
-    ("cross_domain_dependency_correct", "Cross-Domain Dependency Correct"),
+RETRIEVAL_METRICS = [
+    ("overall_pass", "Retrieval Pass"),
+    ("expected_hit_at_1", "Expected Evidence Hit@1"),
+    ("expected_hit_at_k", "Expected Evidence Hit@k"),
+    ("acceptable_hit_at_k", "Acceptable Evidence Hit@k"),
+    ("forbidden_absent_at_k", "Forbidden Evidence Absent@k"),
+    ("category_primary_pass", "Category Primary Pass"),
 ]
 
 JUDGE_METRICS = [
@@ -41,11 +38,20 @@ def metric_summary(results: list[dict[str, Any]], validator: str = "deterministi
     if validator == "llm_judge":
         return _judge_metric_summary(scorable)
     if not scorable:
-        return {key: 0.0 for key, _ in METRICS}
-    return {
-        key: float(mean(1.0 if row["validation"].get(key) else 0.0 for row in scorable))
-        for key, _ in METRICS
-    }
+        return {key: 0.0 for key, _ in RETRIEVAL_METRICS}
+    return {key: _mean_validation_bool(scorable, key) for key, _ in RETRIEVAL_METRICS}
+
+
+def _mean_validation_bool(results: list[dict[str, Any]], key: str) -> float:
+    values: list[bool] = []
+    for row in results:
+        validation = row.get("validation", {})
+        scores = validation.get("scores", {})
+        value = validation.get(key, scores.get(key))
+        if value is None:
+            continue
+        values.append(bool(value))
+    return float(mean(1.0 if value else 0.0 for value in values)) if values else 0.0
 
 
 def _judge_metric_summary(results: list[dict[str, Any]]) -> dict[str, float]:
@@ -109,13 +115,13 @@ def write_comparison_report(method_payloads: list[dict[str, Any]], md_path: Path
         "",
         "This is a framework smoke report, not a superiority claim.",
         "",
-        "| Method | Corpus Rows | Questions | Scored | Infra Failures | Avg Evidence | Truncated | Overall Pass | Behavior | Evidence | Valid-Time | Tx Trap | Conflict | Partial/Refusal | Clarification | Cross-Domain | Estimated Calls | Latency ms |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| Method | Corpus Rows | Questions | Scored | Infra Failures | Avg Evidence | Truncated | Retrieval Pass | Expected Hit@1 | Expected Hit@k | Acceptable Hit@k | Forbidden Absent@k | Category Primary Pass | Estimated Calls | Latency ms |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for payload in method_payloads:
         summary = payload["summary"]
         lines.append(
-            "| {method} | {rows} | {questions} | {scored} | {infra} | {avg:.1f} | {truncated} | {overall:.2f} | {behavior:.2f} | {evidence:.2f} | {valid:.2f} | {tx:.2f} | {conflict:.2f} | {partial:.2f} | {clarify:.2f} | {cross:.2f} | {calls} | {latency:.1f} |".format(
+            "| {method} | {rows} | {questions} | {scored} | {infra} | {avg:.1f} | {truncated} | {overall:.2f} | {hit1:.2f} | {hitk:.2f} | {acceptable:.2f} | {forbidden:.2f} | {primary:.2f} | {calls} | {latency:.1f} |".format(
                 method=payload["method"],
                 rows=payload["corpus_rows"],
                 questions=payload["question_count"],
@@ -124,20 +130,17 @@ def write_comparison_report(method_payloads: list[dict[str, Any]], md_path: Path
                 avg=payload.get("average_selected_evidence", 0.0),
                 truncated=payload.get("prompt_truncation_count", 0),
                 overall=summary.get("overall_pass", 0.0),
-                behavior=summary.get("behavior_correct", summary.get("behavior_label_accuracy", 0.0)),
-                evidence=summary.get("evidence_correct", summary.get("citation_grounding_accuracy", 0.0)),
-                valid=summary.get("valid_time_correct", summary.get("temporal_scope_correct", 0.0)),
-                tx=summary.get("transaction_time_not_misused", summary.get("transaction_time_clean", 0.0)),
-                conflict=summary.get("conflict_warning_correct", 0.0),
-                partial=summary.get("partial_refusal_correct", 0.0),
-                clarify=summary.get("clarification_correct", 0.0),
-                cross=summary.get("cross_domain_dependency_correct", 0.0),
+                hit1=summary.get("expected_hit_at_1", 0.0),
+                hitk=summary.get("expected_hit_at_k", 0.0),
+                acceptable=summary.get("acceptable_hit_at_k", 0.0),
+                forbidden=summary.get("forbidden_absent_at_k", 0.0),
+                primary=summary.get("category_primary_pass", 0.0),
                 calls=payload.get("estimated_calls", 0),
                 latency=payload.get("latency_ms", 0.0),
             )
         )
     lines.append("")
-    lines.append("Layer 2 is designed to compare methods under the same corpus, questions, model, and validator.")
+    lines.append("Layer 2 deterministic scoring compares retrieval only. Generated answer quality belongs to the LLM judge path.")
     md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -147,7 +150,7 @@ def _method_markdown(payload: dict[str, Any]) -> str:
     lines = [
         f"# Layer 2 Results: {payload['method']}",
         "",
-        "This is a controlled framework result, not a SOTA or publication-grade claim.",
+        "This is a controlled retrieval report, not a SOTA or publication-grade claim.",
         "",
         f"- Mode: `{payload['mode']}`",
         f"- Corpus rows: {payload['corpus_rows']}",
@@ -163,15 +166,17 @@ def _method_markdown(payload: dict[str, Any]) -> str:
         f"- Answer JSON recovered count: {payload.get('summary', {}).get('answer_json_recovered_count', 0)}",
         f"- Retry attempts: {payload.get('summary', {}).get('retry_attempts_total', 0)}",
         "",
-        "Provider output-contract failures are reported separately from retrieval or reasoning failures.",
+        "Deterministic validation scores selected evidence only. Answer text, behavior labels, confidence, and style are not retrieval pass/fail signals.",
+        "Dry-run answer placeholders must not be interpreted as answer-quality results.",
+        "Provider output-contract failures are reported separately from retrieval failures.",
         "",
         "| Metric | Score |",
         "|---|---:|",
     ]
-    for key, label in METRICS:
-        lines.append(f"| {label} | {payload['summary'][key]:.2f} |")
+    for key, label in RETRIEVAL_METRICS:
+        lines.append(f"| {label} | {payload['summary'].get(key, 0.0):.2f} |")
     lines.extend(["", "## Failure Analysis", ""])
-    failures = [row for row in payload["results"] if not row["validation"]["overall_pass"]]
+    failures = [row for row in payload["results"] if row["validation"].get("overall_pass") is False]
     if failures:
         for row in failures:
             status = row.get("status", "completed")
@@ -184,20 +189,22 @@ def _method_markdown(payload: dict[str, Any]) -> str:
             "## Limitations",
             "",
             "- Fixture results only prove that the framework runs.",
-            "- Full Layer 2 claims require the future 5000-row / 200-question benchmark.",
+            "- Current Layer 2A is a controlled benchmark/debugging layer.",
+            "- Deterministic reports do not score generated answer semantics.",
             "- No SOTA, production, or publication-grade claim is made here.",
             "",
-            "| Case | Status | Behavior | Selected Evidence | Cited Evidence | Pass | Failures |",
-            "|---|---|---|---|---|---:|---|",
+            "| Case | Status | Selected Evidence | Expected Overlap | Acceptable Overlap | Forbidden Overlap | Retrieval Pass | Reason |",
+            "|---|---|---|---|---|---|---:|---|",
         ]
     )
     for row in payload["results"]:
         validation = row["validation"]
-        cited = ", ".join(row["answer"].get("cited_evidence_ids", []))
         selected = ", ".join(row.get("selected_evidence_ids", []))
-        failures = ", ".join(validation.get("failure_reasons", []))
+        expected_overlap = ", ".join(validation.get("selected_expected_overlap", []))
+        acceptable_overlap = ", ".join(validation.get("selected_acceptable_overlap", []))
+        forbidden_overlap = ", ".join(validation.get("selected_forbidden_overlap", []))
         lines.append(
-            f"| {row['case_id']} | {row.get('status', 'completed')} | {row['answer'].get('behavior', '')} | {selected} | {cited} | {validation['overall_pass']} | {failures} |"
+            f"| {row['case_id']} | {row.get('status', 'completed')} | {selected} | {expected_overlap} | {acceptable_overlap} | {forbidden_overlap} | {validation.get('retrieval_pass')} | {validation.get('retrieval_pass_reason', '')} |"
         )
     return "\n".join(lines) + "\n"
 

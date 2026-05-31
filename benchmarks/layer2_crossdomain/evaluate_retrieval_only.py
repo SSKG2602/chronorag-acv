@@ -16,23 +16,18 @@ from benchmarks.layer2_crossdomain.schemas import QuestionCase, load_questions
 
 
 CATEGORY_PRIMARY_METRICS: dict[str, tuple[str, ...]] = {
-    "exact_valid_time_retrieval": ("expected_hit@1", "expected_hit@5"),
-    "transaction_time_vs_valid_time": ("valid_time_hit@5", "transaction_forbidden_absent@5"),
-    "same_entity_wrong_year_trap": ("target_year_hit@5", "wrong_year_forbidden_absent@5"),
-    "broad_window_distractor": ("narrow_or_exact_hit@5", "broad_window_forbidden_absent@5"),
-    "conflict_detection": ("conflict_side_coverage@5",),
-    "source_specific_temporal_query": ("source_temporal_hit@5", "source_forbidden_absent@5"),
-    "metric_specific_query": ("metric_temporal_hit@5", "metric_forbidden_absent@5"),
-    "cross_domain_temporal_comparison": ("both_side_coverage@5",),
+    "exact_valid_time_retrieval": ("expected_hit_at_1", "expected_hit_at_k", "forbidden_absent_at_k"),
+    "transaction_time_vs_valid_time": ("valid_time_hit_at_k", "transaction_time_trap_avoidance"),
+    "same_entity_wrong_year_trap": ("target_time_hit_at_k", "wrong_time_trap_avoidance"),
+    "broad_window_distractor": ("narrow_or_exact_hit_at_k", "broad_window_trap_avoidance"),
+    "conflict_detection": ("conflict_side_coverage_at_k",),
+    "source_specific_temporal_query": ("source_temporal_hit_at_k", "source_forbidden_absent_at_k"),
+    "metric_specific_query": ("metric_temporal_hit_at_k", "metric_forbidden_absent_at_k"),
+    "cross_domain_temporal_comparison": ("both_side_coverage_at_k",),
 }
 
-BEHAVIOR_DIAGNOSTIC_CATEGORIES = {
-    "partial_or_insufficient_evidence",
-    "ambiguous_time_query",
-}
-
-MALFORMED_WRONG_YEAR_RE = re.compile(
-    r"\b(?:for|in|on)\s+(?P<target>\d{4})(?:-\d{2}-\d{2})?\b.*?\bnot\s+(?:for|in|on\s+)?(?P=target)(?:-\d{2}-\d{2})?\b",
+WRONG_TIME_RE = re.compile(
+    r"\b(?:for|in|on)\s+(?P<target>\d{4}(?:-\d{2}-\d{2})?)\b.*?\bnot\s+(?:for|in|on\s+)?(?P<forbidden>\d{4}(?:-\d{2}-\d{2})?)\b",
     re.IGNORECASE,
 )
 
@@ -126,12 +121,11 @@ def evaluate_result_file(path: Path, questions: dict[str, QuestionCase]) -> dict
 def score_case(case: QuestionCase, selected: list[str]) -> dict[str, Any]:
     """Score one retrieval result.
 
-    Layer 2 retrieval-only output is only selected evidence IDs. A single generic
-    Hit@k score is misleading because categories test different failure modes:
-    wrong-year avoidance, transaction-time avoidance, broad-window demotion,
-    conflict coverage, source/metric constraints, and answer-behavior targets.
-    Generic Hit@k remains a diagnostic, while category-specific scores are the
-    primary retrieval diagnostics for their category.
+    Layer 2 deterministic validation reads only selected evidence IDs. A single
+    generic Hit@k score is misleading because categories test different
+    retrieval failure modes: wrong-time avoidance, transaction-time avoidance,
+    broad-window demotion, conflict coverage, and source/metric constraints.
+    Generated answer wording and behavior labels are intentionally ignored.
     """
     expected = set(case.expected_evidence_ids)
     acceptable = set(case.acceptable_evidence_ids)
@@ -142,26 +136,41 @@ def score_case(case: QuestionCase, selected: list[str]) -> dict[str, Any]:
     top5 = selected[:5]
     top5_set = set(top5)
 
+    expected_hit_at_1 = bool(top1) and top1[0] in expected
+    expected_hit_at_k = bool(expected) and bool(top5_set & expected)
+    acceptable_hit_at_k = bool(top5_set & acceptable) if acceptable else None
+    forbidden_absent_at_k = not bool(top5_set & forbidden)
+
     scores: dict[str, bool | None] = {
+        "expected_hit_at_1": expected_hit_at_1,
+        "expected_hit_at_k": expected_hit_at_k,
+        "acceptable_hit_at_k": acceptable_hit_at_k,
+        "forbidden_absent_at_k": forbidden_absent_at_k,
         "generic_hit@1": bool(top1) and top1[0] in expected_or_acceptable,
         "generic_hit@5": bool(expected_or_acceptable) and bool(top5_set & expected_or_acceptable),
-        "generic_forbidden_absent@5": not bool(top5_set & forbidden),
+        "generic_forbidden_absent@5": forbidden_absent_at_k,
+        # Backward-compatible aliases for existing artifacts/tests.
+        "expected_hit@1": expected_hit_at_1,
+        "expected_hit@5": expected_hit_at_k,
+        "acceptable_hit@5": acceptable_hit_at_k,
+        "forbidden_absent@5": forbidden_absent_at_k,
     }
     warnings: list[str] = []
 
     if case.category == "exact_valid_time_retrieval":
         scores.update(
             {
-                "expected_hit@1": scores["generic_hit@1"],
-                "expected_hit@5": scores["generic_hit@5"],
-                "expected_forbidden_absent@5": scores["generic_forbidden_absent@5"],
+                "expected_forbidden_absent_at_k": forbidden_absent_at_k,
+                "expected_forbidden_absent@5": forbidden_absent_at_k,
             }
         )
     elif case.category == "transaction_time_vs_valid_time":
         scores.update(
             {
+                "valid_time_hit_at_k": bool(top5_set & expected_or_acceptable),
+                "transaction_time_trap_avoidance": forbidden_absent_at_k,
                 "valid_time_hit@5": bool(top5_set & expected_or_acceptable),
-                "transaction_forbidden_absent@5": not bool(top5_set & forbidden),
+                "transaction_forbidden_absent@5": forbidden_absent_at_k,
             }
         )
     elif case.category == "same_entity_wrong_year_trap":
@@ -170,16 +179,20 @@ def score_case(case: QuestionCase, selected: list[str]) -> dict[str, Any]:
             warnings.append("malformed_wrong_year_question")
         scores.update(
             {
+                "target_time_hit_at_k": bool(top5_set & expected_or_acceptable),
+                "wrong_time_trap_avoidance": forbidden_absent_at_k,
                 "target_year_hit@5": bool(top5_set & expected_or_acceptable),
-                "wrong_year_forbidden_absent@5": not bool(top5_set & forbidden),
+                "wrong_year_forbidden_absent@5": forbidden_absent_at_k,
                 "malformed_wrong_year_question": malformed,
             }
         )
     elif case.category == "broad_window_distractor":
         scores.update(
             {
+                "narrow_or_exact_hit_at_k": bool(top5_set & expected_or_acceptable),
+                "broad_window_trap_avoidance": forbidden_absent_at_k,
                 "narrow_or_exact_hit@5": bool(top5_set & expected_or_acceptable),
-                "broad_window_forbidden_absent@5": not bool(top5_set & forbidden),
+                "broad_window_forbidden_absent@5": forbidden_absent_at_k,
             }
         )
     elif case.category == "conflict_detection":
@@ -190,49 +203,60 @@ def score_case(case: QuestionCase, selected: list[str]) -> dict[str, Any]:
             warnings.append("synthetic_conflict_ids_present_in_key")
         scores.update(
             {
+                "conflict_side_coverage_at_k": (hit_sides >= required_sides) if required_sides else None,
+                "conflict_marker_presence_at_k": marker_present if synthetic else None,
+                "conflict_any_side_hit_at_k": bool(top5_set & expected_or_acceptable),
                 "conflict_side_coverage@5": (hit_sides >= required_sides) if required_sides else None,
                 "conflict_marker_presence@5": marker_present if synthetic else None,
                 "conflict_any_side_hit@5": bool(top5_set & expected_or_acceptable),
             }
         )
     elif case.category == "partial_or_insufficient_evidence":
-        warnings.append("behavior_target_category_not_primary_retrieval_pass")
+        warnings.append("answer_semantics_not_scored_by_retrieval_validator")
         scores.update(
             {
+                "fallback_expected_hit_at_k": bool(top5_set & expected_or_acceptable) if expected_or_acceptable else None,
+                "fallback_forbidden_absent_at_k": forbidden_absent_at_k,
                 "fallback_expected_hit@5": bool(top5_set & expected_or_acceptable) if expected_or_acceptable else None,
-                "fallback_forbidden_absent@5": not bool(top5_set & forbidden),
-                "behavior_target_partial_or_refuse": case.expected_behavior in {"partial", "refuse"},
+                "fallback_forbidden_absent@5": forbidden_absent_at_k,
             }
         )
     elif case.category == "ambiguous_time_query":
-        warnings.append("behavior_target_category_not_primary_retrieval_pass")
+        warnings.append("answer_semantics_not_scored_by_retrieval_validator")
         scores.update(
             {
+                "ambiguity_evidence_hit_at_k": bool(top5_set & expected_or_acceptable) if expected_or_acceptable else None,
+                "ambiguity_forbidden_absent_at_k": forbidden_absent_at_k,
                 "ambiguity_evidence_hit@5": bool(top5_set & expected_or_acceptable) if expected_or_acceptable else None,
-                "ambiguity_forbidden_absent@5": not bool(top5_set & forbidden),
-                "behavior_target_clarify": case.expected_behavior == "clarify",
+                "ambiguity_forbidden_absent@5": forbidden_absent_at_k,
             }
         )
     elif case.category == "source_specific_temporal_query":
         scores.update(
             {
+                "source_temporal_hit_at_k": bool(top5_set & expected_or_acceptable),
+                "source_forbidden_absent_at_k": forbidden_absent_at_k,
                 "source_temporal_hit@5": bool(top5_set & expected_or_acceptable),
-                "source_forbidden_absent@5": not bool(top5_set & forbidden),
+                "source_forbidden_absent@5": forbidden_absent_at_k,
             }
         )
     elif case.category == "metric_specific_query":
         scores.update(
             {
+                "metric_temporal_hit_at_k": bool(top5_set & expected_or_acceptable),
+                "metric_forbidden_absent_at_k": forbidden_absent_at_k,
                 "metric_temporal_hit@5": bool(top5_set & expected_or_acceptable),
-                "metric_forbidden_absent@5": not bool(top5_set & forbidden),
+                "metric_forbidden_absent@5": forbidden_absent_at_k,
             }
         )
     elif case.category == "cross_domain_temporal_comparison":
         required_sides = min(2, len(expected_or_acceptable)) if expected_or_acceptable else 0
         scores.update(
             {
+                "both_side_coverage_at_k": (len(top5_set & expected_or_acceptable) >= required_sides) if required_sides else None,
+                "comparison_forbidden_absent_at_k": forbidden_absent_at_k,
                 "both_side_coverage@5": (len(top5_set & expected_or_acceptable) >= required_sides) if required_sides else None,
-                "comparison_forbidden_absent@5": not bool(top5_set & forbidden),
+                "comparison_forbidden_absent@5": forbidden_absent_at_k,
             }
         )
 
@@ -240,18 +264,21 @@ def score_case(case: QuestionCase, selected: list[str]) -> dict[str, Any]:
     primary_values = [scores.get(metric) for metric in primary_metrics]
     category_primary_pass = all(value is True for value in primary_values) if primary_values else None
     scores["category_primary_pass"] = category_primary_pass
+    retrieval_reason = _retrieval_reason(category_primary_pass, primary_metrics, scores)
 
     return {
         "case_id": case.id,
         "category": case.category,
-        "expected_behavior": case.expected_behavior,
         "selected_evidence_ids": selected,
+        "top_selected_evidence_id": selected[0] if selected else None,
         "expected_evidence_ids": list(case.expected_evidence_ids),
         "acceptable_evidence_ids": list(case.acceptable_evidence_ids),
         "forbidden_evidence_ids": list(case.forbidden_evidence_ids),
         "selected_expected_overlap": sorted(top5_set & expected),
         "selected_acceptable_overlap": sorted(top5_set & acceptable),
         "selected_forbidden_overlap": sorted(top5_set & forbidden),
+        "retrieval_pass": category_primary_pass,
+        "retrieval_pass_reason": retrieval_reason,
         "scores": scores,
         "warnings": warnings,
     }
@@ -347,20 +374,21 @@ def _render_validation_cards(report: dict[str, Any]) -> list[str]:
     # Raw result rows only tell what the method selected; scoring lives here.
     lines = [
         "",
-        "### Validation cards",
+        "### Retrieval validation cards",
         "",
-        "Each card reads `selected_evidence_ids` from the method result and then attaches the evaluator's expected/acceptable/forbidden overlaps. This prevents raw-result fields from being mistaken for scored fields.",
+        "Each card reads `selected_evidence_ids` from the method result and then attaches the evaluator's expected/acceptable/forbidden overlaps. Answer text is not scored here.",
         "",
-        "| Case | Category | Selected evidence | Expected hit | Acceptable hit | Forbidden hit | Primary pass | Warnings |",
-        "|---|---|---|---|---|---|---:|---|",
+        "| Question ID | Category | Method | Selected evidence | Expected evidence | Acceptable evidence | Forbidden evidence | Expected overlap | Acceptable overlap | Forbidden overlap | Retrieval pass/fail reason | Top selected evidence |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for case in report.get("case_reports", []):
-        scores = case.get("scores", {})
         lines.append(
-            f"| {case['case_id']} | {case['category']} | {_join(case.get('selected_evidence_ids'))} | "
+            f"| {case['case_id']} | {case['category']} | {report.get('method')} | "
+            f"{_join(case.get('selected_evidence_ids'))} | {_join(case.get('expected_evidence_ids'))} | "
+            f"{_join(case.get('acceptable_evidence_ids'))} | {_join(case.get('forbidden_evidence_ids'))} | "
             f"{_join(case.get('selected_expected_overlap'))} | {_join(case.get('selected_acceptable_overlap'))} | "
-            f"{_join(case.get('selected_forbidden_overlap'))} | {_fmt(scores, 'category_primary_pass')} | "
-            f"{_join(case.get('warnings'))} |"
+            f"{_join(case.get('selected_forbidden_overlap'))} | {case.get('retrieval_pass_reason')} | "
+            f"{case.get('top_selected_evidence_id') or '—'} |"
         )
     return lines
 
@@ -420,11 +448,11 @@ def _render_pairwise_markdown(comparison: dict[str, Any]) -> list[str]:
 
 def _render_category_diagnostics(category: str, metrics: dict[str, Any]) -> str:
     wanted = CATEGORY_PRIMARY_METRICS.get(category, ())
-    if category in BEHAVIOR_DIAGNOSTIC_CATEGORIES:
+    if category in {"partial_or_insufficient_evidence", "ambiguous_time_query"}:
         wanted = tuple(
             key
             for key in metrics
-            if (key.startswith("fallback_") or key.startswith("ambiguity_") or key.startswith("behavior_target_"))
+            if (key.startswith("fallback_") or key.startswith("ambiguity_"))
             and not key.endswith("_count")
             and not key.endswith("_denominator")
         )
@@ -510,7 +538,25 @@ def _summarize_skip_reasons(skipped: list[dict[str, str]]) -> dict[str, int]:
 
 
 def _is_malformed_wrong_year_question(question: str) -> bool:
-    return bool(MALFORMED_WRONG_YEAR_RE.search(question))
+    match = WRONG_TIME_RE.search(question)
+    if not match:
+        return False
+    target = match.group("target")
+    forbidden = match.group("forbidden")
+    return target == forbidden
+
+
+def _retrieval_reason(
+    category_primary_pass: bool | None,
+    primary_metrics: tuple[str, ...],
+    scores: dict[str, bool | None],
+) -> str:
+    if category_primary_pass is True:
+        return "pass: selected evidence satisfies category retrieval checks"
+    if category_primary_pass is None:
+        return "not_applicable: category is diagnostic-only for deterministic retrieval"
+    failed = [metric for metric in primary_metrics if scores.get(metric) is not True]
+    return "fail: " + ", ".join(failed)
 
 
 if __name__ == "__main__":

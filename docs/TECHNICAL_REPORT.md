@@ -5,8 +5,9 @@
 ChronoRAG is a temporal retrieval-augmented generation research scaffold for
 time-sensitive question answering. It treats validity windows, transaction
 windows, provenance, and temporal alignment as first-class retrieval
-constraints. The current implementation is a reproducible prototype, not a
-production service and not a broad external benchmark claim.
+constraints. The current implementation is evaluated primarily as a temporal
+retrieval and grounding framework. It is a reproducible prototype, not a
+production service, not a SOTA claim, and not publication-grade proof.
 
 ## 1. Problem Statement
 
@@ -192,6 +193,24 @@ rule validation pass. The failed cases are q08, q11, and q14. The dynamic top-k
 run is stored separately as a diagnostic result and is not the primary
 benchmark claim.
 
+Layer 2A extends the controlled setting to a generated cross-domain local
+benchmark path. Its active retrieval methods are `metadata_temporal_rag` and
+`chronorag_full`. Deterministic Layer 2A validation measures retrieval only. It
+uses `selected_evidence_ids` and scores expected evidence Hit@1/Hit@k,
+acceptable evidence Hit@k, forbidden evidence absent@k, and category-specific
+temporal checks such as wrong-time/date trap avoidance, transaction-time trap
+avoidance, broad-window distractor avoidance, conflict-side coverage, and
+source/metric constraints.
+
+Layer 2A deterministic validation does not judge generated answer wording,
+behavior labels, required or forbidden fact strings in the answer,
+clarification/refusal/conflict-warning wording, confidence, formatting, style,
+or explanation quality. Dry-run outputs are prompt-generation artifacts only;
+placeholder answers such as `DRY RUN: prompt generated without provider call.`
+must not be interpreted as answer-quality results. Generated answer quality is
+reserved for a separate provider-backed grounded answer judge. Current Layer 2A
+status is controlled benchmark/debugging, not a public performance proof.
+
 ## 9. Metrics
 
 Window Hit@5: whether the top five results contain evidence from the expected
@@ -213,8 +232,10 @@ Latency ms: wall-clock runtime for the method.
 
 - The smoke benchmark is easy by design.
 - Temporal Eval v2 has 15 controlled cases.
-- Generalization beyond historical GDP/debt style data is not yet proven.
-- Layer 2 evaluation needs at least one second domain.
+- Generalization beyond controlled local benchmark/debugging data is not yet
+  proven.
+- Layer 2A deterministic scores are retrieval scores, not generated answer
+  quality scores.
 - Temporal metadata extraction is partly heuristic.
 - The strongest tested path is world-economy style data.
 - Full LLM mode depends on local or provider model availability.
