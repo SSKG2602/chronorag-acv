@@ -112,6 +112,11 @@ can be decided after the scoring semantics are clean. Dry-run outputs such as
 `DRY RUN: prompt generated without provider call.` must not be interpreted as
 answer-quality results.
 
+ChronoRAG temporal scoring now treats locally negated dates and times as
+negative constraints. For example, in `for 1990-04-20, not 1990-03-28`, the
+first date is the positive retrieval target and the second date is penalized as
+explicitly forbidden evidence.
+
 ## Grounded Answer Judge Boundary
 
 Generated answer quality belongs to the provider-backed grounded answer judge,

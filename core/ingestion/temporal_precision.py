@@ -39,6 +39,11 @@ DD_MONTH_YYYY_RE = re.compile(
 )
 TIME_RE = re.compile(r"\b(\d{1,2})(?::(\d{2}))?(?::(\d{2}))?\s*(am|pm)\b|\b(\d{1,2}):(\d{2})(?::(\d{2}))?\b", re.IGNORECASE)
 YEAR_RE = re.compile(r"\b(18\d{2}|19\d{2}|20\d{2}|21\d{2})\b")
+NEGATIVE_LEFT_CONTEXT_RE = re.compile(
+    r"(?:\bas\s+opposed\s+to|\brather\s+than|\binstead\s+of|\bother\s+than|"
+    r"\bexcluding|\bexcept|\b(?:but\s+|and\s+)?not(?:\s+(?:on|in|for))?)\s*$",
+    re.IGNORECASE,
+)
 
 
 @dataclass(frozen=True)
@@ -51,6 +56,7 @@ class TemporalConstraint:
     confidence: float
     ambiguous_parse: bool
     temporal_role: str
+    polarity: str = "positive"
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -111,6 +117,7 @@ def extract_temporal_constraints(text: str) -> list[TemporalConstraint]:
                 confidence=0.85,
                 ambiguous_parse=False,
                 temporal_role=_infer_role(text, match.start(), match.end()),
+                polarity=_constraint_polarity(text, match.start()),
             )
         )
 
@@ -134,13 +141,25 @@ def score_temporal_precision(case: Any, row: Any) -> float:
             return 0.80
         return 0.08 if row.temporal_type != "missing_or_unknown" else 0.02
 
-    best = 0.0
-    for constraint in constraints:
+    positive_constraints = [constraint for constraint in constraints if constraint.polarity != "negative"]
+    negative_constraints = [constraint for constraint in constraints if constraint.polarity == "negative"]
+
+    positive_score = 0.0
+    for constraint in positive_constraints:
         if constraint.ambiguous_parse:
-            best = max(best, 0.18)
+            positive_score = max(positive_score, 0.18)
             continue
         score = _score_constraint_against_interval(constraint, row_start, row_end or row_start, row.temporal_type)
-        best = max(best, score)
+        positive_score = max(positive_score, score)
+
+    negative_penalty = 0.0
+    for constraint in negative_constraints:
+        if constraint.ambiguous_parse:
+            continue
+        score = _score_constraint_against_interval(constraint, row_start, row_end or row_start, row.temporal_type)
+        negative_penalty = max(negative_penalty, score)
+
+    best = max(0.0, positive_score * (1.0 - negative_penalty))
 
     if row.temporal_type in {"conflict_claim", "revision"} and case.category in {"conflict_or_revision", "conflict_detection"}:
         best = max(best, 0.80)
@@ -276,7 +295,17 @@ def _extract_quarter_constraints(text: str) -> list[tuple[TemporalConstraint, tu
         end = date(year, end_month, calendar.monthrange(year, end_month)[1])
         results.append(
             (
-                TemporalConstraint(match.group(0), start.isoformat(), end.isoformat(), "quarter", 0.60, 0.90, False, _infer_role(text, *match.span())),
+                TemporalConstraint(
+                    match.group(0),
+                    start.isoformat(),
+                    end.isoformat(),
+                    "quarter",
+                    0.60,
+                    0.90,
+                    False,
+                    _infer_role(text, *match.span()),
+                    _constraint_polarity(text, match.start()),
+                ),
                 match.span(),
             )
         )
@@ -293,7 +322,17 @@ def _extract_month_constraints(text: str) -> list[tuple[TemporalConstraint, tupl
         end = date(year, month, calendar.monthrange(year, month)[1])
         results.append(
             (
-                TemporalConstraint(match.group(0), start.isoformat(), end.isoformat(), "month", 0.58, 0.90, False, _infer_role(text, *match.span())),
+                TemporalConstraint(
+                    match.group(0),
+                    start.isoformat(),
+                    end.isoformat(),
+                    "month",
+                    0.58,
+                    0.90,
+                    False,
+                    _infer_role(text, *match.span()),
+                    _constraint_polarity(text, match.start()),
+                ),
                 match.span(),
             )
         )
@@ -316,7 +355,17 @@ def _extract_date_constraints(text: str) -> list[tuple[TemporalConstraint, tuple
             elif ambiguous:
                 results.append(
                     (
-                        TemporalConstraint(match.group(0), "", "", "day", 0.20, 0.30, True, _infer_role(text, *match.span())),
+                        TemporalConstraint(
+                            match.group(0),
+                            "",
+                            "",
+                            "day",
+                            0.20,
+                            0.30,
+                            True,
+                            _infer_role(text, *match.span()),
+                            _constraint_polarity(text, match.start()),
+                        ),
                         match.span(),
                     )
                 )
@@ -338,7 +387,17 @@ def _extract_daypart_constraints(text: str) -> list[tuple[TemporalConstraint, tu
         exact = start == end
         results.append(
             (
-                TemporalConstraint(match.group(0), start, end, "time" if exact else "daypart", 0.85 if exact else 0.45, 0.85, False, _infer_role(text, *match.span())),
+                TemporalConstraint(
+                    match.group(0),
+                    start,
+                    end,
+                    "time" if exact else "daypart",
+                    0.85 if exact else 0.45,
+                    0.85,
+                    False,
+                    _infer_role(text, *match.span()),
+                    _constraint_polarity(text, match.start()),
+                ),
                 match.span(),
             )
         )
@@ -353,7 +412,17 @@ def _extract_time_constraints(text: str) -> list[tuple[TemporalConstraint, tuple
             granularity = "second" if parsed.second else "minute" if parsed.minute else "hour"
             results.append(
                 (
-                    TemporalConstraint(match.group(0), parsed.isoformat(), parsed.isoformat(), granularity, 0.70, 0.90, False, _infer_role(text, *match.span())),
+                    TemporalConstraint(
+                        match.group(0),
+                        parsed.isoformat(),
+                        parsed.isoformat(),
+                        granularity,
+                        0.70,
+                        0.90,
+                        False,
+                        _infer_role(text, *match.span()),
+                        _constraint_polarity(text, match.start()),
+                    ),
                     match.span(),
                 )
             )
@@ -514,17 +583,38 @@ def _date_constraint(original: str, parsed: date, text: str, span: tuple[int, in
         confidence=0.30 if ambiguous else 0.95,
         ambiguous_parse=ambiguous,
         temporal_role=_infer_role(text, *span),
+        polarity=_constraint_polarity(text, span[0]),
     )
 
 
 def _datetime_constraint(original: str, parsed_date: date, parsed_time: time, text: str, span: tuple[int, int]) -> TemporalConstraint:
     normalized = datetime.combine(parsed_date, parsed_time).isoformat()
     granularity = "second" if parsed_time.second else "minute" if parsed_time.minute else "hour"
-    return TemporalConstraint(original, normalized, normalized, granularity, 1.0, 0.98, False, _infer_role(text, *span))
+    return TemporalConstraint(
+        original,
+        normalized,
+        normalized,
+        granularity,
+        1.0,
+        0.98,
+        False,
+        _infer_role(text, *span),
+        _constraint_polarity(text, span[0]),
+    )
 
 
 def _fuzzy_constraint(original: str, start: date, end: date, text: str, span: tuple[int, int]) -> TemporalConstraint:
-    return TemporalConstraint(original, start.isoformat(), end.isoformat(), "fuzzy_interval", 0.50, 0.65, False, _infer_role(text, *span))
+    return TemporalConstraint(
+        original,
+        start.isoformat(),
+        end.isoformat(),
+        "fuzzy_interval",
+        0.50,
+        0.65,
+        False,
+        _infer_role(text, *span),
+        _constraint_polarity(text, span[0]),
+    )
 
 
 def _safe_date(year: int, month: int, day: int) -> date | None:
@@ -562,6 +652,11 @@ def _infer_role(text: str, start: int, end: int) -> str:
     if any(token in local for token in ("transaction-time-only", "transaction time only")):
         return "transaction_time"
     return "valid_time"
+
+
+def _constraint_polarity(text: str, start: int) -> str:
+    before = text[max(0, start - 48) : start]
+    return "negative" if NEGATIVE_LEFT_CONTEXT_RE.search(before) else "positive"
 
 
 def _date_fragment_pattern() -> str:

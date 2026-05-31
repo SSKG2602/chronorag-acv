@@ -62,6 +62,8 @@ SOTA claim or publication-grade proof.
 - Use multi-granularity symbolic temporal precision for dense time-series rows:
   exact dates/timestamps must outrank same-year wrong-date evidence before
   embedding similarity is considered sufficient.
+- Keep temporal constraint polarity explicit so dates after local negation
+  phrases such as `not` or `instead of` are penalized during retrieval scoring.
 - Keep core TCC precision metadata backward-compatible while extending
   `normalized_start`, `normalized_end`, `precision`, `temporal_role`, and
   ambiguity fields across ingestion paths.

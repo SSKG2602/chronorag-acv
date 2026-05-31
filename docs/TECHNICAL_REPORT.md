@@ -202,6 +202,11 @@ temporal checks such as wrong-time/date trap avoidance, transaction-time trap
 avoidance, broad-window distractor avoidance, conflict-side coverage, and
 source/metric constraints.
 
+Temporal constraints are polarity-aware in retrieval scoring. Dates or times
+governed by local phrases such as `not`, `rather than`, or `instead of` are
+treated as negative constraints so explicitly forbidden dates do not receive the
+same temporal reward as the target date.
+
 Layer 2A deterministic validation does not judge generated answer wording,
 behavior labels, required or forbidden fact strings in the answer,
 clarification/refusal/conflict-warning wording, confidence, formatting, style,
