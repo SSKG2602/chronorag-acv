@@ -6,7 +6,11 @@ import pytest
 
 from benchmarks.layer2_crossdomain.methods.chronorag_full.adapter import retrieve_with_chronorag_adapter
 from benchmarks.layer2_crossdomain.schemas import CorpusRow, QuestionCase, load_corpus, load_questions
-from benchmarks.layer2_crossdomain.temporal_precision import extract_temporal_constraints, score_temporal_precision
+from benchmarks.layer2_crossdomain.temporal_precision import (
+    extract_temporal_constraints,
+    has_negative_exact_temporal_match,
+    score_temporal_precision,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -85,6 +89,14 @@ def test_negative_date_penalty_makes_target_score_higher() -> None:
     assert forbidden == 0.0
 
 
+def test_negative_exact_match_detects_forbidden_row_only() -> None:
+    case = _case("For Treasury yield, answer value for 1990-04-20, not 1990-03-28.")
+    constraints = extract_temporal_constraints(case.question)
+    assert has_negative_exact_temporal_match(case, _row("forbidden", "1990-03-28"), constraints)
+    assert not has_negative_exact_temporal_match(case, _row("target", "1990-04-20"), constraints)
+    assert not has_negative_exact_temporal_match(case, _row("same_year", "1990-05-01"), constraints)
+
+
 def test_year_only_query_has_no_negative_constraints_and_scores_normally() -> None:
     case = _case("What was the yield in 1990?")
     constraints = extract_temporal_constraints(case.question)
@@ -107,5 +119,7 @@ def test_layer2_same_year_date_traps_rank_expected_above_forbidden() -> None:
         selected = [row.id for row in rows]
         expected = case.expected_evidence_ids[0]
         forbidden = case.forbidden_evidence_ids[0]
+        assert expected in selected
         assert selected[0] != forbidden
-        assert selected.index(expected) < selected.index(forbidden)
+        if forbidden in selected:
+            assert selected.index(expected) < selected.index(forbidden)

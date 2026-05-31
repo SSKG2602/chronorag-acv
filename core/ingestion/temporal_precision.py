@@ -166,6 +166,27 @@ def score_temporal_precision(case: Any, row: Any) -> float:
     return round(best, 4)
 
 
+def has_negative_exact_temporal_match(
+    case: Any,
+    row: Any,
+    constraints: list[TemporalConstraint] | None = None,
+) -> bool:
+    """Return True when row time exactly matches an explicitly excluded constraint."""
+    constraints = constraints if constraints is not None else extract_temporal_constraints(case.question)
+    negative_constraints = [constraint for constraint in constraints if constraint.polarity == "negative" and not constraint.ambiguous_parse]
+    if not negative_constraints:
+        return False
+
+    asks_transaction = _asks_transaction_role(case.question, constraints)
+    row_start, row_end = _row_interval(row, use_transaction=asks_transaction)
+    row_start_dt = _parse_isoish(row_start)
+    row_end_dt = _parse_isoish(row_end or row_start)
+    if not row_start_dt or not row_end_dt:
+        return False
+
+    return any(_is_exact_constraint_match(constraint, row_start_dt, row_end_dt) for constraint in negative_constraints)
+
+
 def has_exact_date_query(constraints: list[TemporalConstraint]) -> bool:
     return any(item.granularity == "day" and not item.ambiguous_parse for item in constraints)
 
@@ -530,6 +551,35 @@ def _score_constraint_against_interval(constraint: TemporalConstraint, row_start
         return 0.03
 
     return 0.10
+
+
+def _is_exact_constraint_match(constraint: TemporalConstraint, row_start: datetime, row_end: datetime) -> bool:
+    constraint_start = _parse_isoish(constraint.normalized_start)
+    constraint_end = _parse_isoish(constraint.normalized_end) or constraint_start
+    if not constraint_start or not constraint_end:
+        return False
+
+    if constraint.granularity in {"second", "minute", "hour"} and "T" in constraint.normalized_start:
+        return row_start == constraint_start and row_end == constraint_end
+
+    if constraint.granularity == "day":
+        return row_start.date() == constraint_start.date() and row_end.date() == constraint_end.date()
+
+    if constraint.granularity == "month":
+        return (
+            row_start.year == constraint_start.year
+            and row_start.month == constraint_start.month
+            and row_end.year == constraint_end.year
+            and row_end.month == constraint_end.month
+        )
+
+    if constraint.granularity == "year":
+        return row_start.year == constraint_start.year and row_end.year == constraint_end.year
+
+    if constraint.granularity in {"range", "quarter", "fuzzy_interval"}:
+        return row_start.date() == constraint_start.date() and row_end.date() == constraint_end.date()
+
+    return False
 
 
 def _constraints_from_expected_valid_time(case: QuestionCase) -> list[TemporalConstraint]:

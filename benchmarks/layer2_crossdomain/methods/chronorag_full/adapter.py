@@ -9,6 +9,7 @@ from benchmarks.layer2_crossdomain.temporal_precision import (
     extract_temporal_constraints,
     has_exact_date_query,
     has_exact_timestamp_query,
+    has_negative_exact_temporal_match,
     score_temporal_precision,
 )
 from core.ingestion.temporal_contextual_chunker import build_temporal_contextual_chunks
@@ -97,6 +98,8 @@ def retrieve_with_chronorag_adapter(case: QuestionCase, corpus: list[CorpusRow],
             0.0,
             {"alpha": 0.50, "beta_time": 0.35, "gamma_authority": 0.10, "delta_age": 0.0, "tx_gamma": 0.25},
         )
+        if has_negative_exact_temporal_match(case, item.row, temporal_constraints):
+            score = 0.0
         scored.append(
             AdaptedChronoEvidence(
                 row=item.row,
