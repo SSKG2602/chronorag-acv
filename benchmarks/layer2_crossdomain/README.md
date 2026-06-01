@@ -44,13 +44,14 @@ retrieval-based and the 5,000-row corpus can exceed practical prompt limits.
 
 ## Results Table
 
-No final Layer 2 results exist yet. This table is a placeholder for the
-5,000-row / 200-question benchmark run.
+Final public Layer 2A v3 retrieval-only summaries are stored under
+`benchmarks/layer2_crossdomain/results/`:
 
-| Method | Corpus | Questions | Mode | Overall | Evidence | Valid-time | Transaction trap | Conflict | Refusal/partial | Status |
-|---|---:|---:|---|---:|---:|---:|---:|---:|---:|---|
-| Metadata temporal RAG | pending | pending | pending | pending | pending | pending | pending | pending | pending | framework ready |
-| ChronoRAG full | pending | pending | pending | pending | pending | pending | pending | pending | pending | framework ready |
+- [`layer2_retrieval_only_v3_200_eval.md`](results/layer2_retrieval_only_v3_200_eval.md)
+- [`layer2_ablation_v3_ablation200.md`](results/layer2_ablation_v3_ablation200.md)
+
+These are controlled retrieval-only artifacts. They do not claim SOTA,
+production readiness, or answer-generation quality.
 
 ## Temporal Precision Hardening
 
@@ -228,6 +229,18 @@ python3 benchmarks/layer2_crossdomain/run_layer2_comparison.py \
   --dataset real \
   --limit 200 \
   --result-suffix retrieval_only_metadata
+```
+
+No-Vertex retrieval-only ablations on the same Layer 2A v3 200-question set:
+
+```bash
+python3 benchmarks/layer2_crossdomain/run_layer2_ablations.py \
+  --corpus benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl \
+  --questions benchmarks/layer2_crossdomain/data/layer2_questions.jsonl \
+  --mode dry_run \
+  --limit 200 \
+  --top-k 5 \
+  --result-suffix v3_ablation200
 ```
 
 Estimate Vertex calls without running Gemini:
