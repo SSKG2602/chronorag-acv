@@ -59,6 +59,12 @@ SOTA claim or publication-grade proof.
   judge.
 - Use the `benchmarks/layer2_crossdomain/` framework to compare metadata
   temporal RAG and ChronoRAG full under the same corpus and questions.
+- Maintain the Layer 2A v3 question contract: generated questions must expose
+  exact target dates, source anchors, metrics, versions, and comparison slots
+  whenever those fields are expected by retrieval-only scoring.
+- Keep `conflict_detection` out of the scored v3 retrieval categories until the
+  corpus has real two-sided conflict evidence pairs. Missing synthetic conflict
+  IDs should remain a data-contract diagnostic, not a scored retrieval target.
 - Use multi-granularity symbolic temporal precision for dense time-series rows:
   exact dates/timestamps must outrank same-year wrong-date evidence before
   embedding similarity is considered sufficient.

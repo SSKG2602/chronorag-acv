@@ -21,10 +21,13 @@ QuestionCategory = Literal[
     "exact_valid_time_retrieval",
     "wrong_year_trap",
     "same_entity_wrong_year_trap",
+    "same_entity_wrong_time_trap",
     "transaction_vs_valid_time",
     "transaction_time_vs_valid_time",
+    "valid_time_vs_transaction_time",
     "broad_window_vs_exact",
     "broad_window_distractor",
+    "exact_vs_broad_temporal_preference",
     "conflict_or_revision",
     "conflict_detection",
     "cross_domain_dependency",
@@ -35,8 +38,11 @@ QuestionCategory = Literal[
     "ambiguous_time_query",
     "metric_confusion",
     "metric_specific_query",
+    "metric_specific_exact_time",
     "source_family_grounding",
     "source_specific_temporal_query",
+    "source_specific_exact_time",
+    "multi_slot_temporal_coverage",
 ]
 
 ExpectedBehavior = Literal[

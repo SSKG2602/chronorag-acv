@@ -15,6 +15,13 @@ provider settings when provider-backed runs are used. Deterministic validation
 is retrieval-only; generated answer quality belongs to a separate grounded
 answer judge.
 
+The v3 question set is generated from corpus rows by
+`benchmarks/layer2_crossdomain/generate_layer2_questions_v3.py`. It contains
+200 questions, 20 per category, and every expected evidence row must be
+recoverable from the question wording: exact dates, sources, metrics, versions,
+and comparison slots are explicit. Hidden-target year-only questions are not
+valid Layer 2A retrieval checks.
+
 ## Methods
 
 | Method | Purpose |
@@ -24,9 +31,10 @@ answer judge.
 | `chronorag_full` | Adapter around the existing ChronoRAG framework. The fixture adapter maps Layer 2 rows through ChronoRAG TCC and monotone temporal fusion utilities without creating a second ChronoRAG implementation. |
 
 ChronoRAG should be evaluated on valid-time correctness, transaction-time trap
-avoidance, conflict evidence coverage, and grounding. Deterministic Layer 2A
-validation must not score answer wording, behavior labels, refusal wording,
-confidence, formatting, or explanation quality.
+avoidance, source/metric/time-slot coverage, and conflict evidence coverage when
+the corpus contains real conflict pairs. Deterministic Layer 2A validation must
+not score answer wording, behavior labels, refusal wording, confidence,
+formatting, or explanation quality.
 
 The same processed corpus, same question set, same Gemini/Vertex model, and same
 validator must be used for every provider-backed method. The active Layer
@@ -83,10 +91,18 @@ candidate quality, but exact-time precision remains symbolic.
 Layer 2 retrieval-only evaluation is deterministic, diagnostic, and
 category-aware. It reads `selected_evidence_ids` as the source of truth. Generic
 Hit@1/Hit@5 is still reported, but it is not the primary truth for all
-categories. Wrong-time/date traps, transaction-time traps, broad-window
-distractors, conflict questions, source-specific questions, metric-specific
-questions, cross-domain comparisons, ambiguous queries, and partial/refusal
-cases have different retrieval scoring semantics.
+categories. The active v3 categories are `exact_valid_time_retrieval`,
+`same_entity_wrong_time_trap`, `valid_time_vs_transaction_time`,
+`cross_domain_temporal_comparison`, `source_specific_exact_time`,
+`metric_specific_exact_time`, `exact_vs_broad_temporal_preference`,
+`multi_slot_temporal_coverage`, `partial_or_insufficient_evidence`, and
+`ambiguous_time_query`.
+
+The old scored `broad_window_distractor` category has been replaced by
+explicit-date exact-vs-broad preference cases. `conflict_detection` is not a
+scored v3 retrieval category because the current corpus does not contain real
+two-sided conflict pairs; the generator writes a data-contract-blocked
+diagnostic artifact instead of using missing synthetic conflict IDs.
 
 The evaluator therefore reports:
 
@@ -94,9 +110,9 @@ The evaluator therefore reports:
   reasons per method;
 - evidence diagnostics: expected evidence Hit@1, expected evidence Hit@k,
   acceptable evidence Hit@k, and forbidden evidence absent@k;
-- category-specific diagnostics such as valid-time hit, wrong-year forbidden
-  absence, broad-window forbidden absence, conflict-side coverage, source/metric
-  constraint checks, and both-side comparison coverage;
+- category-specific diagnostics such as valid-time hit, wrong-time forbidden
+  absence, exact-vs-broad preference, source/metric constraint checks,
+  comparison coverage, and multi-slot coverage;
 - retrieval validation cards showing selected, expected, acceptable, and
   forbidden evidence IDs plus the expected/acceptable/forbidden overlaps;
 - same-case pairwise comparison for two methods: both hit, left-only,
@@ -165,6 +181,15 @@ judge-infrastructure cases are not semantic failures. Provider output-contract
 failures are reported separately from retrieval or reasoning failures.
 
 ## Commands
+
+Regenerate and validate the real 200-case v3 question set:
+
+```bash
+python3 benchmarks/layer2_crossdomain/generate_layer2_questions_v3.py
+python3 benchmarks/layer2_crossdomain/validate_layer2_dataset.py \
+  --corpus benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl \
+  --questions benchmarks/layer2_crossdomain/data/layer2_questions.jsonl
+```
 
 Smoke the default serious methods in deterministic light mode. The generated
 method report is retrieval-only unless `--validator llm_judge` is selected:

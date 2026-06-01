@@ -23,7 +23,7 @@ def _case(question: str, expected_valid_time: list[str] | None = None) -> Questi
         id="test",
         domain="macro_fred",
         question=question,
-        category="same_entity_wrong_year_trap",
+        category="same_entity_wrong_time_trap",
         expected_behavior="answer",
         expected_evidence_ids=[],
         acceptable_evidence_ids=[],
@@ -105,16 +105,19 @@ def test_year_only_query_has_no_negative_constraints_and_scores_normally() -> No
     assert score_temporal_precision(case, _row("target", "1990-04-20")) > 0.0
 
 
-def test_layer2_same_year_date_traps_rank_expected_above_forbidden() -> None:
+def test_layer2_same_time_traps_rank_expected_above_forbidden() -> None:
     corpus = load_corpus(REAL_CORPUS)
-    questions = {case.id: case for case in load_questions(REAL_QUESTIONS)}
-    case_ids = [
-        "l2q:0023:same_entity_wrong_year_trap",
-        "l2q:0026:same_entity_wrong_year_trap",
-        "l2q:0033:same_entity_wrong_year_trap",
-    ]
-    for case_id in case_ids:
-        case = questions[case_id]
+    cases = [
+        case
+        for case in load_questions(REAL_QUESTIONS)
+        if case.category == "same_entity_wrong_time_trap"
+        and case.expected_evidence_ids
+        and case.forbidden_evidence_ids
+    ][:3]
+
+    assert len(cases) >= 3
+
+    for case in cases:
         rows, _metadata = retrieve_with_chronorag_adapter(case, corpus, top_k=5)
         selected = [row.id for row in rows]
         expected = case.expected_evidence_ids[0]

@@ -7,6 +7,7 @@ import re
 import sys
 from collections import Counter
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -20,6 +21,9 @@ WRONG_TIME_RE = re.compile(
     r"\b(?:for|in|on)\s+(?P<target>\d{4}(?:-\d{2}-\d{2})?)\b.*?\bnot\s+(?:for|in|on\s+)?(?P<forbidden>\d{4}(?:-\d{2}-\d{2})?)\b",
     re.IGNORECASE,
 )
+DATE_RE = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
+YEAR_RE = re.compile(r"\b(?:18|19|20)\d{2}\b")
+VERSION_RE = re.compile(r"\bv\d+\.\d+(?:\.\d+)?(?:[-.]?(?:alpha|beta|rc)\.?\d+)?\b", re.IGNORECASE)
 
 DEFAULT_CORPUS = Path("benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl")
 DEFAULT_QUESTIONS = Path("benchmarks/layer2_crossdomain/data/layer2_questions.jsonl")
@@ -58,11 +62,7 @@ def main() -> None:
     corpus = load_corpus(corpus_path)
     questions = load_questions(questions_path)
     corpus_ids = {row.id for row in corpus}
-    synthetic_ids = {
-        evidence_id
-        for question in questions
-        for evidence_id in getattr(question, "synthetic_evidence_ids", [])
-    }
+    corpus_by_id = {row.id: row for row in corpus}
 
     _expect(len(corpus) == args.expected_corpus_rows, errors, f"Corpus has {len(corpus)} rows, expected {args.expected_corpus_rows}.")
     _expect(len(questions) == args.expected_questions, errors, f"Questions has {len(questions)} rows, expected {args.expected_questions}.")
@@ -76,8 +76,7 @@ def main() -> None:
         if row.temporal_type == "transaction_time_only":
             _expect(not row.valid_from and not row.valid_to, errors, f"{row.id} is transaction_time_only but has valid-time fields.")
 
-    for case in questions:
-        _check_question_integrity(case, corpus_ids, synthetic_ids, errors)
+    errors.extend(validate_question_contracts(questions, corpus_by_id))
 
     domain_counts = Counter(row.domain for row in corpus)
     category_counts = Counter(case.category for case in questions)
@@ -86,6 +85,13 @@ def main() -> None:
 
     _finish(errors, domain_counts, category_counts)
 
+def validate_question_contracts(questions: list[Any], corpus_by_id: dict[str, Any]) -> list[str]:
+    """Validate that every Layer 2A answer key is recoverable from the question."""
+    errors: list[str] = []
+    corpus_ids = set(corpus_by_id)
+    for case in questions:
+        _check_question_integrity(case, corpus_by_id, corpus_ids, errors)
+    return errors
 
 
 def _check_active_methods(methods: list[str], errors: list[str]) -> None:
@@ -101,15 +107,21 @@ def _check_active_methods(methods: list[str], errors: list[str]) -> None:
             errors.append(f"Cannot import Layer 2A method {method}: {exc}")
 
 
-def _check_question_integrity(case, corpus_ids: set[str], synthetic_ids: set[str], errors: list[str]) -> None:
+def _check_question_integrity(case, corpus_by_id: dict[str, Any], corpus_ids: set[str], errors: list[str]) -> None:
     expected = set(case.expected_evidence_ids)
     acceptable = set(case.acceptable_evidence_ids)
     forbidden = set(case.forbidden_evidence_ids)
     all_ids = case.expected_evidence_ids + case.acceptable_evidence_ids + case.forbidden_evidence_ids
 
     for evidence_id in all_ids:
-        if evidence_id not in corpus_ids and evidence_id not in synthetic_ids and not evidence_id.startswith("synthetic:"):
+        if evidence_id not in corpus_ids:
             errors.append(f"{case.id} references missing evidence ID: {evidence_id}")
+        if evidence_id.startswith("synthetic:"):
+            errors.append(f"{case.id} references synthetic evidence ID not present in corpus: {evidence_id}")
+
+    for evidence_id in getattr(case, "synthetic_evidence_ids", []):
+        if evidence_id not in corpus_ids:
+            errors.append(f"{case.id} synthetic_evidence_ids references missing corpus ID: {evidence_id}")
 
     expected_forbidden_overlap = sorted(expected & forbidden)
     acceptable_forbidden_overlap = sorted(acceptable & forbidden)
@@ -127,17 +139,101 @@ def _check_question_integrity(case, corpus_ids: set[str], synthetic_ids: set[str
     for token in ("expected_evidence_ids", "required_facts", "forbidden_facts", "acceptable_evidence_ids"):
         _expect(token not in case.question, errors, f"{case.id} leaks answer-key token in question text: {token}")
 
-    if case.category == "same_entity_wrong_year_trap":
+    if case.category in {"same_entity_wrong_year_trap", "same_entity_wrong_time_trap"}:
         _expect(
             not _has_malformed_wrong_time_wording(case.question),
             errors,
             f"{case.id} has malformed wrong-time wording: target time and forbidden time are identical or only repeat the same year.",
         )
 
+    _check_recoverable_evidence_contract(case, corpus_by_id, errors)
+
     if case.expected_behavior in {"answer", "compare", "prefer_exact", "conflict_warning"}:
         _expect(bool(case.required_facts), errors, f"{case.id} answerable case has empty required_facts.")
     if "partial" in case.category or "insufficient" in case.category:
         _expect(case.expected_behavior in {"partial", "refuse", "clarify"}, errors, f"{case.id} partial category has wrong behavior.")
+
+
+def _check_recoverable_evidence_contract(case: Any, corpus_by_id: dict[str, Any], errors: list[str]) -> None:
+    question = case.question or ""
+    question_norm = _normalize(question)
+    question_dates = set(DATE_RE.findall(question))
+    question_years = set(YEAR_RE.findall(question))
+    expected_rows = [corpus_by_id[evidence_id] for evidence_id in case.expected_evidence_ids if evidence_id in corpus_by_id]
+
+    for row in expected_rows:
+        valid_from = getattr(row, "valid_from", None)
+        if _is_exact_dated_row(row) and valid_from and valid_from not in question_dates:
+            errors.append(f"{case.id} expects exact-date row {row.id} but question omits {valid_from}.")
+        if (
+            len(expected_rows) == 1
+            and _is_exact_dated_row(row)
+            and valid_from
+            and valid_from not in question_dates
+            and valid_from[:4] in question_years
+        ):
+            errors.append(f"{case.id} is year-only but has one hidden exact-date expected ID: {row.id}.")
+
+        for version in _version_tokens_for_row(row):
+            if version.lower() not in question.lower():
+                errors.append(f"{case.id} expects version row {row.id} but question omits version {version}.")
+
+    if case.category == "source_specific_exact_time":
+        for row in expected_rows:
+            anchors = _source_anchors(row)
+            if not any(_normalize(anchor) and _normalize(anchor) in question_norm for anchor in anchors):
+                errors.append(f"{case.id} source-specific question omits source anchor for {row.id}.")
+
+    if case.category == "metric_specific_exact_time":
+        for row in expected_rows:
+            metric = getattr(row, "metric_or_claim", "")
+            if _normalize(metric) not in question_norm and not (_version_tokens_for_row(row) & {item.lower() for item in VERSION_RE.findall(question)}):
+                errors.append(f"{case.id} metric-specific question omits metric/version for {row.id}.")
+
+    if case.category in {"cross_domain_temporal_comparison", "multi_slot_temporal_coverage"}:
+        if len(expected_rows) < 2:
+            errors.append(f"{case.id} {case.category} must include at least two expected slot rows.")
+        for row in expected_rows:
+            valid_from = getattr(row, "valid_from", None)
+            if valid_from and valid_from not in question_dates:
+                errors.append(f"{case.id} slot question omits date {valid_from} for {row.id}.")
+            if _normalize(getattr(row, "entity", "")) not in question_norm:
+                errors.append(f"{case.id} slot question omits entity for {row.id}.")
+            if _normalize(getattr(row, "metric_or_claim", "")) not in question_norm:
+                errors.append(f"{case.id} slot question omits metric for {row.id}.")
+
+
+def _is_exact_dated_row(row: Any) -> bool:
+    return getattr(row, "temporal_type", None) in {"valid_time_exact", "revision"} and bool(getattr(row, "valid_from", None))
+
+
+def _version_tokens_for_row(row: Any) -> set[str]:
+    text = " ".join(
+        str(value or "")
+        for value in (
+            getattr(row, "metric_or_claim", ""),
+            getattr(row, "value", ""),
+        )
+    )
+    return {item.lower() for item in VERSION_RE.findall(text)}
+
+
+def _source_anchors(row: Any) -> set[str]:
+    metadata = getattr(row, "metadata", {}) or {}
+    anchors = {
+        getattr(row, "source_family", ""),
+        getattr(row, "source_file", ""),
+        getattr(row, "source_kind", ""),
+        metadata.get("source_id", ""),
+        metadata.get("source_name", ""),
+        metadata.get("source_path", ""),
+    }
+    return {str(anchor) for anchor in anchors if anchor}
+
+
+def _normalize(value: Any) -> str:
+    return " ".join(re.findall(r"[a-z0-9]+", str(value or "").lower()))
+
 
 def _has_malformed_wrong_time_wording(question: str) -> bool:
     match = WRONG_TIME_RE.search(question)

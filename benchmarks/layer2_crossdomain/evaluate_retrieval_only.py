@@ -18,12 +18,18 @@ from benchmarks.layer2_crossdomain.schemas import QuestionCase, load_questions
 CATEGORY_PRIMARY_METRICS: dict[str, tuple[str, ...]] = {
     "exact_valid_time_retrieval": ("expected_hit_at_1", "expected_hit_at_k", "forbidden_absent_at_k"),
     "transaction_time_vs_valid_time": ("valid_time_hit_at_k", "transaction_time_trap_avoidance"),
+    "valid_time_vs_transaction_time": ("valid_time_hit_at_k", "transaction_time_trap_avoidance"),
     "same_entity_wrong_year_trap": ("target_time_hit_at_k", "wrong_time_trap_avoidance"),
+    "same_entity_wrong_time_trap": ("target_time_hit_at_k", "wrong_time_trap_avoidance"),
     "broad_window_distractor": ("narrow_or_exact_hit_at_k", "broad_window_trap_avoidance"),
+    "exact_vs_broad_temporal_preference": ("narrow_or_exact_hit_at_k", "broad_window_trap_avoidance"),
     "conflict_detection": ("conflict_side_coverage_at_k",),
     "source_specific_temporal_query": ("source_temporal_hit_at_k", "source_forbidden_absent_at_k"),
+    "source_specific_exact_time": ("source_temporal_hit_at_k", "source_forbidden_absent_at_k"),
     "metric_specific_query": ("metric_temporal_hit_at_k", "metric_forbidden_absent_at_k"),
+    "metric_specific_exact_time": ("metric_temporal_hit_at_k", "metric_forbidden_absent_at_k"),
     "cross_domain_temporal_comparison": ("both_side_coverage_at_k",),
+    "multi_slot_temporal_coverage": ("all_slot_coverage_at_k", "multi_slot_forbidden_absent_at_k"),
 }
 
 WRONG_TIME_RE = re.compile(
@@ -164,7 +170,7 @@ def score_case(case: QuestionCase, selected: list[str]) -> dict[str, Any]:
                 "expected_forbidden_absent@5": forbidden_absent_at_k,
             }
         )
-    elif case.category == "transaction_time_vs_valid_time":
+    elif case.category in {"transaction_time_vs_valid_time", "valid_time_vs_transaction_time"}:
         scores.update(
             {
                 "valid_time_hit_at_k": bool(top5_set & expected_or_acceptable),
@@ -173,7 +179,7 @@ def score_case(case: QuestionCase, selected: list[str]) -> dict[str, Any]:
                 "transaction_forbidden_absent@5": forbidden_absent_at_k,
             }
         )
-    elif case.category == "same_entity_wrong_year_trap":
+    elif case.category in {"same_entity_wrong_year_trap", "same_entity_wrong_time_trap"}:
         malformed = _is_malformed_wrong_year_question(case.question)
         if malformed:
             warnings.append("malformed_wrong_year_question")
@@ -186,7 +192,7 @@ def score_case(case: QuestionCase, selected: list[str]) -> dict[str, Any]:
                 "malformed_wrong_year_question": malformed,
             }
         )
-    elif case.category == "broad_window_distractor":
+    elif case.category in {"broad_window_distractor", "exact_vs_broad_temporal_preference"}:
         scores.update(
             {
                 "narrow_or_exact_hit_at_k": bool(top5_set & expected_or_acceptable),
@@ -231,7 +237,7 @@ def score_case(case: QuestionCase, selected: list[str]) -> dict[str, Any]:
                 "ambiguity_forbidden_absent@5": forbidden_absent_at_k,
             }
         )
-    elif case.category == "source_specific_temporal_query":
+    elif case.category in {"source_specific_temporal_query", "source_specific_exact_time"}:
         scores.update(
             {
                 "source_temporal_hit_at_k": bool(top5_set & expected_or_acceptable),
@@ -240,7 +246,7 @@ def score_case(case: QuestionCase, selected: list[str]) -> dict[str, Any]:
                 "source_forbidden_absent@5": forbidden_absent_at_k,
             }
         )
-    elif case.category == "metric_specific_query":
+    elif case.category in {"metric_specific_query", "metric_specific_exact_time"}:
         scores.update(
             {
                 "metric_temporal_hit_at_k": bool(top5_set & expected_or_acceptable),
@@ -257,6 +263,17 @@ def score_case(case: QuestionCase, selected: list[str]) -> dict[str, Any]:
                 "comparison_forbidden_absent_at_k": forbidden_absent_at_k,
                 "both_side_coverage@5": (len(top5_set & expected_or_acceptable) >= required_sides) if required_sides else None,
                 "comparison_forbidden_absent@5": forbidden_absent_at_k,
+            }
+        )
+    elif case.category == "multi_slot_temporal_coverage":
+        required_slots = len(expected_or_acceptable)
+        covered_slots = len(top5_set & expected_or_acceptable)
+        scores.update(
+            {
+                "all_slot_coverage_at_k": (covered_slots >= required_slots) if required_slots else None,
+                "multi_slot_forbidden_absent_at_k": forbidden_absent_at_k,
+                "all_slot_coverage@5": (covered_slots >= required_slots) if required_slots else None,
+                "multi_slot_forbidden_absent@5": forbidden_absent_at_k,
             }
         )
 

@@ -198,9 +198,18 @@ benchmark path. Its active retrieval methods are `metadata_temporal_rag` and
 `chronorag_full`. Deterministic Layer 2A validation measures retrieval only. It
 uses `selected_evidence_ids` and scores expected evidence Hit@1/Hit@k,
 acceptable evidence Hit@k, forbidden evidence absent@k, and category-specific
-temporal checks such as wrong-time/date trap avoidance, transaction-time trap
-avoidance, broad-window distractor avoidance, conflict-side coverage, and
-source/metric constraints.
+temporal checks such as wrong-time/date trap avoidance, valid-time versus
+transaction-time separation, exact-vs-broad preference, source/metric
+constraints, cross-domain comparison coverage, and multi-slot temporal
+coverage.
+
+The Layer 2A v3 question set is generated from corpus rows and removes
+hidden-target cases. If an expected row is exact-dated, the question includes
+that exact date; source-specific, metric-specific, version-specific, comparison,
+and multi-slot cases expose the relevant source, metric/version, entity, and
+date anchors. `conflict_detection` is not scored in v3 because the current
+corpus has no real two-sided conflict pairs; this is recorded as a data-contract
+blocked diagnostic rather than filled with synthetic IDs.
 
 Temporal constraints are polarity-aware in retrieval scoring. Target temporal
 mentions are positive constraints. Dates or times governed by local phrases such

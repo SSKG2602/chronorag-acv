@@ -32,6 +32,9 @@ or publication-grade proof.
   modes.
 - Layer 2 has a cross-domain comparison framework and generated local
   5,000-row / 200-question dataset path.
+- Layer 2A v3 question generation removes hidden-target cases by requiring
+  exact dates, source anchors, metrics, versions, and comparison slots to appear
+  in the question whenever they are part of the expected evidence contract.
 - Layer 2 ChronoRAG adapter retrieval applies symbolic multi-granularity
   temporal precision for dense exact-date/timestamp cases, and core TCC now
   preserves the same precision metadata.
@@ -85,9 +88,9 @@ transaction/publication/filing/release time. This is retrieval precision
 hardening, not a benchmark win.
 
 Next planned step: rerun 50-case and 200-case retrieval-only Layer 2A with
-polarity-aware temporal scoring and retrieval finalization. Active hybrid
-retrieval with embeddings should remain a separate patch if the retrieval-only
-rerun shows it is needed.
+the v3 question set, polarity-aware temporal scoring, and retrieval
+finalization. Active hybrid retrieval with embeddings should remain a separate
+patch if the retrieval-only rerun shows it is needed.
 
 ### P2: External Baselines
 
