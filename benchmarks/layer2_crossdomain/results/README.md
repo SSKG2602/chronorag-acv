@@ -33,3 +33,10 @@ Evaluates ChronoRAG component ablations on the same Layer 2A v3 questions.
 Diagnostic categories such as partial/insufficient and ambiguous-time cases are not scored as category-primary retrieval cases.
 
 Conflict detection is documented as data-contract blocked because real conflict-pair evidence rows are not present in the current corpus.
+
+## Archive
+
+`archive/` contains stale intermediate Layer 2 pilot artifacts such as Vertex
+smokes, answer-contract hardening runs, and older category-aware retrieval
+diagnostics. They are preserved for audit history but are not the public Layer
+2A v3 result set.
