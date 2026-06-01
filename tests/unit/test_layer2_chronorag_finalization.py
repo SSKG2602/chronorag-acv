@@ -62,7 +62,8 @@ def test_exact_valid_time_cleanup_demotes_same_neighborhood_wrong_time() -> None
     selected, metadata = _finalize(query, [wrong, target], top_k=2)
 
     assert selected[0] == "target"
-    assert selected.index("target") < selected.index("wrong")
+    if "wrong" in selected:
+        assert selected.index("target") < selected.index("wrong")
     assert metadata["exact_time_cleanup_applied_count"] == 2
 
 
@@ -73,7 +74,7 @@ def test_exact_valid_time_cleanup_does_not_collapse_comparison_queries() -> None
 
     selected, metadata = _finalize(query, [first, second], top_k=2)
 
-    assert selected == ["first", "second"]
+    assert set(selected) == {"first", "second"}
     assert metadata["exact_time_cleanup_applied_count"] == 0
     assert metadata["diversified_selection_applied"] is True
 

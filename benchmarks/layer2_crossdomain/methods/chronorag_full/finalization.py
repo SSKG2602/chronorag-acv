@@ -8,6 +8,7 @@ from typing import Any
 
 from benchmarks.layer2_crossdomain.schemas import CorpusRow
 from benchmarks.layer2_crossdomain.temporal_precision import TemporalConstraint
+from benchmarks.layer2_crossdomain.methods.chronorag_full.slot_assembler import assemble_top_k, classify_query_intent
 
 
 TOKEN_RE = re.compile(r"[a-z0-9]+")
@@ -42,15 +43,17 @@ def finalize_chronorag_evidence(
     adjusted, source_metric_count = _apply_source_metric_adjustments(adjusted, query_text)
 
     adjusted.sort(key=lambda item: item.score, reverse=True)
-    diversified = _should_diversify(query_text)
-    selected = _select_diversified_topk(adjusted, top_k, query_text) if diversified else adjusted[:top_k]
+    intent = classify_query_intent(query_text=query_text, constraints=constraints, candidates=adjusted)
+    selected, slot_report = assemble_top_k(adjusted, intent, top_k)
 
     metadata = {
         "retrieval_finalization_ran": True,
         "exact_time_cleanup_applied_count": exact_count,
         "transaction_role_cleanup_applied_count": transaction_count,
         "source_metric_adjustment_applied_count": source_metric_count,
-        "diversified_selection_applied": diversified,
+        "diversified_selection_applied": intent.is_comparison or intent.is_conflict,
+        "slot_aware_assembly_applied": True,
+        "slot_assembly_report": slot_report,
         "selected_scores_after_finalization": {item.row.id: round(item.score, 4) for item in selected},
     }
     return selected, metadata
