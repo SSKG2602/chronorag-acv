@@ -209,6 +209,13 @@ negative constraints. This supports contrastive temporal queries such as `use
 1990-04-20, not 1990-03-28` while keeping deterministic Layer 2A validation
 focused on selected evidence IDs.
 
+After temporal fusion, `chronorag_full` applies a small retrieval-finalization
+pass for Layer 2A evidence selection. The pass cleans exact-time neighbors,
+separates valid-time from transaction-time candidates, applies source/metric
+aware score adjustments, and conservatively diversifies top-k evidence for
+comparison or conflict-style queries. It is a final evidence-selection policy,
+not an embedding retrieval patch or a generated-answer quality claim.
+
 Layer 2A deterministic validation does not judge generated answer wording,
 behavior labels, required or forbidden fact strings in the answer,
 clarification/refusal/conflict-warning wording, confidence, formatting, style,
@@ -219,8 +226,9 @@ reserved for a separate provider-backed grounded answer judge. Current Layer 2A
 status is controlled benchmark/debugging, not a public performance proof.
 
 The next planned Layer 2A step is a fresh 50-case and 200-case retrieval-only
-rerun. Active hybrid retrieval with embeddings remains a separate future patch
-if the retrieval-only results show it is needed.
+rerun with temporal-intent and finalization handling. Active hybrid retrieval
+with embeddings remains a separate future patch if the retrieval-only results
+show it is needed.
 
 ## 9. Metrics
 

@@ -460,7 +460,8 @@ question set, same Gemini/Vertex model in provider mode, and same final
 validator:
 
 1. Metadata-aware temporal RAG baseline.
-2. ChronoRAG full adapter using TCC, temporal precision, and monotone temporal fusion.
+2. ChronoRAG full adapter using TCC, temporal precision, monotone temporal
+   fusion, and retrieval finalization.
 
 Direct LLM full-context remains available only as a historical/small-context
 diagnostic. It is deprecated for serious 5,000-row Layer 2A because it is not a
@@ -478,6 +479,13 @@ treated as positive constraints, while locally excluded mentions such as
 This supports queries such as `use 1990-04-20, not 1990-03-28` without changing
 answer-generation validation. This is capability hardening, not a superiority
 claim.
+
+Layer 2A now applies a small retrieval-finalization pass after temporal fusion.
+It cleans exact-time neighbors, separates valid-time from transaction-time
+candidates, applies source/metric-aware score adjustments, and conservatively
+diversifies comparison/conflict-style top-k evidence. This is still
+retrieval-only evidence selection; it does not add embeddings or solve generated
+answer quality.
 
 | Method | Corpus | Questions | Mode | Overall | Evidence | Valid-time | Transaction trap | Conflict | Refusal/partial | Status |
 |---|---:|---:|---|---:|---:|---:|---:|---:|---:|---|
@@ -508,8 +516,8 @@ python benchmarks/run_temporal_eval_v2.py --light
 - Layer 2 exact-time precision is now preserved in core TCC metadata and used by
   the comparison adapter; broader full-benchmark validation remains pending.
 - Polarity-aware temporal scoring is implemented for retrieval precision, but
-  new Layer 2A result claims should wait for fresh 50-case and 200-case
-  retrieval-only reruns.
+  new Layer 2A result claims should wait for fresh retrieval-only reruns after
+  the retrieval-finalization pass.
 - Domain support is strongest for the world-economy/Maddison-style path; other domains need dedicated policy sets and evaluation.
 - Cross-encoder and LLM reranking can be expensive in full mode.
 - Local model execution depends on CPU/GPU memory and Hugging Face model access.
@@ -524,8 +532,8 @@ python benchmarks/run_temporal_eval_v2.py --light
      metadata-aware temporal RAG, with ChronoRAG full as the ChronoRAG method.
    - Treat diagnostic pilots as debugging evidence, not final benchmark wins.
    - Next planned step: rerun 50-case and 200-case retrieval-only Layer 2A with
-     polarity-aware temporal scoring, then evaluate active hybrid retrieval
-     with embeddings as a separate patch if needed.
+     polarity-aware temporal scoring and retrieval finalization, then evaluate
+     active hybrid retrieval with embeddings as a separate patch if needed.
 
 2. **Temporal retrieval ablations**
    - BM25 only vs ANN only vs hybrid.

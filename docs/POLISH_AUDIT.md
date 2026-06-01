@@ -38,6 +38,10 @@ or publication-grade proof.
 - Layer 2A retrieval scoring now includes polarity-aware temporal intent:
   requested temporal mentions are positive constraints, while locally excluded
   mentions such as `not 1990-03-28` are negative constraints.
+- Layer 2A `chronorag_full` retrieval now includes a small finalization pass
+  after temporal fusion for exact-time cleanup, valid-time/transaction-time
+  separation, source/metric-aware ranking, and conservative comparison/conflict
+  diversification.
 - The primary stored Vertex result is
   `benchmarks/results/temporal_answer_validation_v2_vertex_topk5_results.md`.
 - The dynamic top-k result is stored separately as a diagnostic at
@@ -81,8 +85,9 @@ transaction/publication/filing/release time. This is retrieval precision
 hardening, not a benchmark win.
 
 Next planned step: rerun 50-case and 200-case retrieval-only Layer 2A with
-polarity-aware temporal scoring. Active hybrid retrieval with embeddings should
-remain a separate patch if the retrieval-only rerun shows it is needed.
+polarity-aware temporal scoring and retrieval finalization. Active hybrid
+retrieval with embeddings should remain a separate patch if the retrieval-only
+rerun shows it is needed.
 
 ### P2: External Baselines
 

@@ -121,9 +121,15 @@ negative constraints. For example, in `for 1990-04-20, not 1990-03-28`, the
 first date is the positive retrieval target and the second date is penalized as
 explicitly forbidden evidence.
 
+ChronoRAG full now applies a small retrieval-finalization pass after temporal
+fusion. It cleans exact-time neighbors, separates valid-time from
+transaction-time candidates, applies source/metric-aware score adjustments, and
+conservatively diversifies comparison/conflict-style top-k evidence. This pass
+does not add embeddings and does not change the retrieval-only evaluator.
+
 Next planned step: rerun 50-case and 200-case retrieval-only Layer 2A with this
-temporal-intent handling, then add active hybrid retrieval with embeddings as a
-separate patch if the retrieval-only results show it is needed.
+temporal-intent and finalization handling, then add active hybrid retrieval with
+embeddings as a separate patch if the retrieval-only results show it is needed.
 
 ## Grounded Answer Judge Boundary
 

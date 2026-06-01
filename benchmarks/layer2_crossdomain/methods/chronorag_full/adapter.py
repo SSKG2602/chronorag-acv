@@ -12,6 +12,7 @@ from benchmarks.layer2_crossdomain.temporal_precision import (
     has_negative_exact_temporal_match,
     score_temporal_precision,
 )
+from benchmarks.layer2_crossdomain.methods.chronorag_full.finalization import finalize_chronorag_evidence
 from core.ingestion.temporal_contextual_chunker import build_temporal_contextual_chunks
 from core.retrieval.lexical_bm25 import bm25_search
 
@@ -110,13 +111,13 @@ def retrieve_with_chronorag_adapter(case: QuestionCase, corpus: list[CorpusRow],
                 score=score,
             )
         )
-    scored.sort(key=lambda item: item.score, reverse=True)
+    selected, finalization_metadata = finalize_chronorag_evidence(scored, temporal_constraints, case.question, top_k)
     metadata = {
         "method_family": "chronorag_full",
         "uses_existing_chronorag_framework": True,
         "adapter_used": True,
         "uses_tcc": True,
-        "uses_tcc_precision_metadata": any(item.temporal_metadata.get("normalized_start") for item in scored[:top_k]),
+        "uses_tcc_precision_metadata": any(item.temporal_metadata.get("normalized_start") for item in selected),
         "uses_monotone_temporal_fusion": True,
         "temporal_precision_applied": True,
         "extracted_temporal_constraints": [constraint.to_dict() for constraint in temporal_constraints],
@@ -127,7 +128,8 @@ def retrieve_with_chronorag_adapter(case: QuestionCase, corpus: list[CorpusRow],
         "embedding_model": os.getenv("CHRONORAG_EMBED_MODEL", "BAAI/bge-small-en-v1.5"),
         "embedding_dim": int(os.getenv("CHRONORAG_EMBED_DIM", "384")),
         "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
-        "selected_scores": {item.row.id: round(item.score, 4) for item in scored[:top_k]},
+        **finalization_metadata,
+        "selected_scores": {item.row.id: round(item.score, 4) for item in selected},
         "selected_tcc_precision": {
             item.row.id: {
                 "normalized_start": item.temporal_metadata.get("normalized_start"),
@@ -135,10 +137,10 @@ def retrieve_with_chronorag_adapter(case: QuestionCase, corpus: list[CorpusRow],
                 "precision": item.temporal_metadata.get("precision"),
                 "temporal_role": item.temporal_metadata.get("temporal_role"),
             }
-            for item in scored[:top_k]
+            for item in selected
         },
     }
-    return [item.row for item in scored[:top_k]], metadata
+    return [item.row for item in selected], metadata
 
 
 def _year(value: str | None) -> int | None:

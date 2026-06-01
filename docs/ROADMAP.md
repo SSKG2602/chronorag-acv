@@ -64,11 +64,15 @@ SOTA claim or publication-grade proof.
   embedding similarity is considered sufficient.
 - Keep temporal constraint polarity explicit so dates after local negation
   phrases such as `not` or `instead of` are penalized during retrieval scoring.
+- Keep Layer 2A retrieval finalization small and evidence-selection focused:
+  exact-time cleanup, valid-time/transaction-time separation, source/metric
+  ranking adjustments, and conservative comparison/conflict diversification.
 - Keep core TCC precision metadata backward-compatible while extending
   `normalized_start`, `normalized_end`, `precision`, `temporal_role`, and
   ambiguity fields across ingestion paths.
-- Next planned step: rerun 50-case and 200-case retrieval-only Layer 2A, then
-  add active hybrid retrieval with embeddings as a separate patch if needed.
+- Next planned step: rerun 50-case and 200-case retrieval-only Layer 2A with
+  retrieval finalization, then add active hybrid retrieval with embeddings as a
+  separate patch if needed.
 
 ## P4: ChronoSanity Strengthening
 
