@@ -66,6 +66,14 @@ class CandidateClass:
     is_sibling_version: bool = False
 
 
+class Eligibility:
+    REQUIRED = "required"
+    ELIGIBLE = "eligible"
+    WEAK_ELIGIBLE = "weak_eligible"
+    SUPPRESSED = "suppressed"
+    BLOCKED = "blocked"
+
+
 def normalize_text(value: Any) -> str:
     return " ".join(TOKEN_RE.findall(str(value or "").lower().replace("_", " ").replace("-", " ")))
 
@@ -180,6 +188,7 @@ def classify_candidate(candidate: Any, intent: QueryIntent) -> CandidateClass:
     evidence_id = row_evidence_id(candidate)
     temporal_type = row_temporal_type(candidate)
     valid_from = row_valid_from(candidate)
+    valid_to = row_valid_to(candidate) or valid_from
     valid_year = valid_from[:4] if valid_from else None
     is_transaction_only = temporal_type == "transaction_time_only" or (not valid_from and bool(row_transaction_time(candidate)))
     temporal_fit = "unknown"
@@ -190,6 +199,8 @@ def classify_candidate(candidate: Any, intent: QueryIntent) -> CandidateClass:
         if valid_from in intent.dates:
             temporal_fit = "exact_target"
             is_exact_target = True
+        elif any(_interval_contains_date(valid_from, valid_to, date) for date in intent.dates):
+            temporal_fit = "narrow" if valid_from == valid_to else "broad"
         elif valid_year and valid_year in {date[:4] for date in intent.dates}:
             temporal_fit = "same_year_wrong_date"
         elif _near_query_year(valid_year, intent.years):
@@ -223,15 +234,15 @@ def classify_candidate(candidate: Any, intent: QueryIntent) -> CandidateClass:
 
 def assemble_top_k(candidates: list[Any], intent: QueryIntent, top_k: int) -> tuple[list[Any], dict[str, Any]]:
     if top_k <= 0:
-        return [], _report(intent, [], {}, [], {}, [], [])
+        return [], _report(intent, [], {}, [], {}, [], [], {})
 
     ordered = sorted(candidates, key=candidate_score, reverse=True)
     classes = {row_evidence_id(candidate): classify_candidate(candidate, intent) for candidate in ordered}
-    by_id = {row_evidence_id(candidate): candidate for candidate in ordered if row_evidence_id(candidate)}
     selected: list[Any] = []
     selected_ids: set[str] = set()
     slot_filled: list[str] = []
     slot_misses: list[str] = []
+    required_ids: set[str] = set()
 
     def add(candidate: Any | None, slot_name: str) -> None:
         if candidate is None or len(selected) >= top_k:
@@ -247,42 +258,79 @@ def assemble_top_k(candidates: list[Any], intent: QueryIntent, top_k: int) -> tu
 
     if intent.is_comparison:
         for index, _slot in enumerate(intent.comparison_slots):
-            add(_best_for_slot(ordered, classes, intent, index, selected_ids), f"comparison_slot_{index}")
+            candidate = _best_for_slot(ordered, classes, intent, index, selected_ids)
+            if candidate is not None:
+                required_ids.add(row_evidence_id(candidate))
+            add(candidate, f"comparison_slot_{index}")
 
     if intent.is_transaction_valid_time:
-        add(_best_valid_time_candidate(ordered, classes, selected_ids), "transaction_valid_time")
+        candidate = _best_valid_time_candidate(ordered, classes, selected_ids)
+        if candidate is not None:
+            required_ids.add(row_evidence_id(candidate))
+        add(candidate, "transaction_valid_time")
 
     if intent.dates or intent.years:
-        add(_best_exact_target(ordered, classes, selected_ids, intent), "exact_temporal_target")
+        candidate = _best_exact_target(ordered, classes, selected_ids, intent)
+        if candidate is not None:
+            required_ids.add(row_evidence_id(candidate))
+        add(candidate, "exact_temporal_target")
 
     if intent.version_tokens:
-        add(_best_version_candidate(ordered, classes, selected_ids), "exact_version")
+        candidate = _best_version_candidate(ordered, classes, selected_ids)
+        if candidate is not None:
+            required_ids.add(row_evidence_id(candidate))
+        add(candidate, "exact_version")
 
     if intent.is_conflict:
         primary = _best_exact_target(ordered, classes, selected_ids, intent) or _best_version_candidate(ordered, classes, selected_ids)
+        if primary is not None:
+            required_ids.add(row_evidence_id(primary))
         add(primary, "conflict_primary")
-        add(_best_conflict_side(ordered, classes, selected_ids), "conflict_side")
+        conflict_side = _best_conflict_side(ordered, classes, selected_ids)
+        if conflict_side is not None:
+            required_ids.add(row_evidence_id(conflict_side))
+        add(conflict_side, "conflict_side")
 
-    suppressed_ids, suppression_reasons = _suppression_map(ordered, classes, selected_ids, intent)
+    eligibility, eligibility_reasons = _eligibility_map(ordered, classes, intent, required_ids)
     for candidate in ordered:
         if len(selected) >= top_k:
             break
         evidence_id = row_evidence_id(candidate)
-        if not evidence_id or evidence_id in selected_ids or evidence_id in suppressed_ids:
+        if not evidence_id or evidence_id in selected_ids or eligibility.get(evidence_id) != Eligibility.ELIGIBLE:
             continue
-        add(candidate, "score_filler")
+        add(candidate, "eligible_filler")
 
-    for candidate in ordered:
-        if len(selected) >= top_k:
-            break
-        evidence_id = row_evidence_id(candidate)
-        if not evidence_id or evidence_id in selected_ids:
-            continue
-        if _forbidden_like(classes[evidence_id]):
-            continue
-        add(candidate, "suppressed_fallback")
+    allow_weak = _allows_weak_filler(intent, ordered, classes)
+    if allow_weak:
+        for candidate in ordered:
+            if len(selected) >= top_k:
+                break
+            evidence_id = row_evidence_id(candidate)
+            if not evidence_id or evidence_id in selected_ids or eligibility.get(evidence_id) != Eligibility.WEAK_ELIGIBLE:
+                continue
+            add(candidate, "weak_eligible_filler")
 
-    return selected, _report(intent, selected, classes, slot_filled, suppression_reasons, sorted(suppressed_ids), slot_misses)
+    if not selected:
+        candidate = _best_with_eligibility(ordered, eligibility, Eligibility.WEAK_ELIGIBLE)
+        if candidate is not None:
+            add(candidate, "weak_emergency_fallback")
+
+    if not selected:
+        candidate = _best_with_eligibility(ordered, eligibility, Eligibility.SUPPRESSED)
+        if candidate is not None:
+            add(candidate, "suppressed_emergency_fallback")
+
+    suppressed_ids = [evidence_id for evidence_id, state in eligibility.items() if state == Eligibility.SUPPRESSED]
+    return selected, _report(
+        intent,
+        selected,
+        classes,
+        slot_filled,
+        eligibility_reasons,
+        sorted(suppressed_ids),
+        slot_misses,
+        eligibility,
+    )
 
 
 def audit_conflict_data_contract(
@@ -403,51 +451,87 @@ def _best_preferred(candidates: list[Any], classes: dict[str, CandidateClass]) -
     )
 
 
-def _suppression_map(
+def _eligibility_map(
     candidates: list[Any],
     classes: dict[str, CandidateClass],
-    selected_ids: set[str],
     intent: QueryIntent,
-) -> tuple[set[str], dict[str, list[str]]]:
-    suppressed: set[str] = set()
+    required_ids: set[str],
+) -> tuple[dict[str, str], dict[str, list[str]]]:
+    eligibility: dict[str, str] = {}
     reasons: dict[str, list[str]] = {}
     exact_neighborhoods = {
         _neighborhood_key(candidate)
         for candidate in candidates
         if classes[row_evidence_id(candidate)].is_exact_target
     }
-    valid_time_exists = any(not classes[row_evidence_id(candidate)].is_transaction_only for candidate in candidates)
+    exact_or_narrow_exists = any(_is_exact_or_narrow(classes[row_evidence_id(candidate)]) for candidate in candidates)
     exact_version_exists = any(classes[row_evidence_id(candidate)].version_fit == "exact" for candidate in candidates)
+    valid_time_exists = any(not classes[row_evidence_id(candidate)].is_transaction_only for candidate in candidates)
+
     for candidate in candidates:
         evidence_id = row_evidence_id(candidate)
-        if not evidence_id or evidence_id in selected_ids:
+        if not evidence_id:
             continue
         classification = classes[evidence_id]
+        if evidence_id in required_ids:
+            eligibility[evidence_id] = Eligibility.REQUIRED
+            reasons[evidence_id] = ["required_slot"]
+            continue
+
+        state = Eligibility.ELIGIBLE
         candidate_reasons: list[str] = []
-        if _neighborhood_key(candidate) in exact_neighborhoods and classification.is_same_neighborhood_wrong_time:
-            candidate_reasons.append("same_neighborhood_wrong_time")
-        if exact_version_exists and classification.is_sibling_version:
+        if candidate_score(candidate) <= 0.0:
+            state = Eligibility.BLOCKED
+            candidate_reasons.append("zero_score_or_negative_constraint")
+        elif intent.is_transaction_valid_time and valid_time_exists and classification.is_transaction_only:
+            state = Eligibility.BLOCKED
+            candidate_reasons.append("transaction_only_when_valid_time_exists")
+        elif exact_version_exists and classification.is_sibling_version:
+            state = Eligibility.SUPPRESSED
             candidate_reasons.append("sibling_version")
-        if intent.source_tokens and classification.source_fit == "mismatch":
+        elif exact_neighborhoods and _neighborhood_key(candidate) in exact_neighborhoods and _wrong_time_for_exact_target(classification):
+            state = Eligibility.SUPPRESSED
+            candidate_reasons.append("same_neighborhood_wrong_time")
+        elif intent.source_tokens and classification.source_fit == "mismatch":
+            state = Eligibility.SUPPRESSED
             candidate_reasons.append("source_mismatch")
-        if (intent.metric_tokens or intent.version_tokens) and classification.metric_fit == "mismatch":
+        elif (intent.metric_tokens or intent.version_tokens) and classification.metric_fit == "mismatch":
+            state = Eligibility.SUPPRESSED
             candidate_reasons.append("metric_mismatch")
-        if intent.is_transaction_valid_time and valid_time_exists and classification.is_transaction_only:
-            candidate_reasons.append("transaction_only")
-        if candidate_reasons:
-            suppressed.add(evidence_id)
-            reasons[evidence_id] = candidate_reasons
-    return suppressed, reasons
+        elif classification.temporal_fit == "broad":
+            state = Eligibility.SUPPRESSED if exact_or_narrow_exists and _query_mentions_candidate_neighborhood(candidate, intent) else Eligibility.WEAK_ELIGIBLE
+            candidate_reasons.append("broad_time_window")
+        elif classification.temporal_fit in {"nearby", "unknown"}:
+            state = Eligibility.WEAK_ELIGIBLE
+            candidate_reasons.append("weak_temporal_fit")
+
+        eligibility[evidence_id] = state
+        reasons[evidence_id] = candidate_reasons or [state]
+    return eligibility, reasons
 
 
-def _forbidden_like(classification: CandidateClass) -> bool:
-    return (
-        classification.is_transaction_only
-        or classification.is_same_neighborhood_wrong_time
-        or classification.is_sibling_version
-        or classification.source_fit == "mismatch"
-        or classification.metric_fit == "mismatch"
-    )
+def _best_with_eligibility(candidates: list[Any], eligibility: dict[str, str], state: str) -> Any | None:
+    matches = [candidate for candidate in candidates if eligibility.get(row_evidence_id(candidate)) == state]
+    return max(matches, key=candidate_score) if matches else None
+
+
+def _allows_weak_filler(intent: QueryIntent, candidates: list[Any], classes: dict[str, CandidateClass]) -> bool:
+    if _is_broad_partial_or_ambiguous(intent.query_text):
+        return True
+    return not any(_is_exact_or_narrow(classes[row_evidence_id(candidate)]) for candidate in candidates)
+
+
+def _is_broad_partial_or_ambiguous(query_text: str) -> bool:
+    lowered = query_text.lower()
+    return any(token in lowered for token in ("broad", "background", "partial", "insufficient", "ambiguous", "around", "recent period"))
+
+
+def _is_exact_or_narrow(classification: CandidateClass) -> bool:
+    return classification.temporal_fit in {"exact_target", "year_match", "narrow"}
+
+
+def _wrong_time_for_exact_target(classification: CandidateClass) -> bool:
+    return classification.temporal_fit in {"same_year_wrong_date", "nearby", "broad", "unknown"}
 
 
 def _is_comparison_query(query_text: str, years: set[str], candidates: list[Any]) -> bool:
@@ -586,6 +670,14 @@ def _near_query_year(candidate_year: str | None, query_years: set[str]) -> bool:
         return False
 
 
+def _interval_contains_date(start: str | None, end: str | None, target: str) -> bool:
+    if not start or not end:
+        return False
+    if not (DATE_RE.fullmatch(start) and DATE_RE.fullmatch(end) and DATE_RE.fullmatch(target)):
+        return False
+    return start <= target <= end
+
+
 def _query_mentions_candidate_neighborhood(candidate: Any, intent: QueryIntent) -> bool:
     query_tokens = tokenize(intent.query_text)
     neighborhood_tokens = tokenize(row_entity(candidate)) | tokenize(row_source_family(candidate)) | tokenize(row_metric(candidate))
@@ -630,6 +722,7 @@ def _report(
     suppression_reasons: dict[str, list[str]],
     suppressed_ids: list[str],
     slot_misses: list[str],
+    eligibility: dict[str, str],
 ) -> dict[str, Any]:
     return {
         "intent": _intent_to_dict(intent),
@@ -638,6 +731,9 @@ def _report(
         "slot_misses": slot_misses,
         "suppressed_evidence_ids": suppressed_ids,
         "suppression_reasons": suppression_reasons,
+        "eligibility": eligibility,
+        "blocked_evidence_ids": sorted(evidence_id for evidence_id, state in eligibility.items() if state == Eligibility.BLOCKED),
+        "weak_eligible_evidence_ids": sorted(evidence_id for evidence_id, state in eligibility.items() if state == Eligibility.WEAK_ELIGIBLE),
         "classifications": {evidence_id: asdict(classification) for evidence_id, classification in classes.items()},
     }
 

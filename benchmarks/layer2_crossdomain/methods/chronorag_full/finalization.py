@@ -43,8 +43,9 @@ def finalize_chronorag_evidence(
     adjusted, source_metric_count = _apply_source_metric_adjustments(adjusted, query_text)
 
     adjusted.sort(key=lambda item: item.score, reverse=True)
-    intent = classify_query_intent(query_text=query_text, constraints=constraints, candidates=adjusted)
-    selected, slot_report = assemble_top_k(adjusted, intent, top_k)
+    assembler_pool = adjusted[: min(len(adjusted), 200)]
+    intent = classify_query_intent(query_text=query_text, constraints=constraints, candidates=assembler_pool)
+    selected, slot_report = assemble_top_k(assembler_pool, intent, top_k)
 
     metadata = {
         "retrieval_finalization_ran": True,

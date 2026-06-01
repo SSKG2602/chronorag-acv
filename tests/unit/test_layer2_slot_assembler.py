@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from benchmarks.layer2_crossdomain.methods.chronorag_full.slot_assembler import (
     assemble_top_k,
     audit_conflict_data_contract,
+    classify_candidate,
     classify_query_intent,
 )
 
@@ -65,9 +66,22 @@ def test_exact_target_date_beats_higher_scored_same_year_wrong_date() -> None:
     assert "target" in selected
     assert selected.index("target") == 0
     assert "wrong" in report["suppressed_evidence_ids"]
+    assert "wrong" not in selected
 
 
-def test_broad_evidence_demoted_only_when_exact_exists() -> None:
+def test_if_only_suppressed_rows_remain_selection_can_be_shorter_than_topk() -> None:
+    query = "What was Alpha yield on 1962-08-15?"
+    target = _candidate("target", 10.0, valid_from="1962-08-15")
+    wrong_a = _candidate("wrong_a", 100.0, valid_from="1962-01-18")
+    wrong_b = _candidate("wrong_b", 90.0, valid_from="1962-02-09")
+
+    selected, report = _assemble(query, [wrong_a, wrong_b, target], top_k=5)
+
+    assert selected == ["target"]
+    assert set(report["suppressed_evidence_ids"]) == {"wrong_a", "wrong_b"}
+
+
+def test_broad_evidence_selected_only_when_no_exact_or_narrow_candidate_exists() -> None:
     query = "What was Alpha yield on 1962-08-15?"
     broad = _candidate("broad", 100.0, valid_from="1962-01-01", valid_to="1962-12-31", temporal_type="valid_time_range")
     exact = _candidate("exact", 10.0, valid_from="1962-08-15")
@@ -98,7 +112,7 @@ def test_transaction_time_demotion_triggers_valid_time_replacement() -> None:
 
     assert "valid" in selected
     assert "transaction" not in selected
-    assert "transaction" in report["suppressed_evidence_ids"]
+    assert "transaction" in report["blocked_evidence_ids"]
 
 
 def test_comparison_query_reserves_both_sides() -> None:
@@ -201,3 +215,23 @@ def test_forbidden_like_rows_are_not_forced_when_clean_candidates_exist() -> Non
     selected, _report = _assemble(query, [transaction, valid, clean], top_k=2)
 
     assert selected == ["valid", "clean"]
+
+
+def test_performance_guard_classifies_each_candidate_once(monkeypatch) -> None:
+    import benchmarks.layer2_crossdomain.methods.chronorag_full.slot_assembler as slot_assembler
+
+    query = "What was Alpha yield on 1962-08-15?"
+    candidates = [_candidate(f"row_{index}", float(index), valid_from="1962-01-18") for index in range(999)]
+    candidates.append(_candidate("target", 1.0, valid_from="1962-08-15"))
+    call_count = 0
+
+    def counted(candidate, intent):
+        nonlocal call_count
+        call_count += 1
+        return classify_candidate(candidate, intent)
+
+    monkeypatch.setattr(slot_assembler, "classify_candidate", counted)
+    selected, _report = _assemble(query, candidates, top_k=5)
+
+    assert selected == ["target"]
+    assert call_count == len(candidates)
