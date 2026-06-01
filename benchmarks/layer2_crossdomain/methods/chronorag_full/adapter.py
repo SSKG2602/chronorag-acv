@@ -12,7 +12,7 @@ from benchmarks.layer2_crossdomain.temporal_precision import (
     has_negative_exact_temporal_match,
     score_temporal_precision,
 )
-from benchmarks.layer2_crossdomain.methods.chronorag_full.finalization import finalize_chronorag_evidence
+from benchmarks.layer2_crossdomain.methods.chronorag_full.finalization import AblationConfig, finalize_chronorag_evidence
 from core.ingestion.temporal_contextual_chunker import build_temporal_contextual_chunks
 from core.retrieval.lexical_bm25 import bm25_search
 
@@ -25,6 +25,13 @@ class AdaptedChronoEvidence:
     temporal_source: str
     temporal_metadata: dict
     score: float = 0.0
+
+
+@dataclass(frozen=True)
+class ChronoRAGPreparedContext:
+    corpus: list[CorpusRow]
+    adapted_chunks: list[AdaptedChronoEvidence]
+    tcc_disabled: bool = False
 
 
 def adapt_corpus(rows: list[CorpusRow]) -> list[AdaptedChronoEvidence]:
@@ -82,14 +89,57 @@ def adapt_corpus(rows: list[CorpusRow]) -> list[AdaptedChronoEvidence]:
     return adapted
 
 
-def retrieve_with_chronorag_adapter(case: QuestionCase, corpus: list[CorpusRow], top_k: int) -> tuple[list[CorpusRow], dict]:
-    adapted = adapt_corpus(corpus)
+def adapt_corpus_without_tcc(rows: list[CorpusRow]) -> list[AdaptedChronoEvidence]:
+    """Use raw row text for retrieval while preserving row-level temporal metadata."""
+    return [
+        AdaptedChronoEvidence(
+            row=row,
+            retrieval_text=row.raw_text,
+            temporal_confidence=0.0,
+            temporal_source="row_metadata",
+            temporal_metadata={
+                "tcc_disabled": True,
+                "valid_from": row.valid_from,
+                "valid_to": row.valid_to,
+                "transaction_time": row.transaction_time,
+                "temporal_type": row.temporal_type,
+                "source_family": row.source_family,
+            },
+        )
+        for row in rows
+    ]
+
+
+def prepare_chronorag_context(corpus: list[CorpusRow], *, disable_tcc: bool = False) -> ChronoRAGPreparedContext:
+    adapted = adapt_corpus_without_tcc(corpus) if disable_tcc else adapt_corpus(corpus)
+    return ChronoRAGPreparedContext(corpus=corpus, adapted_chunks=adapted, tcc_disabled=disable_tcc)
+
+
+def retrieve_with_chronorag_adapter(
+    case: QuestionCase,
+    corpus: list[CorpusRow],
+    top_k: int,
+    ablation_config: AblationConfig | None = None,
+) -> tuple[list[CorpusRow], dict]:
+    config = ablation_config or AblationConfig()
+    prepared = prepare_chronorag_context(corpus, disable_tcc=config.disable_tcc)
+    return retrieve_with_chronorag_prepared(case, prepared, top_k, ablation_config=config)
+
+
+def retrieve_with_chronorag_prepared(
+    case: QuestionCase,
+    prepared_context: ChronoRAGPreparedContext,
+    top_k: int,
+    ablation_config: AblationConfig | None = None,
+) -> tuple[list[CorpusRow], dict]:
+    config = ablation_config or AblationConfig()
+    adapted = prepared_context.adapted_chunks
     temporal_constraints = extract_temporal_constraints(case.question)
     lexical = dict(bm25_search(case.question, [(item.row.id, item.retrieval_text) for item in adapted], top_k=len(adapted)))
     scored: list[AdaptedChronoEvidence] = []
     for item in adapted:
         relevance = _normalize(lexical.get(item.row.id, 0.0), lexical.values())
-        temporal = _temporal_weight(case, item.row)
+        temporal = 0.0 if config.disable_temporal_precision else _temporal_weight(case, item.row)
         authority = 0.70 if item.row.source_kind in {"filing", "regulation", "guideline", "changelog"} else 0.50
         score = monotone_temporal_fusion(
             relevance,
@@ -99,7 +149,7 @@ def retrieve_with_chronorag_adapter(case: QuestionCase, corpus: list[CorpusRow],
             0.0,
             {"alpha": 0.50, "beta_time": 0.35, "gamma_authority": 0.10, "delta_age": 0.0, "tx_gamma": 0.25},
         )
-        if has_negative_exact_temporal_match(case, item.row, temporal_constraints):
+        if not config.disable_temporal_precision and has_negative_exact_temporal_match(case, item.row, temporal_constraints):
             score = 0.0
         scored.append(
             AdaptedChronoEvidence(
@@ -111,15 +161,30 @@ def retrieve_with_chronorag_adapter(case: QuestionCase, corpus: list[CorpusRow],
                 score=score,
             )
         )
-    selected, finalization_metadata = finalize_chronorag_evidence(scored, temporal_constraints, case.question, top_k)
+    selected, finalization_metadata = finalize_chronorag_evidence(
+        scored,
+        temporal_constraints,
+        case.question,
+        top_k,
+        ablation_config=ablation_config,
+    )
     metadata = {
         "method_family": "chronorag_full",
         "uses_existing_chronorag_framework": True,
         "adapter_used": True,
-        "uses_tcc": True,
+        "uses_tcc": not prepared_context.tcc_disabled,
+        "tcc_disabled": prepared_context.tcc_disabled,
         "uses_tcc_precision_metadata": any(item.temporal_metadata.get("normalized_start") for item in selected),
         "uses_monotone_temporal_fusion": True,
-        "temporal_precision_applied": True,
+        "temporal_precision_applied": not config.disable_temporal_precision,
+        "requested_ablation_config": {
+            "disable_tcc": config.disable_tcc,
+            "disable_temporal_precision": config.disable_temporal_precision,
+            "disable_transaction_role": config.disable_transaction_role,
+            "disable_source_metric": config.disable_source_metric,
+            "disable_slot_assembler": config.disable_slot_assembler,
+            "score_only": config.score_only,
+        },
         "extracted_temporal_constraints": [constraint.to_dict() for constraint in temporal_constraints],
         "exact_date_query": has_exact_date_query(temporal_constraints),
         "exact_timestamp_query": has_exact_timestamp_query(temporal_constraints),

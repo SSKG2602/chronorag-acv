@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
@@ -26,26 +27,60 @@ TRANSACTION_ROLES = {"transaction_time", "publication_time", "filing_time", "rel
 SOURCE_GENERIC_TOKENS = {"data", "document", "evidence", "file", "record", "source"}
 
 
+@dataclass(frozen=True)
+class AblationConfig:
+    disable_tcc: bool = False
+    disable_temporal_precision: bool = False
+    disable_transaction_role: bool = False
+    disable_source_metric: bool = False
+    disable_slot_assembler: bool = False
+    score_only: bool = False
+
+    def effective(self) -> "AblationConfig":
+        if not self.score_only:
+            return self
+        return AblationConfig(
+            disable_tcc=self.disable_tcc,
+            disable_temporal_precision=True,
+            disable_transaction_role=True,
+            disable_source_metric=True,
+            disable_slot_assembler=True,
+            score_only=True,
+        )
+
+
 def finalize_chronorag_evidence(
     candidates: list[Any],
     constraints: list[TemporalConstraint],
     query_text: str,
     top_k: int,
+    ablation_config: AblationConfig | None = None,
 ) -> tuple[list[Any], dict[str, object]]:
     """Apply a small final evidence-selection pass after temporal fusion."""
+    config = (ablation_config or AblationConfig()).effective()
     adjusted = list(candidates)
     exact_count = 0
     transaction_count = 0
     source_metric_count = 0
 
-    adjusted, exact_count = _apply_exact_valid_time_cleanup(adjusted, constraints, query_text)
-    adjusted, transaction_count = _apply_transaction_role_cleanup(adjusted, constraints, query_text)
-    adjusted, source_metric_count = _apply_source_metric_adjustments(adjusted, query_text)
+    if not config.disable_temporal_precision:
+        adjusted, exact_count = _apply_exact_valid_time_cleanup(adjusted, constraints, query_text)
+    if not config.disable_transaction_role:
+        adjusted, transaction_count = _apply_transaction_role_cleanup(adjusted, constraints, query_text)
+    if not config.disable_source_metric:
+        adjusted, source_metric_count = _apply_source_metric_adjustments(adjusted, query_text)
 
     adjusted.sort(key=lambda item: item.score, reverse=True)
     assembler_pool = adjusted[: min(len(adjusted), 200)]
     intent = classify_query_intent(query_text=query_text, constraints=constraints, candidates=assembler_pool)
-    selected, slot_report = assemble_top_k(assembler_pool, intent, top_k)
+    if config.disable_slot_assembler:
+        selected = assembler_pool[:top_k]
+        slot_report = {
+            "slot_assembler_disabled": True,
+            "selected_evidence_ids": [item.row.id for item in selected],
+        }
+    else:
+        selected, slot_report = assemble_top_k(assembler_pool, intent, top_k)
 
     metadata = {
         "retrieval_finalization_ran": True,
@@ -53,8 +88,16 @@ def finalize_chronorag_evidence(
         "transaction_role_cleanup_applied_count": transaction_count,
         "source_metric_adjustment_applied_count": source_metric_count,
         "diversified_selection_applied": intent.is_comparison or intent.is_conflict,
-        "slot_aware_assembly_applied": True,
+        "slot_aware_assembly_applied": not config.disable_slot_assembler,
         "slot_assembly_report": slot_report,
+        "ablation_config": {
+            "disable_tcc": config.disable_tcc,
+            "disable_temporal_precision": config.disable_temporal_precision,
+            "disable_transaction_role": config.disable_transaction_role,
+            "disable_source_metric": config.disable_source_metric,
+            "disable_slot_assembler": config.disable_slot_assembler,
+            "score_only": config.score_only,
+        },
         "selected_scores_after_finalization": {item.row.id: round(item.score, 4) for item in selected},
     }
     return selected, metadata
