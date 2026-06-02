@@ -179,6 +179,61 @@ def retrieve_chronorag_full(
     return retrieve_with_chronorag_prepared(case.to_question_case(), prepared_context, top_k)
 
 
+def retrieve_layer2b_evidence(
+    case: Layer2BQACase,
+    prepared_context: ChronoRAGPreparedContext,
+    *,
+    top_k: int,
+    max_top_k: int,
+    dynamic_top_k: bool,
+    ensure_expected_evidence: bool,
+    corpus_lookup: dict[str, CorpusRow],
+) -> tuple[list[CorpusRow], dict[str, Any]]:
+    attempts = _top_k_progression(top_k, max_top_k) if dynamic_top_k else [top_k]
+    final_rows: list[CorpusRow] = []
+    final_metadata: dict[str, Any] = {}
+    retrieved_expected = False
+    final_top_k = top_k
+
+    for candidate_top_k in attempts:
+        final_rows, final_metadata = retrieve_chronorag_full(case, prepared_context, candidate_top_k)
+        final_top_k = candidate_top_k
+        if _all_expected_present(case, final_rows):
+            retrieved_expected = True
+            break
+
+    retrieved_ids_before_injection = [row.id for row in final_rows]
+    missing_before_injection = [
+        evidence_id for evidence_id in case.expected_evidence_ids if evidence_id not in set(retrieved_ids_before_injection)
+    ]
+    injected_ids: list[str] = []
+
+    if missing_before_injection and ensure_expected_evidence:
+        existing_row_ids = {row.id for row in final_rows}
+        for evidence_id in missing_before_injection:
+            row = corpus_lookup.get(evidence_id)
+            if row is None or row.id in existing_row_ids:
+                continue
+            final_rows.append(row)
+            existing_row_ids.add(row.id)
+            injected_ids.append(row.id)
+
+    metadata = {
+        **final_metadata,
+        "dynamic_top_k_enabled": dynamic_top_k,
+        "dynamic_top_k_used": dynamic_top_k and final_top_k != top_k,
+        "dynamic_top_k_attempts": attempts,
+        "final_top_k": final_top_k,
+        "expected_evidence_injected": bool(injected_ids),
+        "injected_expected_evidence_ids": injected_ids,
+        "missing_expected_evidence_ids_before_injection": missing_before_injection,
+        "retrieved_evidence_ids_before_injection": retrieved_ids_before_injection,
+        "expected_evidence_retrieved_before_injection": retrieved_expected,
+        "expected_evidence_available_to_model": _all_expected_present(case, final_rows),
+    }
+    return final_rows, metadata
+
+
 def build_layer2b_prompt(case: Layer2BQACase, evidence_rows: list[CorpusRow]) -> str:
     cards = "\n".join(json.dumps(_evidence_card(row, index), ensure_ascii=True, sort_keys=True) for index, row in enumerate(evidence_rows, start=1))
     schema = {
@@ -267,6 +322,7 @@ def validate_answer_contract(
     corpus_ids = set(corpus_lookup)
     expected_evidence_cited = bool(expected) and expected.issubset(cited_set)
     unknown_citation_absent = all(item in retrieved_set and item in corpus_ids for item in cited)
+    expected_evidence_available_to_model = bool(expected) and expected.issubset(retrieved_set)
     valid_time_present = _expected_valid_time_present(case.expected_valid_time, valid_time_used, answer_text)
     answer_behavior_correct = _answer_behavior_correct(case.answer_behavior, behavior)
     partial_refusal_correct = _partial_refusal_correct(case.answer_behavior, behavior, partial_or_refusal)
@@ -284,6 +340,7 @@ def validate_answer_contract(
     failure_reasons = [name for name, passed in checks.items() if not passed]
     return {
         **checks,
+        "expected_evidence_available_to_model": expected_evidence_available_to_model,
         "overall_contract_pass": all(checks.values()),
         "failure_reasons": failure_reasons,
         "normalized_answer": normalized,
@@ -295,7 +352,43 @@ def dry_run_validation(case: Layer2BQACase, retrieved_evidence_ids: list[str]) -
     missing = [evidence_id for evidence_id in case.expected_evidence_ids if evidence_id not in set(retrieved_evidence_ids)]
     return {
         "expected_evidence_retrieved_at_k": not missing,
+        "expected_evidence_available_to_model": not missing,
         "missing_expected_evidence_ids": missing,
+        "injected_expected_evidence_ids": [],
+        "schema_pass": None,
+        "expected_evidence_cited": None,
+        "unknown_citation_absent": None,
+        "valid_time_present": None,
+        "answer_behavior_correct": None,
+        "partial_refusal_correct": None,
+        "conflict_warning_correct": None,
+        "overall_contract_pass": None,
+        "failure_reasons": ["answer_contract_not_applicable_in_dry_run"],
+    }
+
+
+def dry_run_validation_with_injection(
+    case: Layer2BQACase,
+    retrieved_evidence_ids_before_injection: list[str],
+    available_evidence_ids: list[str],
+    retrieval_metadata: dict[str, Any],
+) -> dict[str, Any]:
+    missing_before = [
+        evidence_id
+        for evidence_id in case.expected_evidence_ids
+        if evidence_id not in set(retrieved_evidence_ids_before_injection)
+    ]
+    missing_after = [
+        evidence_id
+        for evidence_id in case.expected_evidence_ids
+        if evidence_id not in set(available_evidence_ids)
+    ]
+    return {
+        "expected_evidence_retrieved_at_k": not missing_before,
+        "expected_evidence_available_to_model": not missing_after,
+        "missing_expected_evidence_ids": missing_before,
+        "missing_expected_evidence_ids_after_injection": missing_after,
+        "injected_expected_evidence_ids": list(retrieval_metadata.get("injected_expected_evidence_ids") or []),
         "schema_pass": None,
         "expected_evidence_cited": None,
         "unknown_citation_absent": None,
@@ -324,6 +417,8 @@ def normalize_answer_payload(payload: dict[str, Any] | None) -> dict[str, Any] |
         return None
     normalized["cited_evidence_ids"] = cited
     valid_time = normalized.get("valid_time_used")
+    if valid_time is None:
+        valid_time = ""
     if isinstance(valid_time, list):
         valid_time = "/".join(str(item) for item in valid_time if item)
     if not isinstance(valid_time, str):
@@ -356,6 +451,7 @@ def build_dry_run_result(
     suffix: str,
 ) -> dict[str, Any]:
     selected_ids = [row.id for row in evidence_rows]
+    retrieved_ids = list(retrieval_metadata.get("retrieved_evidence_ids_before_injection") or selected_ids)
     return {
         "benchmark": "layer2b_manual_qa",
         "method": METHOD_NAME,
@@ -369,12 +465,13 @@ def build_dry_run_result(
         "source_family": case.source_family,
         "expected_evidence_ids": case.expected_evidence_ids,
         "selected_evidence_ids": selected_ids,
+        "retrieved_evidence_ids_before_injection": retrieved_ids,
         "top_k": top_k,
         "status": "completed",
         "answer": None,
         "raw_model_response": None,
         "provider_error": None,
-        "validation": dry_run_validation(case, selected_ids),
+        "validation": dry_run_validation_with_injection(case, retrieved_ids, selected_ids, retrieval_metadata),
         "retrieval_metadata": retrieval_metadata,
     }
 
@@ -390,6 +487,7 @@ def build_provider_error_result(
     latency_ms: float,
 ) -> dict[str, Any]:
     selected_ids = [row.id for row in evidence_rows]
+    retrieved_ids = list(retrieval_metadata.get("retrieved_evidence_ids_before_injection") or selected_ids)
     return {
         "benchmark": "layer2b_manual_qa",
         "method": METHOD_NAME,
@@ -403,6 +501,7 @@ def build_provider_error_result(
         "source_family": case.source_family,
         "expected_evidence_ids": case.expected_evidence_ids,
         "selected_evidence_ids": selected_ids,
+        "retrieved_evidence_ids_before_injection": retrieved_ids,
         "top_k": top_k,
         "status": "provider_error",
         "answer": None,
@@ -438,6 +537,7 @@ def build_vertex_result(
     latency_ms: float,
 ) -> dict[str, Any]:
     selected_ids = [row.id for row in evidence_rows]
+    retrieved_ids = list(retrieval_metadata.get("retrieved_evidence_ids_before_injection") or selected_ids)
     validation = validate_answer_contract(case, answer_payload, raw_response, selected_ids, corpus_lookup)
     return {
         "benchmark": "layer2b_manual_qa",
@@ -452,6 +552,7 @@ def build_vertex_result(
         "source_family": case.source_family,
         "expected_evidence_ids": case.expected_evidence_ids,
         "selected_evidence_ids": selected_ids,
+        "retrieved_evidence_ids_before_injection": retrieved_ids,
         "top_k": top_k,
         "status": "completed",
         "answer": validation.pop("normalized_answer"),
@@ -553,6 +654,16 @@ def render_markdown_summary(rows: list[dict[str, Any]], *, mode: str, top_k: int
     provider_errors = sum(1 for row in rows if row.get("status") == "provider_error")
     schema_failures = _count_validation_false(rows, "schema_pass")
     retrieved_expected = sum(1 for row in rows if row.get("validation", {}).get("expected_evidence_retrieved_at_k"))
+    available_expected = sum(1 for row in rows if row.get("validation", {}).get("expected_evidence_available_to_model"))
+    injected_rows = [
+        row
+        for row in rows
+        if (row.get("retrieval_metadata") or {}).get("expected_evidence_injected")
+    ]
+    injected_count = sum(
+        len((row.get("retrieval_metadata") or {}).get("injected_expected_evidence_ids") or [])
+        for row in rows
+    )
     expected_cited = sum(1 for row in rows if row.get("validation", {}).get("expected_evidence_cited"))
     valid_time_correct = sum(1 for row in rows if row.get("validation", {}).get("valid_time_present"))
     behavior_correct = sum(1 for row in rows if row.get("validation", {}).get("answer_behavior_correct"))
@@ -569,7 +680,10 @@ def render_markdown_summary(rows: list[dict[str, Any]], *, mode: str, top_k: int
         f"- Result suffix: `{result_suffix}`",
         f"- Provider errors: {provider_errors}",
         f"- JSON/schema failures: {schema_failures}",
-        f"- Expected evidence retrieved@k: {retrieved_expected} / {len(rows)}",
+        f"- Expected evidence retrieved before injection: {retrieved_expected} / {len(rows)}",
+        f"- Expected evidence available to model after injection: {available_expected} / {len(rows)}",
+        f"- Injected expected evidence rows: {injected_count}",
+        f"- Cases with injected expected evidence: {len(injected_rows)}",
         f"- Expected evidence cited: {expected_cited} / {len(rows)}",
         f"- Valid time correctness: {valid_time_correct} / {len(rows)}",
         f"- Behavior correctness: {behavior_correct} / {len(rows)}",
@@ -583,10 +697,17 @@ def render_markdown_summary(rows: list[dict[str, Any]], *, mode: str, top_k: int
                 "",
             ]
         )
+    if injected_count:
+        lines.extend(
+            [
+                "Expected-evidence injection was used for at least one case. Injected evidence is gold evidence made available to evaluate answer synthesis with the right evidence in context; it must not be interpreted as retrieval quality.",
+                "",
+            ]
+        )
     lines.extend(
         [
-            "| Question ID | Type | Expected Behavior | Status | Retrieved Expected Evidence | Contract Pass | Failure Reasons |",
-            "|---|---|---|---|---:|---:|---|",
+            "| Question ID | Type | Expected Behavior | Status | Retrieved Expected Evidence | Available To Model | Injected Evidence IDs | Contract Pass | Failure Reasons |",
+            "|---|---|---|---|---:|---:|---|---:|---|",
         ]
     )
     for row in rows:
@@ -596,15 +717,23 @@ def render_markdown_summary(rows: list[dict[str, Any]], *, mode: str, top_k: int
             expected = set(row.get("expected_evidence_ids") or [])
             selected = set(row.get("selected_evidence_ids") or [])
             retrieved = bool(expected) and expected.issubset(selected)
+        available = validation.get("expected_evidence_available_to_model")
+        if available is None:
+            expected = set(row.get("expected_evidence_ids") or [])
+            selected = set(row.get("selected_evidence_ids") or [])
+            available = bool(expected) and expected.issubset(selected)
+        injected = ", ".join((row.get("retrieval_metadata") or {}).get("injected_expected_evidence_ids") or [])
         contract = validation.get("overall_contract_pass")
         failures = ", ".join(str(item) for item in validation.get("failure_reasons") or [])
         lines.append(
-            "| {qid} | {qtype} | {behavior} | {status} | {retrieved} | {contract} | {failures} |".format(
+            "| {qid} | {qtype} | {behavior} | {status} | {retrieved} | {available} | {injected} | {contract} | {failures} |".format(
                 qid=row.get("question_id", ""),
                 qtype=row.get("question_type", ""),
                 behavior=row.get("expected_answer_behavior", ""),
                 status=row.get("status", ""),
                 retrieved=_format_bool(retrieved),
+                available=_format_bool(available),
+                injected=injected,
                 contract="n/a" if contract is None else _format_bool(contract),
                 failures=failures,
             )
@@ -621,6 +750,18 @@ def _evidence_card(row: CorpusRow, rank: int) -> dict[str, Any]:
     card = row.to_prompt_dict()
     card["rank"] = rank
     return card
+
+
+def _top_k_progression(top_k: int, max_top_k: int) -> list[int]:
+    if max_top_k < top_k:
+        raise ValueError("--max-top-k must be greater than or equal to --top-k")
+    candidates = [top_k, 10, 20, max_top_k]
+    return sorted({value for value in candidates if top_k <= value <= max_top_k})
+
+
+def _all_expected_present(case: Layer2BQACase, rows: list[CorpusRow]) -> bool:
+    selected_ids = {row.id for row in rows}
+    return all(evidence_id in selected_ids for evidence_id in case.expected_evidence_ids)
 
 
 def _split_expected_valid_time(value: str) -> list[str]:

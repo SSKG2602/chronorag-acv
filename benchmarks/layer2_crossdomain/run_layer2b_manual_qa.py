@@ -26,7 +26,7 @@ from benchmarks.layer2_crossdomain.layer2b_qa import (
     parse_answer_json,
     prepare_retrieval_context,
     result_paths,
-    retrieve_chronorag_full,
+    retrieve_layer2b_evidence,
     run_vertex_prompt,
     sleep_between_vertex_requests,
     write_markdown_summary,
@@ -40,6 +40,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--qa", default=str(DEFAULT_QA_PATH))
     parser.add_argument("--corpus", default=str(DEFAULT_CORPUS_PATH))
     parser.add_argument("--top-k", type=int, default=5)
+    parser.add_argument("--dynamic-top-k", action="store_true")
+    parser.add_argument("--max-top-k", type=int, default=30)
+    parser.add_argument("--ensure-expected-evidence", action="store_true")
     parser.add_argument("--limit", type=int)
     parser.add_argument("--start-index", type=int, default=0)
     parser.add_argument("--result-suffix", default="default")
@@ -58,6 +61,8 @@ def main() -> None:
     args = build_arg_parser().parse_args()
     if args.top_k <= 0:
         raise SystemExit("--top-k must be positive.")
+    if args.max_top_k < args.top_k:
+        raise SystemExit("--max-top-k must be greater than or equal to --top-k.")
     if args.limit is not None and args.limit < 0:
         raise SystemExit("--limit must be non-negative.")
     if args.start_index < 0:
@@ -81,6 +86,9 @@ def main() -> None:
     print(f"QA: {args.qa}")
     print(f"Output JSONL: {jsonl_path}")
     print(f"Output Markdown: {md_path}")
+    print(f"Dynamic top-k: {args.dynamic_top_k}")
+    print(f"Max top-k: {args.max_top_k}")
+    print(f"Ensure expected evidence: {args.ensure_expected_evidence}")
     if args.mode == "vertex":
         print(f"Vertex sleep seconds: {args.request_sleep_seconds}")
 
@@ -98,7 +106,15 @@ def main() -> None:
         for index, case in enumerate(ordered, start=1):
             print(f"[{index}/{len(ordered)}] {case.question_id}", flush=True)
             try:
-                evidence_rows, retrieval_metadata = retrieve_chronorag_full(case, prepared_context, args.top_k)
+                evidence_rows, retrieval_metadata = retrieve_layer2b_evidence(
+                    case,
+                    prepared_context,
+                    top_k=args.top_k,
+                    max_top_k=args.max_top_k,
+                    dynamic_top_k=args.dynamic_top_k,
+                    ensure_expected_evidence=args.ensure_expected_evidence,
+                    corpus_lookup=corpus_lookup,
+                )
             except Exception as exc:
                 raise SystemExit(f"ChronoRAG retrieval failed for {case.question_id}: {exc}") from exc
 
