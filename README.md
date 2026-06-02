@@ -269,6 +269,28 @@ Scoring boundary:
   slot, forbidden-evidence, and insufficiency behavior can be interpreted
   without blending them into one opaque aggregate.
 
+### Data used in Layer 2A
+
+Layer 2A starts from a raw pool of about 46,503 detected rows or items. The
+controlled benchmark uses a selected 5,000-row corpus and 200 v3 aligned
+questions built against that selected corpus.
+
+The source families represented in the Layer 2A setup are FRED macro,
+market/index series, SEC submissions, Federal Register, and GitHub releases.
+Those families are used to test whether temporal retrieval behavior survives
+across macroeconomic, market, filing, regulatory, and software-release
+contexts.
+
+The 5,000-row full corpus is generated working data. A full working corpus may
+exist at `benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl` during local
+or GCP benchmark execution. The public repository keeps sample corpus files
+and final result artifacts so the benchmark boundary is visible without
+committing every generated data row.
+
+New Layer 2B questions must be built from the selected 5,000-row corpus, not
+the 46,503-row raw pool, unless the corpus is intentionally rebuilt and the
+question/evidence contracts are regenerated against that new corpus.
+
 Final public result files:
 
 - `benchmarks/layer2_crossdomain/results/layer2_retrieval_only_v3_200_eval.md`
@@ -323,6 +345,29 @@ the same 200 v3 questions.
 | `chronorag_no_slot_assembler` | Disables slot-aware evidence assembly. | Tests multi-slot and cross-domain comparison coverage. |
 | `chronorag_score_only` | Uses fused ranking without finalization components. | Tests whether retrieval finalization adds behavior beyond score ordering. |
 | `metadata_temporal_rag` | Metadata-oriented temporal retrieval baseline. | Provides a comparison point for selected-evidence behavior. |
+
+### Stored ablation scores
+
+These scores are copied from
+`benchmarks/layer2_crossdomain/results/layer2_ablation_v3_ablation200.md`.
+
+| Variant | Cases | Generic Hit@1 | Generic Hit@5 | Forbidden absent@5 | Category primary pass | Delta vs chronorag_full | Interpretation |
+|---|---:|---:|---:|---:|---:|---:|---|
+| `chronorag_full` | 200 | 0.8250 | 0.8950 | 0.9950 | 0.9625 | 0.0000 | Reference setting for this ablation run. |
+| `chronorag_no_tcc` | 200 | 0.8350 | 0.8950 | 0.9950 | 0.9625 | 0.0000 | Same overall category-primary pass as full in this controlled run. |
+| `chronorag_no_temporal_precision` | 200 | 0.7500 | 0.8500 | 0.9450 | 0.7500 | -0.2125 | Lower category-primary pass when precision handling is disabled. |
+| `chronorag_no_transaction_role` | 200 | 0.8250 | 0.8950 | 0.9950 | 0.9625 | 0.0000 | Same overall category-primary pass as full in this controlled run. |
+| `chronorag_no_source_metric` | 200 | 0.8300 | 0.8900 | 1.0000 | 0.9688 | 0.0062 | Source/metric ablation did not reduce overall primary pass in this run. |
+| `chronorag_no_slot_assembler` | 200 | 0.8300 | 0.8900 | 0.8150 | 0.7750 | -0.1875 | Lower forbidden-absence and category-primary pass without slot assembly. |
+| `chronorag_score_only` | 200 | 0.8150 | 0.9850 | 0.6500 | 0.5625 | -0.4000 | High generic Hit@5 but weaker final selected-evidence behavior. |
+| `metadata_temporal_rag` | 200 | 0.6900 | 0.8600 | 0.6950 | 0.4813 | -0.4813 | Independent metadata baseline with lower category-primary pass here. |
+
+The ablation score table is the fastest way to see which component removals
+changed behavior in the controlled 200-question Layer 2A v3 benchmark. The
+per-ablation descriptions below explain why those score differences matter:
+they connect metric changes to the expected failure modes for retrieval text,
+temporal precision, transaction roles, source/metric anchors, slot coverage,
+and final eligibility-gated selection.
 
 ### `chronorag_no_tcc`
 
@@ -547,6 +592,28 @@ Planned research and communication work includes a technical report,
 arXiv-style draft, LinkedIn/build-log posts, and a professor or lab outreach
 summary. These are planned reporting artifacts, not completed benchmark layers.
 
+### Layer 2B natural-language QA plan
+
+Layer 2B remains planned work. The intended benchmark is 50 manually designed
+natural-language temporal QA questions built from evidence cards in the
+selected 5,000-row Layer 2A corpus. The planned path is retrieval with
+ChronoRAG, Vertex-backed answer synthesis, dynamic top-k selection, and
+answer-contract validation.
+
+### Technical report / arXiv-style draft
+
+The technical report and arXiv-style draft remain planned reporting work. The
+report should use the current Layer 1A, Layer 1B, and Layer 2A results, then
+incorporate Layer 2B results once that planned answer-generation benchmark is
+available.
+
+### Outreach and portfolio work
+
+README and technical-report material are intended to support professor or lab
+outreach, LinkedIn build-log posts, and research portfolio presentation. This
+work should summarize the controlled benchmark setup, correction history, and
+result boundaries without presenting planned Layer 2B work as completed.
+
 ## Reproduce
 
 The commands below are grouped by reproducibility boundary. Some commands run
@@ -665,6 +732,80 @@ result files should be treated as development history, especially when they
 come from intermediate provider or judge experiments rather than the final
 retrieval-only Layer 2A boundary.
 
+## Data and Artifact Structure
+
+### Tracked source and application code
+
+- `app/`: FastAPI application routes, schemas, and service wiring.
+- `core/`: temporal retrieval, contextual chunking, routing, ranking, and
+  generation support code.
+- `storage/`: local persistence abstractions for PVDB/cache-style storage.
+- `tests/`: unit tests and benchmark contract tests.
+
+### Layer 1 benchmark artifacts
+
+- `benchmarks/run_temporal_eval_v2.py`: Layer 1A retrieval benchmark runner.
+- `benchmarks/run_temporal_answer_validation_v2.py`: Layer 1B answer-contract
+  validation runner.
+- `benchmarks/temporal_eval_v2_15.jsonl`: Layer 1A controlled temporal
+  retrieval cases.
+- `benchmarks/temporal_answer_validation_v2_15.jsonl`: Layer 1B answer
+  validation cases.
+- `benchmarks/results/temporal_eval_v2_results.md`: stored Layer 1A result
+  report.
+- `benchmarks/results/temporal_answer_validation_v2_*.md`: stored Layer 1B
+  result reports across dry-run, light, and provider-backed settings.
+- `data/sample/temporal_eval_v2/`: tracked sample data used by the Layer 1A
+  temporal benchmark path.
+
+### Layer 2A benchmark artifacts
+
+- `benchmarks/layer2_crossdomain/build_layer2_corpus.py`: builder for the
+  selected cross-domain corpus.
+- `benchmarks/layer2_crossdomain/generate_layer2_questions_v3.py`: v3 aligned
+  question generator.
+- `benchmarks/layer2_crossdomain/validate_layer2_dataset.py`: dataset and
+  question-contract validation.
+- `benchmarks/layer2_crossdomain/run_layer2_comparison.py`: retrieval-only
+  method comparison runner.
+- `benchmarks/layer2_crossdomain/evaluate_retrieval_only.py`: selected
+  evidence evaluation script.
+- `benchmarks/layer2_crossdomain/run_layer2_ablations.py`: Layer 2A ablation
+  runner.
+- `benchmarks/layer2_crossdomain/data/layer2_questions.jsonl`: final v3 aligned
+  Layer 2A questions.
+- `benchmarks/layer2_crossdomain/data/layer2_corpus.sample.jsonl`: tracked
+  sample corpus rows documenting schema and examples.
+- `benchmarks/layer2_crossdomain/data/raw_pool_manifest.json`: raw-pool scale
+  manifest for the detected 46,503-row/item pool.
+
+### Final public Layer 2A results
+
+- `benchmarks/layer2_crossdomain/results/layer2_retrieval_only_v3_200_eval.md`:
+  final v3 retrieval-only comparison report.
+- `benchmarks/layer2_crossdomain/results/layer2_ablation_v3_ablation200.md`:
+  final v3 ablation report.
+- `benchmarks/layer2_crossdomain/results/conflict_data_contract_blocked_v3.md`:
+  blocked conflict-category data-contract note.
+- `benchmarks/layer2_crossdomain/results/README.md`: result-directory guide
+  for final and archived Layer 2A artifacts.
+
+The final public Layer 2A result boundary is the v3 retrieval comparison, the
+v3 ablation report, and the blocked conflict data-contract note. These files
+are the public retrieval-only Layer 2A reports; they should be read separately
+from intermediate development outputs.
+
+### Archived development artifacts
+
+- `benchmarks/layer2_crossdomain/results/archive/`: archived Layer 2A
+  development outputs, including intermediate provider or judge experiments and
+  earlier benchmark iterations.
+
+Archived files are development history, not the final result boundary. They are
+useful for understanding the correction process, but the final public result
+files are the v3 retrieval comparison, v3 ablation, and blocked conflict
+data-contract note listed above.
+
 ## Repository Map
 
 ```text
@@ -672,7 +813,13 @@ app/                          FastAPI app, routes, schemas, services
 core/                         Temporal retrieval, chunking, routing, generation
 storage/                      Local PVDB/cache persistence abstractions
 benchmarks/                   Layer 1A and Layer 1B benchmark harnesses
-benchmarks/layer2_crossdomain Layer 2A corpus, questions, methods, reports
+benchmarks/results/           Layer 1 stored benchmark reports
+benchmarks/layer2_crossdomain Layer 2A corpus builders, validators, methods
+benchmarks/layer2_crossdomain/data/
+                              Layer 2A questions, sample corpus, raw manifest
+benchmarks/layer2_crossdomain/results/
+                              Final Layer 2A reports plus archived history
+data/sample/temporal_eval_v2/ Tracked Layer 1A sample benchmark data
 docs/                         Technical reports and design notes
 tests/                        Unit and benchmark contract tests
 ```
