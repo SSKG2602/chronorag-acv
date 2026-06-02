@@ -56,7 +56,12 @@ def finalize_chronorag_evidence(
     top_k: int,
     ablation_config: AblationConfig | None = None,
 ) -> tuple[list[Any], dict[str, object]]:
-    """Apply a small final evidence-selection pass after temporal fusion."""
+    """Apply a small final evidence-selection pass after temporal fusion.
+
+    The finalizer is where Layer 2A tests symbolic retrieval behavior that a
+    score-only ranker can miss: exact valid-time preference, transaction-role
+    cleanup, source/metric constraints, and multi-slot coverage.
+    """
     config = (ablation_config or AblationConfig()).effective()
     adjusted = list(candidates)
     exact_count = 0
@@ -71,6 +76,8 @@ def finalize_chronorag_evidence(
         adjusted, source_metric_count = _apply_source_metric_adjustments(adjusted, query_text)
 
     adjusted.sort(key=lambda item: item.score, reverse=True)
+    # The assembler only needs a bounded high-scoring pool; the benchmark still
+    # scores the final top-k selected evidence IDs, not the full candidate list.
     assembler_pool = adjusted[: min(len(adjusted), 200)]
     intent = classify_query_intent(query_text=query_text, constraints=constraints, candidates=assembler_pool)
     if config.disable_slot_assembler:

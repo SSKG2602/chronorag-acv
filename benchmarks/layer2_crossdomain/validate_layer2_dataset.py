@@ -50,6 +50,8 @@ def main() -> None:
     corpus_path = Path(args.corpus)
     questions_path = Path(args.questions)
     errors: list[str] = []
+    # Validation checks the public retrieval boundary before a run: active
+    # methods must import, but no retrieval, Vertex, or scoring logic executes.
     _check_active_methods(args.methods, errors)
     _check_no_detached_method_references(errors)
     if not corpus_path.exists():
@@ -163,6 +165,8 @@ def _check_recoverable_evidence_contract(case: Any, corpus_by_id: dict[str, Any]
 
     for row in expected_rows:
         valid_from = getattr(row, "valid_from", None)
+        # V3 exact-date cases must expose the date they expect. This prevents a
+        # year-only question from silently requiring a hidden exact evidence row.
         if _is_exact_dated_row(row) and valid_from and valid_from not in question_dates:
             errors.append(f"{case.id} expects exact-date row {row.id} but question omits {valid_from}.")
         if (

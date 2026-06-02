@@ -233,6 +233,12 @@ def classify_candidate(candidate: Any, intent: QueryIntent) -> CandidateClass:
 
 
 def assemble_top_k(candidates: list[Any], intent: QueryIntent, top_k: int) -> tuple[list[Any], dict[str, Any]]:
+    """Select top-k evidence while preserving required temporal slots.
+
+    This is a retrieval finalization step, not answer synthesis. It ensures
+    comparison and multi-slot questions can surface all required evidence cards
+    before ordinary filler rows are considered.
+    """
     if top_k <= 0:
         return [], _report(intent, [], {}, [], {}, [], [], {})
 
@@ -256,6 +262,8 @@ def assemble_top_k(candidates: list[Any], intent: QueryIntent, top_k: int) -> tu
         selected_ids.add(evidence_id)
         slot_filled.append(slot_name)
 
+    # Required slots are filled first so a single high-scoring side of a
+    # comparison cannot crowd out the other side before top-k is capped.
     if intent.is_comparison:
         for index, _slot in enumerate(intent.comparison_slots):
             candidate = _best_for_slot(ordered, classes, intent, index, selected_ids)

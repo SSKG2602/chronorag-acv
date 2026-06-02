@@ -24,6 +24,9 @@ QUESTIONS_PER_CATEGORY = 20
 VERSION_RE = re.compile(r"\bv\d+\.\d+(?:\.\d+)?(?:[-.]?(?:alpha|beta|rc)\.?\d+)?\b", re.IGNORECASE)
 
 CATEGORY_ORDER = [
+    # V3 builders are evidence-card-first: choose rows with available expected
+    # and forbidden IDs, then write question text that exposes the needed
+    # anchors instead of hiding exact dates behind vague wording.
     "exact_valid_time_retrieval",
     "same_entity_wrong_time_trap",
     "valid_time_vs_transaction_time",
@@ -127,6 +130,7 @@ def build_indexes(corpus: list[CorpusRow]) -> CorpusIndexes:
 
 
 def generate_questions(indexes: CorpusIndexes) -> list[dict[str, Any]]:
+    """Generate the fixed 200-case Layer 2A v3 question set."""
     builders: dict[str, Callable[[CorpusIndexes, int], list[dict[str, Any]]]] = {
         "exact_valid_time_retrieval": _build_exact_valid_time,
         "same_entity_wrong_time_trap": _build_same_entity_wrong_time,
@@ -373,6 +377,9 @@ def _build_multi_slot_temporal_coverage(indexes: CorpusIndexes, offset: int) -> 
 
 
 def _build_partial_or_insufficient(indexes: CorpusIndexes, offset: int) -> list[dict[str, Any]]:
+    # These cases are diagnostic for retrieval-only Layer 2A. They carry
+    # acceptable evidence but no hidden exact target, leaving answer behavior to
+    # the planned natural-language QA layer.
     rows = _sample_even([row for row in indexes.transaction_rows if row.domain == "federal_register"], QUESTIONS_PER_CATEGORY)
     output = []
     for idx, row in enumerate(rows):

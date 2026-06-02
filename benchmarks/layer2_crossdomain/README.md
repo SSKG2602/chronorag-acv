@@ -1,27 +1,85 @@
 # Layer 2A Cross-Domain Retrieval Benchmark
 
 Layer 2A is ChronoRAG's controlled cross-domain retrieval-only benchmark. It
-does not call Vertex, does not score generated answer wording, and does not
-claim SOTA.
+tests selected evidence behavior across a selected 5,000-row corpus and 200 v3
+aligned questions. It does not call Vertex in the public retrieval-only path and
+does not score generated natural-language answer quality.
 
-## Current v3 Scope
+ChronoRAG reports controlled benchmark evidence for temporal retrieval behavior
+under explicitly scoped datasets and validators. The Layer 2A claims are limited
+to retrieval-only evidence selection in this tested setting.
 
-- 5,000 processed evidence rows.
-- 200 v3 aligned temporal questions.
-- 20 questions per active category.
-- Domains: FRED macro, market index, SEC submissions, Federal Register, GitHub
-  releases.
-- Scoring input: each method's `selected_evidence_ids`.
-- Active methods: `chronorag_full` and `metadata_temporal_rag`.
+## Layer 2A Flow
 
-The v3 questions are generated so the target evidence is recoverable from the
-question wording. Exact dates, source names, metric/form terms, versions, and
-comparison slots are explicit. Hidden-target year-only questions are not part
-of the public v3 retrieval check.
+```mermaid
+flowchart LR
+    A[Raw pool: about 46,503 detected rows/items] --> B[Selected 5,000-row corpus]
+    B --> C[Question generation v3]
+    C --> D[200 aligned question/evidence contracts]
+    B --> E[Method runs]
+    D --> E
+    E --> F[Retrieval-only evaluator]
+    F --> G[Final result artifacts]
+    F --> H[Ablation analysis]
+```
 
-## Public Result Files
+## Corpus And Question Files
 
-The public Layer 2A result directory should keep only:
+Layer 2A distinguishes tracked sample data from generated or working benchmark
+data:
+
+| Path | Role |
+|---|---|
+| `benchmarks/layer2_crossdomain/data/raw_pool_manifest.json` | Records the measured raw-pool scale: 46,503 detected rows/items across five source families. |
+| `benchmarks/layer2_crossdomain/data/layer2_corpus.sample.jsonl` | Small tracked sample corpus for plumbing tests and public inspection. |
+| `benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl` | Full generated/working 5,000-row corpus used during benchmark execution. It may be generated or carried in working environments and is not the same as the smaller public sample. |
+| `benchmarks/layer2_crossdomain/data/layer2_questions.jsonl` | Final 200-question v3 aligned benchmark file. |
+| `benchmarks/layer2_crossdomain/generate_layer2_questions_v3.py` | Evidence-card-first question builder for the v3 contracts. |
+| `benchmarks/layer2_crossdomain/validate_layer2_dataset.py` | Dataset and question-contract validator. |
+
+The larger raw pool included FRED macro, market/index, SEC submissions, Federal
+Register, and GitHub release rows/items. The final controlled benchmark uses a
+selected 5,000-row cross-domain corpus rather than the full raw pool.
+
+## V3 Question Categories
+
+The v3 benchmark uses 20 questions per category:
+
+| Category | Role | Scoring Status |
+|---|---|---|
+| `exact_valid_time_retrieval` | Retrieve evidence for an explicit valid date. | Scored category-primary retrieval case. |
+| `same_entity_wrong_time_trap` | Retrieve the target date while excluding nearby same-entity same-metric dates. | Scored category-primary retrieval case. |
+| `valid_time_vs_transaction_time` | Prefer fact time over filing/publication/release/transaction time when valid time is requested. | Scored category-primary retrieval case. |
+| `cross_domain_temporal_comparison` | Cover both sides of a cross-domain comparison. | Scored category-primary retrieval case. |
+| `source_specific_exact_time` | Satisfy source-family or source-reference constraints at an exact time. | Scored category-primary retrieval case. |
+| `metric_specific_exact_time` | Satisfy metric, claim, or version constraints at an exact time. | Scored category-primary retrieval case. |
+| `exact_vs_broad_temporal_preference` | Prefer exact valid-time evidence over broad/background or transaction-only rows. | Scored category-primary retrieval case. |
+| `multi_slot_temporal_coverage` | Retrieve evidence for every requested temporal slot. | Scored category-primary retrieval case. |
+| `partial_or_insufficient_evidence` | Surface partial/insufficient evidence behavior when exact valid-time evidence is not present. | Diagnostic in retrieval-only evaluation; answer semantics are for Layer 2B. |
+| `ambiguous_time_query` | Represent ambiguous temporal targets without assigning a hidden exact row. | Diagnostic in retrieval-only evaluation; answer semantics are for Layer 2B. |
+
+The evaluator keeps generic Hit@k for visibility, but the category-primary
+metric is the meaningful Layer 2A check because some categories require
+forbidden-evidence avoidance, slot coverage, source constraints, or metric
+constraints rather than a single expected ID.
+
+`conflict_detection` is not a scored v3 category. It is documented as
+data-contract blocked because the current corpus does not contain real
+two-sided conflict evidence pairs.
+
+## Methods
+
+Active public retrieval methods:
+
+- `chronorag_full`
+- `metadata_temporal_rag`
+
+`direct_llm_full_context` remains available for older diagnostics in the runner,
+but it is not an active Layer 2A retrieval baseline for the public v3 result.
+
+## Final Public Artifacts
+
+The public Layer 2A result directory should keep:
 
 - `results/README.md`
 - `results/layer2_retrieval_only_v3_200_eval.md`
@@ -32,8 +90,10 @@ The public Layer 2A result directory should keep only:
 - `results/conflict_data_contract_blocked_v3.json`
 - `results/.gitkeep` if needed
 
-Intermediate Vertex smokes, answer-contract pilots, and older category-aware
-retrieval reports belong in `results/archive/`.
+Archived intermediate artifacts belong in `results/archive/`. Those include
+older category-aware reports, Vertex smokes, answer-contract pilots, and debug
+runs that are useful for audit history but are not the final Layer 2A v3
+retrieval-only result.
 
 ## Retrieval-Only Result
 
@@ -48,9 +108,8 @@ Summary:
 | `chronorag_full` | 200 | 200 | 200 | 0.82 | 0.90 | 0.99 | 0.96 |
 | `metadata_temporal_rag` | 200 | 200 | 200 | 0.69 | 0.86 | 0.69 | 0.48 |
 
-Category-primary pass is the headline Layer 2A diagnostic because some
-categories require exact-time checks, source/metric constraints, forbidden
-evidence avoidance, or multi-slot coverage rather than generic Hit@k alone.
+This report scores each method's `selected_evidence_ids`. Prompt previews and
+dry-run answer placeholders are not answer-quality measurements.
 
 ## Ablation Result
 
@@ -58,16 +117,18 @@ Stored report:
 
 - [`results/layer2_ablation_v3_ablation200.md`](results/layer2_ablation_v3_ablation200.md)
 
-Ablations:
+Ablation variants:
 
-- `no_tcc`
-- `no_temporal_precision`
-- `no_transaction_role`
-- `no_source_metric`
-- `no_slot_assembler`
-- `score_only`
-- `metadata_temporal_rag`
-- `chronorag_full`
+| Variant | What It Removes Or Changes |
+|---|---|
+| `chronorag_full` | Full ChronoRAG retrieval and finalization path. |
+| `chronorag_no_tcc` | Disables Temporal Contextual Chunking retrieval text. |
+| `chronorag_no_temporal_precision` | Disables temporal precision scoring and exact negative-date suppression. |
+| `chronorag_no_transaction_role` | Disables valid-time versus transaction-time cleanup in finalization. |
+| `chronorag_no_source_metric` | Disables source and metric adjustment in finalization. |
+| `chronorag_no_slot_assembler` | Disables slot-aware assembly for comparison and multi-slot questions. |
+| `chronorag_score_only` | Uses fused scores without the finalization components. |
+| `metadata_temporal_rag` | Metadata-oriented temporal retrieval baseline. |
 
 Overall ablation summary:
 
@@ -82,24 +143,34 @@ Overall ablation summary:
 | `chronorag_no_slot_assembler` | 200 | 0.8300 | 0.8900 | 0.8150 | 0.7750 |
 | `chronorag_full` | 200 | 0.8250 | 0.8950 | 0.9950 | 0.9625 |
 
-Interpretation should stay conservative. The v3 benchmark is controlled and
-retrieval-only; it demonstrates component behavior on this corpus and question
-set, not external generalization.
+Interpretation should stay conservative. Some categories are explicitly
+anchored enough that an ablation may not drop, and that is a property of this
+controlled benchmark design rather than proof that the removed component is
+irrelevant in other settings.
 
-## Conflict Data Contract
+## Benchmark Corrections And Failure Notes
 
-`conflict_detection` is not a scored v3 retrieval category because the current
-corpus contains no real two-sided conflict evidence pairs. The blocked status is
-stored in:
-
-- [`results/conflict_data_contract_blocked_v3.md`](results/conflict_data_contract_blocked_v3.md)
-- [`results/conflict_data_contract_blocked_v3.json`](results/conflict_data_contract_blocked_v3.json)
-
-Synthetic conflict IDs are not used in public v3 scoring.
+- Broad-window style questions were corrected because vague year-only wording
+  cannot fairly require a hidden exact date.
+- Conflict detection is data-contract blocked because real conflict-pair rows
+  are absent in the current corpus.
+- Layer 2A is retrieval-only; Vertex and LLM judge artifacts are not the final
+  public result for this layer.
+- The current v3 benchmark aligns question wording, expected evidence, and
+  available corpus rows more strictly.
+- The correction improved benchmark validity rather than hiding failures.
 
 ## Reproduce
 
-Layer 2A retrieval comparison:
+Layer 2A dataset validation:
+
+```bash
+python3 benchmarks/layer2_crossdomain/validate_layer2_dataset.py \
+  --corpus benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl \
+  --questions benchmarks/layer2_crossdomain/data/layer2_questions.jsonl
+```
+
+Exact 200-case retrieval comparison:
 
 ```bash
 python3 benchmarks/layer2_crossdomain/run_layer2_comparison.py \
@@ -118,7 +189,7 @@ python3 benchmarks/layer2_crossdomain/evaluate_retrieval_only.py \
   --save-md benchmarks/layer2_crossdomain/results/layer2_retrieval_only_v3_200_eval.md
 ```
 
-Layer 2A ablation:
+Exact 200-case ablation:
 
 ```bash
 python3 benchmarks/layer2_crossdomain/run_layer2_ablations.py \
@@ -130,5 +201,4 @@ python3 benchmarks/layer2_crossdomain/run_layer2_ablations.py \
   --result-suffix v3_ablation200
 ```
 
-Do not run Vertex for Layer 2A retrieval-only reporting. Provider-backed
-natural-language temporal QA belongs to future Layer 2B.
+Provider-backed natural-language temporal QA belongs to future Layer 2B work.

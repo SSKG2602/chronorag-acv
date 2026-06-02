@@ -195,6 +195,12 @@ def run_method(
     md_path: Path | None = None,
     existing_payload: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    """Run one Layer 2 method across selected questions.
+
+    The same runner supports historical provider-backed diagnostics, but the
+    public Layer 2A v3 path uses `mode=dry_run` and scores selected evidence IDs
+    through the deterministic retrieval-only evaluator.
+    """
     module = _method_module(method)
     results = list((existing_payload or {}).get("results") or [])
     completed_case_ids = _completed_case_ids(results)
@@ -217,6 +223,8 @@ def run_method(
         }
         case_started = time.perf_counter()
         if dry_run_prompts or mode == "dry_run":
+            # Dry-run mode records prompts and selected evidence without a
+            # provider call. The answer object is deliberately non-semantic.
             answer = _dry_run_answer(prompt)
         elif mode == "light":
             answer = _light_answer(case, evidence_rows)

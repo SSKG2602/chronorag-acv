@@ -16,6 +16,9 @@ from benchmarks.layer2_crossdomain.schemas import QuestionCase, load_questions
 
 
 CATEGORY_PRIMARY_METRICS: dict[str, tuple[str, ...]] = {
+    # Categories omitted from this map, such as partial/insufficient and
+    # ambiguous-time questions, remain diagnostic in retrieval-only evaluation.
+    # Their answer semantics belong to the future natural-language QA layer.
     "exact_valid_time_retrieval": ("expected_hit_at_1", "expected_hit_at_k", "forbidden_absent_at_k"),
     "transaction_time_vs_valid_time": ("valid_time_hit_at_k", "transaction_time_trap_avoidance"),
     "valid_time_vs_transaction_time": ("valid_time_hit_at_k", "transaction_time_trap_avoidance"),
@@ -70,6 +73,8 @@ def evaluate_result_file(path: Path, questions: dict[str, QuestionCase]) -> dict
     duplicate_case_ids: list[str] = []
     skipped: list[dict[str, str]] = []
 
+    # Result files can come from resumable runs. Keep the first completed row
+    # for a case and make every omission explicit in the evaluation report.
     for row in rows:
         case_id = str(row.get("case_id") or "")
         if not case_id:
@@ -335,6 +340,11 @@ def compare_reports(reports: list[dict[str, Any]], questions: dict[str, Question
 
 
 def render_markdown(reports: list[dict[str, Any]], comparison: dict[str, Any] | None = None) -> str:
+    """Render the public retrieval-only comparison report.
+
+    This report intentionally explains category-primary scoring because generic
+    Hit@k alone cannot represent forbidden-evidence or slot-coverage checks.
+    """
     lines = [
         "# Layer 2 Retrieval-Only Evaluation",
         "",

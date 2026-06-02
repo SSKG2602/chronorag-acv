@@ -5,7 +5,13 @@
 ChronoRAG is a temporal retrieval and grounded answer-validation RAG framework.
 It treats validity windows, transaction/publication times, source provenance,
 temporal precision, and grounded citation checks as first-class system
-contracts. Current results are controlled benchmark results, not SOTA claims.
+contracts.
+
+ChronoRAG reports controlled benchmark evidence for temporal retrieval behavior
+under explicitly scoped datasets and validators. The claims are limited to the
+tested settings: temporal retrieval, evidence selection, answer-contract
+validation, and component ablation behavior. The project does not generalize
+these results beyond the benchmark conditions without additional evaluation.
 
 ## 1. Problem Statement
 
@@ -72,7 +78,16 @@ fusion. The pass:
 
 This is retrieval behavior, not answer-generation behavior.
 
-## 5. Layer 1A: Temporal Eval v2
+## 5. Evaluation Layers
+
+| Layer | Scope | Evaluated Behavior | Boundary |
+|---|---|---|---|
+| Layer 1A | Temporal Eval v2 retrieval | Evidence selection, window alignment, distractor avoidance, proxy behavior. | Retrieval-focused benchmark. |
+| Layer 1B | Temporal answer validation | Cited evidence, valid-time correctness, transaction-time trap avoidance, provider/output contract. | Answer-contract validation in a controlled setting. |
+| Layer 2A | Cross-domain retrieval-only | Selected evidence IDs across 5,000 corpus rows and 200 v3 questions. | No generated natural-language answer scoring. |
+| Layer 2B | Planned temporal QA | ChronoRAG answer synthesis and validation after retrieval. | Future 50-question Vertex-backed evaluation. |
+
+## 6. Layer 1A: Temporal Eval v2
 
 Layer 1A is the controlled temporal retrieval benchmark.
 
@@ -91,9 +106,10 @@ Stored light-mode result:
 | Hybrid + temporal fusion + rerank | 0.80 | 0.80 | 0.93 | 0.87 | 0.93 | 0.80 |
 
 Layer 1A measures retrieval and proxy behavior over a 15-case controlled set.
-It is not a broad external benchmark.
+It tests whether temporally correct evidence appears in top-k and whether
+nearby temporal distractors are avoided.
 
-## 6. Layer 1B: Temporal Answer Validation
+## 7. Layer 1B: Temporal Answer Validation
 
 Layer 1B evaluates answer behavior after temporal retrieval. It supports:
 
@@ -127,16 +143,22 @@ Provider JSON failures are treated as provider/output-contract failures, not as
 retrieval wins or losses. A failed retry cannot overwrite a usable initial
 response.
 
-## 7. Layer 2A: Cross-Domain Retrieval-Only
+## 8. Layer 2A: Cross-Domain Retrieval-Only
 
-Layer 2A expands retrieval evaluation to:
+Layer 2A expands retrieval evaluation to a selected cross-domain corpus:
 
-- 5,000 processed corpus rows;
+- about 46,503 detected rows/items in the larger raw pool;
+- 5,000 selected corpus rows for controlled benchmark execution;
 - 200 v3 aligned temporal questions;
-- FRED macro, market index, SEC submissions, Federal Register, and GitHub
-  releases;
+- FRED macro, market/index, SEC submissions, Federal Register, and GitHub
+  release source families;
 - retrieval-only scoring over `selected_evidence_ids`;
-- no Vertex and no generated answer scoring.
+- no Vertex and no generated answer scoring in the public result.
+
+The full 5,000-row corpus is generated/working benchmark data and may not be
+fully tracked in Git. The public repository contains builders, validators,
+tracked samples, question definitions, final result artifacts, and commands
+that distinguish sample files from generated full-corpus files.
 
 Active methods:
 
@@ -149,6 +171,8 @@ Final public result files:
 - `benchmarks/layer2_crossdomain/results/layer2_retrieval_only_v3_200_eval.json`
 - `benchmarks/layer2_crossdomain/results/layer2_ablation_v3_ablation200.md`
 - `benchmarks/layer2_crossdomain/results/layer2_ablation_v3_ablation200.json`
+- `benchmarks/layer2_crossdomain/results/conflict_data_contract_blocked_v3.md`
+- `benchmarks/layer2_crossdomain/results/conflict_data_contract_blocked_v3.json`
 
 Layer 2A v3 retrieval-only summary:
 
@@ -161,18 +185,42 @@ The category-primary score is the more meaningful Layer 2A metric because some
 categories require slot coverage, forbidden-evidence avoidance, or
 source/metric/time constraints rather than generic Hit@k alone.
 
-## 8. Layer 2A Ablations
+## 9. Benchmark Correction And Failure Analysis
+
+Several public-branch corrections were made before treating Layer 2A v3 as the
+current retrieval-only result:
+
+- Earlier broad-window style questions were reframed because vague year-only
+  wording cannot fairly require a hidden exact date.
+- Earlier conflict-detection questions were blocked because real conflict-pair
+  evidence rows were absent in the current corpus.
+- Earlier intermediate Layer 2 Vertex and judge artifacts were archived because
+  they were not the final Layer 2A retrieval-only result.
+- The v3 benchmark aligns question wording, expected evidence, and available
+  corpus rows more strictly.
+- The correction improved benchmark validity rather than hiding failures.
+
+The conflict status is documented in:
+
+- `benchmarks/layer2_crossdomain/results/conflict_data_contract_blocked_v3.md`
+- `benchmarks/layer2_crossdomain/results/conflict_data_contract_blocked_v3.json`
+
+Synthetic conflict IDs are not used in the public v3 scoring path.
+
+## 10. Ablation Interpretation
 
 The public ablation file evaluates:
 
-- `no_tcc`
-- `no_temporal_precision`
-- `no_transaction_role`
-- `no_source_metric`
-- `no_slot_assembler`
-- `score_only`
-- `metadata_temporal_rag`
-- `chronorag_full`
+| Variant | Interpretation Boundary |
+|---|---|
+| `chronorag_full` | Full ChronoRAG retrieval and finalization path. |
+| `chronorag_no_tcc` | Tests whether TCC retrieval text and temporal metadata help in this selected corpus. |
+| `chronorag_no_temporal_precision` | Tests exact-time ranking, broad-window preference, and wrong-time suppression. |
+| `chronorag_no_transaction_role` | Tests final valid-time versus transaction-time cleanup. |
+| `chronorag_no_source_metric` | Tests source and metric/form normalization. |
+| `chronorag_no_slot_assembler` | Tests comparison and multi-slot evidence coverage. |
+| `chronorag_score_only` | Tests ranking without final evidence-selection components. |
+| `metadata_temporal_rag` | Provides a metadata-oriented retrieval comparison point. |
 
 Stored result:
 
@@ -180,23 +228,28 @@ Stored result:
 
 Main interpretation:
 
-- Temporal precision contributes to wrong-time suppression.
+- Temporal precision contributes to wrong-time suppression and exact-time
+  ranking.
 - Slot assembly contributes strongly to multi-slot and cross-domain coverage.
-- Score-only ranking is weaker than final evidence selection.
+- Score-only ranking is weaker than final evidence selection in the v3 tested
+  setting.
 - Several ablations remain strong on explicitly anchored categories; those
   categories should be interpreted as controlled checks, not broad proof.
 
-## 9. Conflict Data Contract
+## 11. Layer 2B Planned Natural-Language Temporal QA
 
-Layer 2A v3 does not score `conflict_detection` because the current corpus has
-no real two-sided conflict-pair rows. This is documented in:
+Layer 2B is planned as 50 manually designed natural-language temporal QA
+questions. The questions will be built evidence-card-first from the selected
+5,000-row corpus and will use ChronoRAG + Vertex + dynamic top-k.
 
-- `benchmarks/layer2_crossdomain/results/conflict_data_contract_blocked_v3.md`
-- `benchmarks/layer2_crossdomain/results/conflict_data_contract_blocked_v3.json`
+The goal is to evaluate ChronoRAG answer synthesis and validation after
+retrieval. Metadata+LLM comparison is not the current goal for Layer 2B.
 
-Synthetic conflict IDs are not used in the public v3 scoring path.
+Layer 2B is where generated answer quality, answer wording, and
+natural-language temporal reasoning should be evaluated. Those behaviors are
+not evaluated by Layer 2A.
 
-## 10. Reproducibility Commands
+## 12. Reproducibility Commands
 
 Layer 1A:
 
@@ -221,6 +274,14 @@ Layer 1B light mode:
 python3 benchmarks/run_temporal_answer_validation_v2.py \
   --mode light \
   --top-k 5
+```
+
+Layer 2A dataset validation:
+
+```bash
+python3 benchmarks/layer2_crossdomain/validate_layer2_dataset.py \
+  --corpus benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl \
+  --questions benchmarks/layer2_crossdomain/data/layer2_questions.jsonl
 ```
 
 Layer 2A retrieval comparison:
@@ -254,21 +315,12 @@ python3 benchmarks/layer2_crossdomain/run_layer2_ablations.py \
   --result-suffix v3_ablation200
 ```
 
-## 11. Limitations
+## 13. Limitations
 
-- No SOTA claim.
 - Layer 2A is retrieval-only.
+- Layer 2A does not evaluate generated natural-language answer quality.
 - Layer 1B is controlled answer validation, not production reliability proof.
-- LLM natural-language temporal QA is future Layer 2B.
 - Conflict detection is data-contract blocked in Layer 2A until real
   conflict-pair rows exist.
 - The current service is not production-hardened for multi-tenant storage,
   authentication, observability, or deployment.
-
-## 12. Roadmap
-
-Layer 2B is planned as 50 manually designed natural-language temporal QA
-questions using ChronoRAG + Vertex + dynamic top-k. It will evaluate generated
-answer quality after retrieval.
-
-No metadata+LLM comparison is planned for that stage.

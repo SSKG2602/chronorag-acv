@@ -45,6 +45,8 @@ DEFAULT_QUESTIONS = "benchmarks/layer2_crossdomain/data/layer2_questions.jsonl"
 RESULTS_ROOT = Path("benchmarks/layer2_crossdomain/results")
 
 VARIANT_CONFIGS: dict[str, AblationConfig | None] = {
+    # Variants are expressed as finalization/retrieval toggles so the ablation
+    # runner changes component availability, not benchmark data or scoring.
     "metadata_temporal_rag": None,
     "chronorag_score_only": AblationConfig(score_only=True),
     "chronorag_no_tcc": AblationConfig(disable_tcc=True),
@@ -140,6 +142,11 @@ def run_variant(
     suffix: str,
     prepared_contexts: dict[bool, ChronoRAGPreparedContext] | None = None,
 ) -> dict[str, Any]:
+    """Run one retrieval-only ablation variant and emit method-style results.
+
+    The dry-run answer payload is only a shape-compatible placeholder. The
+    ablation score is produced later from selected evidence IDs.
+    """
     results: list[dict[str, Any]] = []
     started = time.perf_counter()
     for case in questions:
@@ -179,6 +186,9 @@ def build_ablation_report(evaluation_reports: list[dict[str, Any]], suffix: str)
     overall_rows = []
     category_rows = []
     interpretations = []
+    # Focus categories keep interpretation tied to component intent. Categories
+    # that do not drop are reported conservatively instead of being treated as
+    # broad evidence that a removed component is unnecessary.
     focus_categories = {
         "chronorag_score_only": [
             "same_entity_wrong_time_trap",

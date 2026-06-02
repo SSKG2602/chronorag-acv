@@ -132,12 +132,19 @@ def retrieve_with_chronorag_prepared(
     top_k: int,
     ablation_config: AblationConfig | None = None,
 ) -> tuple[list[CorpusRow], dict]:
+    """Retrieve Layer 2 evidence with the ChronoRAG-adapted path.
+
+    This adapter maps Layer 2 rows into the existing ChronoRAG retrieval
+    machinery while keeping Layer 1 code unchanged.
+    """
     config = ablation_config or AblationConfig()
     adapted = prepared_context.adapted_chunks
     temporal_constraints = extract_temporal_constraints(case.question)
     lexical = dict(bm25_search(case.question, [(item.row.id, item.retrieval_text) for item in adapted], top_k=len(adapted)))
     scored: list[AdaptedChronoEvidence] = []
     for item in adapted:
+        # Temporal precision is combined with lexical relevance before the
+        # finalizer handles exact-time, transaction-role, and slot policies.
         relevance = _normalize(lexical.get(item.row.id, 0.0), lexical.values())
         temporal = 0.0 if config.disable_temporal_precision else _temporal_weight(case, item.row)
         authority = 0.70 if item.row.source_kind in {"filing", "regulation", "guideline", "changelog"} else 0.50
