@@ -1,0 +1,17 @@
+Mode: vertex
+Method: chronorag_full
+Cases selected: 3
+Corpus: benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl
+QA: benchmarks/layer2_crossdomain/data/layer2b_manual_50_qa.jsonl
+Output JSONL: benchmarks/layer2_crossdomain/results/layer2b_chronorag_full_layer2b_smoke3_vertex_final_results.jsonl
+Output Markdown: benchmarks/layer2_crossdomain/results/layer2b_chronorag_full_layer2b_smoke3_vertex_final_results.md
+Dynamic top-k: True
+Max top-k: 30
+Ensure expected evidence: True
+Vertex sleep seconds: 15.0
+[1/3] l2b_manual_001
+[2/3] l2b_manual_002
+[vertex-retry] layer2b case=l2b_manual_002 attempt=2 sleep=5.3s error=Vertex provider call failed: 429 Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details. model=gemini-2.5-flash; project=ginkgo-2026; location=us-cen
+[3/3] l2b_manual_003
+Wrote: benchmarks/layer2_crossdomain/results/layer2b_chronorag_full_layer2b_smoke3_vertex_final_results.jsonl
+Wrote: benchmarks/layer2_crossdomain/results/layer2b_chronorag_full_layer2b_smoke3_vertex_final_results.md
