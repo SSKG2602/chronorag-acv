@@ -291,6 +291,28 @@ New Layer 2B questions must be built from the selected 5,000-row corpus, not
 the 46,503-row raw pool, unless the corpus is intentionally rebuilt and the
 question/evidence contracts are regenerated against that new corpus.
 
+### Layer 2A public source/provenance links
+
+The Layer 2A raw pool was assembled from public cross-domain source families
+before selecting the 5,000-row controlled evaluation corpus. These links
+identify the public source families used for verification and rebuilding; they
+are not a claim that the generated 5,000-row corpus is directly committed in
+full.
+
+| Source family | Used for | Public source/provenance link |
+|---|---|---|
+| FRED macro series | Federal funds rate and 10-year Treasury yield series such as `FEDFUNDS` and `DGS10`. | `https://fred.stlouisfed.org/docs/api/fred/v2/index.html`; `https://fred.stlouisfed.org/series/FEDFUNDS`; `https://fred.stlouisfed.org/series/DGS10` |
+| FRED market/index series | Market/index series used in the cross-domain pool, including `SP500`, `DJIA`, and `NASDAQCOM`. | `https://fred.stlouisfed.org/series/SP500`; `https://fred.stlouisfed.org/series/DJIA`; `https://fred.stlouisfed.org/series/NASDAQCOM` |
+| SEC EDGAR submissions | Company filing/submission metadata and filing-time examples. | `https://www.sec.gov/search-filings/edgar-application-programming-interfaces` |
+| Federal Register | Federal agency rule/document records and publication-time examples. | `https://www.federalregister.gov/developers/documentation/api/v1` |
+| GitHub releases | Repository release records and software-version temporal examples. | `https://docs.github.com/rest/releases/releases` |
+
+The reported Layer 2A metrics were produced on the selected 5,000-row
+evaluation corpus derived from these raw/source families. The README separates
+raw source provenance, generated corpus artifacts, tracked samples, question
+files, validators, and final result artifacts so the benchmark boundary is
+auditable.
+
 Final public result files:
 
 - `benchmarks/layer2_crossdomain/results/layer2_retrieval_only_v3_200_eval.md`
@@ -585,6 +607,9 @@ Layer 2B question design should test relative temporal reasoning, including
 month-before and month-after questions, closest release to filing date, macro
 event before market movement, valid-time versus filing-time traps, and
 insufficient or ambiguous temporal evidence.
+Layer 2B question design must use the selected 5,000-row evaluation corpus as
+the evidence universe unless the corpus is intentionally rebuilt from the
+raw/source families above.
 
 ### Research/report work
 
