@@ -19,6 +19,14 @@ judge score. The 82% result is a secondary manual-audited interpretation after
 accepting 3 cases where hard validation was stricter than the answer quality
 deserved.
 
+## Artifact Links
+
+- Answer result Markdown: `benchmarks/layer2_crossdomain/results/layer2b_chronorag_full_layer2b_full50_vertex_final_results.md`
+- Judge result Markdown: `benchmarks/layer2_crossdomain/results/layer2b_judge_layer2b_full50_judge_final_results.md`
+- Manual QA dataset: `benchmarks/layer2_crossdomain/data/layer2b_manual_50_qa.jsonl`
+- Answer runner: `benchmarks/layer2_crossdomain/run_layer2b_manual_qa.py`
+- Judge runner: `benchmarks/layer2_crossdomain/run_layer2b_judge.py`
+
 ## Manually Accepted Cases
 
 | Case | Manual decision | Why |

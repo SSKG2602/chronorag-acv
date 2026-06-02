@@ -1,9 +1,9 @@
-# Layer 2A Cross-Domain Results
+# Layer 2 Cross-Domain Results
 
-This directory contains the final public Layer 2A controlled retrieval-only
-benchmark outputs and audit notes. These artifacts score selected evidence IDs
-under the v3 benchmark contracts; they do not score generated natural-language
-answers.
+This directory contains final public Layer 2 cross-domain retrieval and answer
+validation outputs, plus audit notes. Layer 2A artifacts score selected
+evidence IDs under the v3 benchmark contracts. Layer 2B artifacts score
+answer synthesis and answer validation over the 50 manual temporal QA cases.
 
 ## Final V3 Retrieval Comparison
 
@@ -23,6 +23,37 @@ Scope:
 - no LLM answer generation or answer-quality scoring
 
 This is the final public Layer 2A comparison artifact.
+
+## Final Layer 2B Full-50 Answer Validation
+
+Files:
+
+- `layer2b_manual_50_qa_summary.md`
+- `layer2b_chronorag_full_layer2b_full50_vertex_final_results.md`
+- `layer2b_judge_layer2b_full50_judge_final_results.md`
+- `layer2b_full50_manual_audit.md`
+
+Scope:
+
+- 50 manually designed temporal QA cases
+- ChronoRAG answer synthesis with Vertex
+- deterministic hard-contract validation
+- LLM judge semantic validation
+- human manual audit of validator-strictness cases
+- expected evidence available where needed, so this is not a retrieval-quality
+  result
+
+Layer 2B final scores:
+
+| Metric | Score |
+|---|---:|
+| Deterministic hard-contract pass | 38 / 50 = 76% |
+| LLM judge semantic pass | 38 / 50 = 76% |
+| Strict combined pass | 35 / 50 = 70% |
+| Manual-audited acceptable pass | 41 / 50 = 82% |
+
+The strict combined score remains the conservative score. The manual-audited
+score is recorded separately and does not replace the strict score.
 
 ## Final V3 Ablation
 
@@ -54,8 +85,13 @@ part of the public result boundary, not an omitted score.
 `archive/` contains intermediate and historical Layer 2 artifacts, including
 older category-aware retrieval diagnostics, debug runs, Vertex smokes, and
 answer-contract pilots. They are preserved for audit history but are not the
-final public Layer 2A v3 retrieval-only result set.
+final public Layer 2A v3 retrieval-only result set or the final Layer 2B
+full-50 answer-validation result set.
 
 When citing Layer 2A, use the final v3 retrieval comparison and final v3
 ablation files above. Treat archived Vertex or judge artifacts as superseded
 intermediate work for this layer.
+
+When citing Layer 2B, use the full-50 answer result, full-50 judge result, and
+manual audit note above. Treat smoke and retry artifacts as intermediate run
+history unless a separate audit explicitly says otherwise.

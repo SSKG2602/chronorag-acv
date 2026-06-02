@@ -2,7 +2,9 @@
 
 ## Purpose
 
-This file summarizes the initial manually generated Layer 2B natural-language temporal QA seed set. The dataset is intended for a future answer-synthesis and judge/evaluator harness, not for retrieval-only scoring.
+This file summarizes the manually generated Layer 2B natural-language temporal
+QA set. The dataset was used for the full-50 answer-synthesis and judge
+evaluation, not for retrieval-only scoring.
 
 ## Source Corpus Boundary
 
@@ -49,6 +51,15 @@ The larger raw/provenance pool is not used as the benchmark corpus for this Laye
 | compare | 10 |
 | partial | 6 |
 
-## Warning
+## Final Evaluation Artifacts
 
-This is a manually generated Layer 2B candidate set validated against selected corpus evidence IDs. It is not a final answer-quality result, not an LLM judge result, and not a SOTA claim.
+- Answer result: `benchmarks/layer2_crossdomain/results/layer2b_chronorag_full_layer2b_full50_vertex_final_results.md`
+- LLM judge result: `benchmarks/layer2_crossdomain/results/layer2b_judge_layer2b_full50_judge_final_results.md`
+- Manual audit: `benchmarks/layer2_crossdomain/results/layer2b_full50_manual_audit.md`
+
+## Boundary
+
+This is the manually generated Layer 2B QA dataset summary. It is separate from
+the answer result, LLM judge result, and manual audit note. Expected evidence
+was available where needed in the Layer 2B answer-synthesis path, so Layer 2B
+does not report retrieval quality; retrieval quality is reported in Layer 2A.

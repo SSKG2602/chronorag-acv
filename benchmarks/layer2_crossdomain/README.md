@@ -1,4 +1,4 @@
-# Layer 2A Cross-Domain Retrieval Benchmark
+# Layer 2 Cross-Domain Benchmarks
 
 Layer 2A is ChronoRAG's controlled cross-domain retrieval-only benchmark. It
 tests selected evidence behavior across a selected 5,000-row corpus and 200 v3
@@ -8,6 +8,12 @@ does not score generated natural-language answer quality.
 ChronoRAG reports controlled benchmark evidence for temporal retrieval behavior
 under explicitly scoped datasets and validators. The Layer 2A claims are limited
 to retrieval-only evidence selection in this tested setting.
+
+Layer 2B is the companion full-50 natural-language temporal QA evaluation. It
+uses manually designed temporal QA cases, ChronoRAG answer synthesis, hard
+answer-contract validation, LLM judge scoring, and a manual audit note.
+Expected evidence was available where needed in Layer 2B, so Layer 2B measures
+answer synthesis and answer validation rather than retrieval quality.
 
 ## Layer 2A Flow
 
@@ -79,7 +85,7 @@ but it is not an active Layer 2A retrieval baseline for the public v3 result.
 
 ## Final Public Artifacts
 
-The public Layer 2A result directory should keep:
+The public Layer 2 result directory should keep:
 
 - `results/README.md`
 - `results/layer2_retrieval_only_v3_200_eval.md`
@@ -88,12 +94,16 @@ The public Layer 2A result directory should keep:
 - `results/layer2_ablation_v3_ablation200.json`
 - `results/conflict_data_contract_blocked_v3.md`
 - `results/conflict_data_contract_blocked_v3.json`
+- `results/layer2b_manual_50_qa_summary.md`
+- `results/layer2b_chronorag_full_layer2b_full50_vertex_final_results.md`
+- `results/layer2b_judge_layer2b_full50_judge_final_results.md`
+- `results/layer2b_full50_manual_audit.md`
 - `results/.gitkeep` if needed
 
 Archived intermediate artifacts belong in `results/archive/`. Those include
 older category-aware reports, Vertex smokes, answer-contract pilots, and debug
 runs that are useful for audit history but are not the final Layer 2A v3
-retrieval-only result.
+retrieval-only result or the final Layer 2B full-50 answer-validation result.
 
 ## Retrieval-Only Result
 
@@ -110,6 +120,43 @@ Summary:
 
 This report scores each method's `selected_evidence_ids`. Prompt previews and
 dry-run answer placeholders are not answer-quality measurements.
+
+## Layer 2B Full-50 Answer Validation
+
+Dataset and execution paths:
+
+- Dataset: `data/layer2b_manual_50_qa.jsonl`
+- Dataset validator: `validate_layer2b_manual_qa.py`
+- Answer runner: `run_layer2b_manual_qa.py`
+- Judge runner: `run_layer2b_judge.py`
+
+Final artifacts:
+
+- `results/layer2b_manual_50_qa_summary.md`
+- `results/layer2b_chronorag_full_layer2b_full50_vertex_final_results.md`
+- `results/layer2b_judge_layer2b_full50_judge_final_results.md`
+- `results/layer2b_full50_manual_audit.md`
+
+Final full-50 scores:
+
+| Layer 2B metric | Score |
+|---|---:|
+| Deterministic hard-contract pass | 38 / 50 = 76% |
+| LLM judge semantic pass | 38 / 50 = 76% |
+| Strict combined pass | 35 / 50 = 70% |
+| Manually accepted validator-strictness cases | 3 |
+| Manual-audited acceptable pass | 41 / 50 = 82% |
+
+The strict combined pass is the conservative score. The manual-audited
+acceptable pass is a secondary audit interpretation after accepting 3 cases
+where hard validation failed but judge and manual review agreed the answer was
+semantically correct. The final full-50 answer and judge runs had 0 answer
+provider errors, 0 judge errors, 0 judge provider failures, and 0 judge parse
+failures.
+
+Layer 2B used expected-evidence injection where needed. Treat Layer 2B as an
+answer-synthesis and answer-validation evaluation. Retrieval-quality claims
+belong to Layer 2A retrieval-only reports.
 
 ## Ablation Result
 
@@ -201,4 +248,5 @@ python3 benchmarks/layer2_crossdomain/run_layer2_ablations.py \
   --result-suffix v3_ablation200
 ```
 
-Provider-backed natural-language temporal QA belongs to future Layer 2B work.
+Provider-backed natural-language temporal QA belongs to Layer 2B
+answer-validation work, not to the Layer 2A retrieval-only report.

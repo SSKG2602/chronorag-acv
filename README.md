@@ -131,7 +131,7 @@ benchmark evaluates selected evidence IDs rather than generated prose. In the
 answer-synthesis path, retrieved evidence is passed to the LLM answer
 synthesizer; then answer-contract checks evaluate citations, valid-time use,
 transaction-time misuse, partial/refusal behavior, and provider-output shape in
-Layer 1B and planned Layer 2B.
+Layer 1B and Layer 2B.
 
 Core pieces:
 
@@ -143,7 +143,7 @@ Core pieces:
 | Polarity and negative constraints | Treats target dates differently from excluded dates such as `not 1990-03-28`. |
 | Source / metric normalization | Rewards source-family, source-file, metric, claim, and version anchors when the question asks for them. |
 | Slot-aware finalization | Assembles evidence for comparison and multi-slot questions so one side does not dominate top-k. |
-| Benchmark scoring / answer-contract checks | Scores retrieval-only evidence cards directly for Layer 1A and Layer 2A, and checks cited evidence, valid-time use, transaction-time misuse, partial/refusal behavior, and provider-output contracts after synthesis in Layer 1B and planned Layer 2B. |
+| Benchmark scoring / answer-contract checks | Scores retrieval-only evidence cards directly for Layer 1A and Layer 2A, and checks cited evidence, valid-time use, transaction-time misuse, partial/refusal behavior, and provider-output contracts after synthesis in Layer 1B and Layer 2B. |
 
 Retrieval-only layers score evidence cards directly. LLM answer synthesis is
 used only for answer-generation layers, with answer-contract checks applied
@@ -158,6 +158,25 @@ Vertex.
 | Layer 1B | Temporal answer validation | Whether generated or light-mode answers satisfy a grounded temporal answer contract. | Answer-contract validation over controlled cases. |
 | Layer 2A | Cross-domain retrieval-only benchmark | Whether retrieval behavior holds across a selected cross-domain corpus and v3 aligned questions. | Selected evidence IDs only; no natural-language answer scoring. |
 | Layer 2B | Natural-language temporal QA | 50 manually designed questions using ChronoRAG + Vertex + dynamic top-k + answer validation. | Answer synthesis and validation with expected evidence available where needed; retrieval quality remains Layer 2A. |
+
+## Claims And Boundaries
+
+What the current benchmark evidence supports:
+
+- ChronoRAG improves controlled temporal retrieval behavior in Layer 2A by
+  selecting cleaner final evidence under temporal-role, source/metric,
+  forbidden-evidence, and slot-coverage constraints.
+- ChronoRAG can perform grounded temporal answer synthesis in Layer 2B when
+  expected evidence is available to the answer-generation path.
+- Layer 2B exposes remaining weaknesses in valid-time precision, behavior
+  labels, and unsupported detail control.
+
+What the current benchmark evidence does not establish:
+
+- Layer 2B does not prove retrieval quality, because expected evidence was
+  injected where needed for answer synthesis and validation.
+- These results do not establish open-domain production reliability.
+- These results do not establish superiority across all datasets or workloads.
 
 ## Layer 1A: Temporal Eval v2
 
@@ -356,6 +375,8 @@ behavior, or untested production workloads.
 
 Layer 2B full-50 artifacts:
 
+- `benchmarks/layer2_crossdomain/data/layer2b_manual_50_qa.jsonl`
+- `benchmarks/layer2_crossdomain/results/layer2b_manual_50_qa_summary.md`
 - `benchmarks/layer2_crossdomain/results/layer2b_chronorag_full_layer2b_full50_vertex_final_results.md`
 - `benchmarks/layer2_crossdomain/results/layer2b_judge_layer2b_full50_judge_final_results.md`
 - `benchmarks/layer2_crossdomain/results/layer2b_full50_manual_audit.md`
@@ -372,6 +393,10 @@ acceptable pass accepts 3 cases where hard validation failed but judge and
 manual review agreed the answer was semantically correct. Expected-evidence
 injection was used, so Layer 2B measures answer synthesis and validation, not
 retrieval quality. Retrieval quality is reported separately in Layer 2A.
+
+The final full-50 runs were clean: answer provider errors were 0, judge errors
+were 0, judge provider failures were 0, and judge parse failures were 0. The
+remaining failures are still listed in the manual audit note.
 
 ## Layer 2A Ablation Summary
 
@@ -556,8 +581,8 @@ blocked data-contract note at
 Some early Vertex and judge artifacts were archived because they mixed
 answer-generation or provider behavior with the retrieval-only Layer 2A
 boundary. Layer 2A now reports selected-evidence retrieval behavior; provider
-backed natural-language answer behavior belongs to Layer 1B and planned Layer
-2B. This separation keeps the benchmark boundary clear.
+backed natural-language answer behavior belongs to Layer 1B and Layer 2B. This
+separation keeps the benchmark boundary clear.
 
 The v3 rebuild aligned question wording, expected evidence, forbidden evidence,
 diagnostic categories, and corpus availability. This is part of the research
@@ -569,18 +594,20 @@ retrieval results from development history.
 
 Current branch: `audit/core-path-scope`.
 
-This branch includes Layer 1A, Layer 1B, and Layer 2A:
+This branch includes Layer 1A, Layer 1B, Layer 2A, and Layer 2B:
 
 - Layer 1A: controlled temporal retrieval benchmark.
 - Layer 1B: temporal answer-contract validation with dry-run, light-mode, and
   Vertex execution paths.
 - Layer 2A: cross-domain retrieval-only benchmark over the selected v3 corpus
   and aligned question set.
+- Layer 2B: full-50 natural-language temporal QA answer synthesis, hard
+  validation, LLM judge, and manual audit note.
 
 Older `main` and `feature/vertex-provider-mode` branch points refer to the
 Layer 1B checkpoint at commit `b98002a`. Planned repository cleanup includes
 creating or preserving a Layer 1 archive branch, then promoting this branch to
-`main` after Layer 2B planning and final public cleanup are complete.
+`main` after final public cleanup is complete.
 
 ## Current Limitations And Next Work
 
@@ -612,25 +639,26 @@ files. ChronoRAG is not a deployed production service; storage,
 authentication, observability, and multi-tenant deployment paths are not
 production-hardened.
 
-### Layer 2B planned work
+### Layer 2B completed boundary and remaining work
 
-Layer 2B is planned as a natural-language temporal QA layer with 50 manually
-designed questions. The questions should be built evidence-card-first from the
-selected 5,000-row corpus so each prompt has a clear expected evidence contract
-before provider-backed answer synthesis is run.
+Layer 2B is now a natural-language temporal QA layer with 50 manually designed
+questions. The questions were built evidence-card-first from the selected
+5,000-row corpus so each prompt has a clear expected evidence contract before
+provider-backed answer synthesis is run.
 
-The planned execution path is ChronoRAG + Vertex + dynamic top-k, followed by
-answer-contract validation. Metadata+LLM comparison is not the current goal for
-Layer 2B; the goal is to test ChronoRAG answer synthesis and validation after
-retrieval.
+The completed execution path is ChronoRAG + Vertex + dynamic top-k, followed
+by deterministic answer-contract validation, LLM judge scoring, and a manual
+audit note for validator-strictness cases. Metadata+LLM comparison is not the
+current goal for Layer 2B; the goal is to test ChronoRAG answer synthesis and
+validation with expected evidence available where needed.
 
-Layer 2B question design should test relative temporal reasoning, including
+Layer 2B question design tests relative temporal reasoning, including
 month-before and month-after questions, closest release to filing date, macro
 event before market movement, valid-time versus filing-time traps, and
 insufficient or ambiguous temporal evidence.
-Layer 2B question design must use the selected 5,000-row evaluation corpus as
-the evidence universe unless the corpus is intentionally rebuilt from the
-raw/source families above.
+Future Layer 2B question design should continue to use the selected 5,000-row
+evaluation corpus as the evidence universe unless the corpus is intentionally
+rebuilt from the raw/source families above.
 
 ### Research/report work
 
@@ -638,27 +666,28 @@ Planned research and communication work includes a technical report,
 arXiv-style draft, LinkedIn/build-log posts, and a professor or lab outreach
 summary. These are planned reporting artifacts, not completed benchmark layers.
 
-### Layer 2B natural-language QA plan
+### Layer 2B natural-language QA result
 
-Layer 2B remains planned work. The intended benchmark is 50 manually designed
-natural-language temporal QA questions built from evidence cards in the
-selected 5,000-row Layer 2A corpus. The planned path is retrieval with
-ChronoRAG, Vertex-backed answer synthesis, dynamic top-k selection, and
-answer-contract validation.
+Layer 2B uses 50 manually designed natural-language temporal QA questions built
+from evidence cards in the selected 5,000-row Layer 2A corpus. The completed
+path is ChronoRAG retrieval context, Vertex-backed answer synthesis, dynamic
+top-k selection, deterministic answer-contract validation, LLM judge scoring,
+and manual audit of selected validator-strictness cases.
 
 ### Technical report / arXiv-style draft
 
 The technical report and arXiv-style draft remain planned reporting work. The
-report should use the current Layer 1A, Layer 1B, and Layer 2A results, then
-incorporate Layer 2B results once that planned answer-generation benchmark is
-available.
+report should use the current Layer 1A, Layer 1B, Layer 2A, and Layer 2B
+results while keeping retrieval-quality claims separate from answer-validation
+claims.
 
 ### Outreach and portfolio work
 
 README and technical-report material are intended to support professor or lab
 outreach, LinkedIn build-log posts, and research portfolio presentation. This
 work should summarize the controlled benchmark setup, correction history, and
-result boundaries without presenting planned Layer 2B work as completed.
+result boundaries without treating Layer 2B answer-validation scores as
+retrieval-quality evidence.
 
 ## Reproduce
 
@@ -761,14 +790,15 @@ tracked sample and light-mode commands above.
 ### Layer 2A provider boundary
 
 Do not run Vertex for Layer 2A retrieval-only reporting. Provider-backed
-natural-language temporal QA belongs to future Layer 2B work.
+natural-language temporal QA belongs to Layer 1B and Layer 2B answer-validation
+work.
 
-## Reading guide
+## How to Read the Benchmark Artifacts
 
 Start with this README for the project overview, benchmark layers, current
 scope, and reproduction boundaries. Read `docs/TECHNICAL_REPORT.md` for
 technical details, design rationale, and broader discussion of the temporal RAG
-pipeline.
+pipeline, and `docs/TEMPORAL_CONTEXTUAL_CHUNKING.md` for the TCC design.
 
 For Layer 2A specifically, read `benchmarks/layer2_crossdomain/README.md` for
 the cross-domain benchmark setup and implementation notes. Read the result
@@ -777,6 +807,21 @@ Markdown files under `benchmarks/results/` and
 result files should be treated as development history, especially when they
 come from intermediate provider or judge experiments rather than the final
 retrieval-only Layer 2A boundary.
+
+Use the benchmark artifacts by boundary:
+
+- Layer 2A result files are retrieval-only reports. They score selected
+  evidence IDs and are the place to read retrieval-quality behavior.
+- The Layer 2B answer result reports model answer-contract behavior over the
+  50 manual temporal QA cases.
+- The Layer 2B judge result reports semantic answer quality from the LLM judge.
+- The Layer 2B manual audit records human interpretation of 3
+  validator-strictness cases; it is separate from the strict combined score.
+
+The strict combined score requires both hard validation and judge pass. The LLM
+semantic score is the judge-only answer-quality score. The manual-audited
+acceptable score is a secondary interpretation after accepting 3 manually
+reviewed validator-strictness cases, and it does not replace the strict score.
 
 ## Data and Artifact Structure
 
@@ -793,6 +838,8 @@ retrieval-only Layer 2A boundary.
 - `benchmarks/run_temporal_eval_v2.py`: Layer 1A retrieval benchmark runner.
 - `benchmarks/run_temporal_answer_validation_v2.py`: Layer 1B answer-contract
   validation runner.
+- `benchmarks/temporal_qa_hard_15.jsonl`: original hard temporal QA cases used
+  in earlier Layer 1 benchmark development.
 - `benchmarks/temporal_eval_v2_15.jsonl`: Layer 1A controlled temporal
   retrieval cases.
 - `benchmarks/temporal_answer_validation_v2_15.jsonl`: Layer 1B answer
@@ -801,6 +848,9 @@ retrieval-only Layer 2A boundary.
   report.
 - `benchmarks/results/temporal_answer_validation_v2_*.md`: stored Layer 1B
   result reports across dry-run, light, and provider-backed settings.
+- `docs/TEMPORAL_CONTEXTUAL_CHUNKING.md`: Temporal Contextual Chunking design
+  note.
+- `docs/TECHNICAL_REPORT.md`: technical report draft and benchmark discussion.
 - `data/sample/temporal_eval_v2/`: tracked sample data used by the Layer 1A
   temporal benchmark path.
 
@@ -820,6 +870,9 @@ retrieval-only Layer 2A boundary.
   runner.
 - `benchmarks/layer2_crossdomain/data/layer2_questions.jsonl`: final v3 aligned
   Layer 2A questions.
+- `benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl`: generated or
+  working selected 5,000-row corpus when present locally; the smaller sample
+  corpus is the tracked public schema/example artifact.
 - `benchmarks/layer2_crossdomain/data/layer2_corpus.sample.jsonl`: tracked
   sample corpus rows documenting schema and examples.
 - `benchmarks/layer2_crossdomain/data/raw_pool_manifest.json`: raw-pool scale
@@ -834,12 +887,32 @@ retrieval-only Layer 2A boundary.
 - `benchmarks/layer2_crossdomain/results/conflict_data_contract_blocked_v3.md`:
   blocked conflict-category data-contract note.
 - `benchmarks/layer2_crossdomain/results/README.md`: result-directory guide
-  for final and archived Layer 2A artifacts.
+  for final and archived Layer 2 artifacts.
 
 The final public Layer 2A result boundary is the v3 retrieval comparison, the
 v3 ablation report, and the blocked conflict data-contract note. These files
 are the public retrieval-only Layer 2A reports; they should be read separately
 from intermediate development outputs.
+
+### Layer 2B benchmark artifacts
+
+- `benchmarks/layer2_crossdomain/data/layer2b_manual_50_qa.jsonl`: 50 manually
+  designed temporal QA cases.
+- `benchmarks/layer2_crossdomain/validate_layer2b_manual_qa.py`: Layer 2B
+  manual QA dataset validator.
+- `benchmarks/layer2_crossdomain/run_layer2b_manual_qa.py`: answer-generation
+  runner for Layer 2B.
+- `benchmarks/layer2_crossdomain/run_layer2b_judge.py`: LLM judge runner for
+  existing Layer 2B answer results.
+- `benchmarks/layer2_crossdomain/results/layer2b_manual_50_qa_summary.md`:
+  manual QA dataset summary.
+- `benchmarks/layer2_crossdomain/results/layer2b_chronorag_full_layer2b_full50_vertex_final_results.md`:
+  full-50 answer-generation report.
+- `benchmarks/layer2_crossdomain/results/layer2b_judge_layer2b_full50_judge_final_results.md`:
+  full-50 LLM judge report.
+- `benchmarks/layer2_crossdomain/results/layer2b_full50_manual_audit.md`:
+  human audit note for validator-strictness cases and the secondary
+  manual-audited interpretation.
 
 ### Archived development artifacts
 
@@ -849,8 +922,9 @@ from intermediate development outputs.
 
 Archived files are development history, not the final result boundary. They are
 useful for understanding the correction process, but the final public result
-files are the v3 retrieval comparison, v3 ablation, and blocked conflict
-data-contract note listed above.
+files are the v3 retrieval comparison, v3 ablation, blocked conflict
+data-contract note, and Layer 2B full-50 answer-validation artifacts listed
+above.
 
 ## Repository Map
 
@@ -860,11 +934,11 @@ core/                         Temporal retrieval, chunking, routing, generation
 storage/                      Local PVDB/cache persistence abstractions
 benchmarks/                   Layer 1A and Layer 1B benchmark harnesses
 benchmarks/results/           Layer 1 stored benchmark reports
-benchmarks/layer2_crossdomain Layer 2A corpus builders, validators, methods
+benchmarks/layer2_crossdomain Layer 2A/2B corpus builders, validators, methods
 benchmarks/layer2_crossdomain/data/
-                              Layer 2A questions, sample corpus, raw manifest
+                              Layer 2A questions, Layer 2B QA, sample corpus
 benchmarks/layer2_crossdomain/results/
-                              Final Layer 2A reports plus archived history
+                              Final Layer 2A/2B reports plus archived history
 data/sample/temporal_eval_v2/ Tracked Layer 1A sample benchmark data
 docs/                         Technical reports and design notes
 tests/                        Unit and benchmark contract tests
