@@ -36,21 +36,15 @@ answer validation.
 
 ```mermaid
 flowchart TD
-    A[Raw documents and evidence rows] --> B[Temporal contextual chunking]
-    B --> C[Metadata extraction]
-    C --> D[valid_time / transaction_time separation]
+    A[Raw evidence rows] --> B[Temporal Contextual Chunking]
+    B --> C[Temporal metadata extraction]
+    C --> D[Valid-time / transaction-time separation]
     D --> E[Temporal precision scoring]
-    D --> F[Polarity and negative constraint handling]
-    D --> G[Source and metric normalization]
-    E --> H[Temporal fusion and ranking]
-    F --> H
-    G --> H
-    H --> I[Slot-aware evidence finalization]
-    I --> J[Retriever output and evidence cards]
-    J --> K[Optional answer generator]
-    J --> L[Benchmark evaluator]
-    K --> M[Answer validator]
-    M --> L
+    E --> F[Slot-aware evidence finalization]
+    F --> G[Evidence cards / retrieved context]
+    G -->|Retrieval-only scoring Layer 1A / Layer 2A| H[Benchmark scoring / answer-contract checks]
+    G -->|Answer-generation layers Layer 1B / Layer 2B| I[LLM answer synthesizer]
+    I -->|Answer-contract scoring| H
 ```
 
 Core pieces:
@@ -63,10 +57,12 @@ Core pieces:
 | Polarity and negative constraints | Treats target dates differently from excluded dates such as `not 1990-03-28`. |
 | Source / metric normalization | Rewards source-family, source-file, metric, claim, and version anchors when the question asks for them. |
 | Slot-aware finalization | Assembles evidence for comparison and multi-slot questions so one side does not dominate top-k. |
-| Answer validation | Checks cited evidence, valid-time use, transaction-time misuse, partial/refusal behavior, and provider-output contracts. |
+| Benchmark scoring / answer-contract checks | Scores retrieval-only evidence cards directly for Layer 1A and Layer 2A, and checks cited evidence, valid-time use, transaction-time misuse, partial/refusal behavior, and provider-output contracts after synthesis in Layer 1B and planned Layer 2B. |
 
-Provider-backed generation is optional. Retrieval and validation can be run
-deterministically without Vertex.
+Retrieval-only layers score evidence cards directly. LLM answer synthesis is
+used only for answer-generation layers, with answer-contract checks applied
+after synthesis. Retrieval scoring and deterministic checks can be run without
+Vertex.
 
 ## Evaluation Map
 
