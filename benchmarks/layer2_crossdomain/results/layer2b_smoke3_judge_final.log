@@ -1,0 +1,12 @@
+Mode: vertex
+Input results: benchmarks/layer2_crossdomain/results/layer2b_chronorag_full_layer2b_smoke3_vertex_final_results.jsonl
+Cases selected: 3
+Output JSONL: benchmarks/layer2_crossdomain/results/layer2b_judge_layer2b_smoke3_judge_final_results.jsonl
+Output Markdown: benchmarks/layer2_crossdomain/results/layer2b_judge_layer2b_smoke3_judge_final_results.md
+Judge runs per case: 1
+Judge sleep seconds: 10.0
+[1/3] l2b_manual_001
+[2/3] l2b_manual_002
+[3/3] l2b_manual_003
+Wrote: benchmarks/layer2_crossdomain/results/layer2b_judge_layer2b_smoke3_judge_final_results.jsonl
+Wrote: benchmarks/layer2_crossdomain/results/layer2b_judge_layer2b_smoke3_judge_final_results.md
