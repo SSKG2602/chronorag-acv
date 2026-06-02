@@ -48,7 +48,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--result-suffix", default="default")
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--temperature", type=float, default=0.0)
-    parser.add_argument("--max-output-tokens", type=int, default=2048)
+    parser.add_argument("--max-output-tokens", type=int, default=5000)
     parser.add_argument("--request-sleep-seconds", type=float, default=10.0)
     parser.add_argument("--retry-max-attempts", type=int, default=5)
     parser.add_argument("--retry-base-sleep-seconds", type=float, default=5.0)

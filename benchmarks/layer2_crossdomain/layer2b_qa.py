@@ -237,32 +237,25 @@ def retrieve_layer2b_evidence(
 def build_layer2b_prompt(case: Layer2BQACase, evidence_rows: list[CorpusRow]) -> str:
     cards = "\n".join(json.dumps(_evidence_card(row, index), ensure_ascii=True, sort_keys=True) for index, row in enumerate(evidence_rows, start=1))
     schema = {
-        "answer": "string",
-        "cited_evidence_ids": ["string"],
-        "valid_time_used": "string",
+        "answer": "...",
+        "cited_evidence_ids": ["..."],
+        "valid_time_used": "...",
         "answer_behavior": "answer | compare | warn_conflict | partial | refuse_or_clarify",
         "conflict_warning": False,
         "partial_or_refusal": False,
         "confidence": "high | medium | low",
     }
-    return f"""You are ChronoRAG's Layer 2B grounded temporal answer synthesizer.
+    return f"""You are ChronoRAG's Layer 2B grounded temporal answer synthesizer. Answer only from the supplied evidence. Preserve temporal meaning. Expose uncertainty instead of guessing.
 
-Return only one strict JSON object. Do not include markdown, code fences, or prose outside JSON.
+Bitemporal rule: separate valid time from transaction time. Valid time means when the fact is true, observed, effective, reported, or applies. Transaction time means when the record was filed, published, released, stored, or made available. Use the time requested by the question. If the answer depends on both, state both clearly.
 
-Rules:
-- Use only the retrieved evidence cards below.
-- Cite only evidence IDs from the provided evidence cards.
-- Do not invent evidence IDs.
-- Do not use outside knowledge.
-- If evidence is insufficient, use answer_behavior "partial" or "refuse_or_clarify".
-- Distinguish filing, publication, release, and transaction time from valid, effective, report, event, or observation time.
-- For SEC records, filing date is transaction/publication time and report date is valid/event time when present.
-- For Federal Register records, publication date is transaction/publication time and effective date is valid time when present.
-- For FRED and market index rows, observation date is valid time.
-- For GitHub releases, release timestamp/date is valid event time for this benchmark.
-- Preserve exact values and dates from evidence.
-- Do not hallucinate details not present in evidence.
-- If multiple evidence rows are needed for comparison or chronology, cite all rows used.
+Conflict rule: if supplied evidence disagrees about the same entity, time, value, status, or requested fact, surface the conflict, cite the conflicting evidence, set conflict_warning to true, and set answer_behavior to warn_conflict.
+
+Insufficient-evidence rule: if the supplied evidence is missing the requested detail, only partially supports the answer, is ambiguous, or is not about the requested time/entity/fact, do not infer. Give a partial or clarification/refusal answer, set partial_or_refusal to true, and set answer_behavior to partial or refuse_or_clarify.
+
+Answer-quality rule: answer directly first. Preserve exact dates, values, units, names, identifiers, agencies, companies, repositories, releases, forms, and temporal windows. Cite every evidence row used. Do not cite unused rows. Do not use outside knowledge. Do not hallucinate missing details.
+
+Output rules: Return exactly one raw JSON object. Do not use markdown fences. Do not include prose outside JSON. Never use null; use "", [], or false. answer must be a string. cited_evidence_ids must be a list of strings; use [] if no supplied evidence supports the answer. valid_time_used must be a string; use "" if no valid time is used. answer_behavior must be one of: answer, compare, warn_conflict, partial, refuse_or_clarify. conflict_warning must be boolean. partial_or_refusal must be boolean. confidence must be one of: high, medium, low.
 
 User question:
 {case.question}
