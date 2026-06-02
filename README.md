@@ -157,7 +157,7 @@ Vertex.
 | Layer 1A | Temporal retrieval benchmark | Whether retrieval finds temporally correct evidence and avoids temporal distractors. | Retrieval-focused only. |
 | Layer 1B | Temporal answer validation | Whether generated or light-mode answers satisfy a grounded temporal answer contract. | Answer-contract validation over controlled cases. |
 | Layer 2A | Cross-domain retrieval-only benchmark | Whether retrieval behavior holds across a selected cross-domain corpus and v3 aligned questions. | Selected evidence IDs only; no natural-language answer scoring. |
-| Layer 2B | Planned natural-language temporal QA | 50 manually designed questions using ChronoRAG + Vertex + dynamic top-k + answer validation. | Future work; answer synthesis and validation after retrieval. |
+| Layer 2B | Natural-language temporal QA | 50 manually designed questions using ChronoRAG + Vertex + dynamic top-k + answer validation. | Answer synthesis and validation with expected evidence available where needed; retrieval quality remains Layer 2A. |
 
 ## Layer 1A: Temporal Eval v2
 
@@ -351,6 +351,27 @@ These results support the tested claim that explicit temporal roles and final
 evidence gating improve controlled temporal retrieval behavior on this Layer 2A
 benchmark. They do not evaluate natural-language answer quality, provider
 behavior, or untested production workloads.
+
+### Layer 2B Full-50 Answer Validation
+
+Layer 2B full-50 artifacts:
+
+- `benchmarks/layer2_crossdomain/results/layer2b_chronorag_full_layer2b_full50_vertex_final_results.md`
+- `benchmarks/layer2_crossdomain/results/layer2b_judge_layer2b_full50_judge_final_results.md`
+- `benchmarks/layer2_crossdomain/results/layer2b_full50_manual_audit.md`
+
+| Layer 2B metric | Score |
+|---|---:|
+| Deterministic hard-contract pass | 38 / 50 = 76% |
+| LLM judge semantic pass | 38 / 50 = 76% |
+| Strict combined pass | 35 / 50 = 70% |
+| Manual-audited acceptable pass | 41 / 50 = 82% |
+
+The strict combined pass is the conservative score. The manual-audited
+acceptable pass accepts 3 cases where hard validation failed but judge and
+manual review agreed the answer was semantically correct. Expected-evidence
+injection was used, so Layer 2B measures answer synthesis and validation, not
+retrieval quality. Retrieval quality is reported separately in Layer 2A.
 
 ## Layer 2A Ablation Summary
 
