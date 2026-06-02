@@ -38,12 +38,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--result-suffix", default="default")
     parser.add_argument("--judge-runs", type=int, default=1)
     parser.add_argument("--judge-temperature", type=float, default=0.0)
-    parser.add_argument("--judge-max-output-tokens", type=int, default=3000)
+    parser.add_argument("--judge-max-output-tokens", type=int, default=5000)
     parser.add_argument("--judge-request-sleep-seconds", type=float, default=10.0)
     parser.add_argument("--judge-retry-max-attempts", type=int, default=4)
     parser.add_argument("--judge-retry-base-sleep-seconds", type=float, default=8.0)
     parser.add_argument("--judge-retry-max-sleep-seconds", type=float, default=90.0)
-    parser.add_argument("--judge-json-retry-max-attempts", type=int, default=1)
+    parser.add_argument("--judge-json-retry-max-attempts", type=int, default=3)
     parser.add_argument("--fail-fast", action="store_true")
     return parser
 
