@@ -1,13 +1,13 @@
 # Layer 2 Cross-Domain Benchmarks
 
 Layer 2A is ChronoRAG's controlled cross-domain retrieval-only benchmark. It
-tests selected evidence behavior across a selected 5,000-row corpus and 200 v3
+checks selected evidence behavior across a selected 5,000-row corpus and 200 v3
 aligned questions. It does not call Vertex in the public retrieval-only path and
 does not score generated natural-language answer quality.
 
-ChronoRAG reports controlled benchmark evidence for temporal retrieval behavior
-under explicitly scoped datasets and validators. The Layer 2A claims are limited
-to retrieval-only evidence selection in this tested setting.
+The Layer 2A artifacts provide controlled benchmark evidence for temporal
+retrieval behavior under explicitly scoped datasets and validators. Their
+claims are limited to retrieval-only evidence selection in this tested setting.
 
 Layer 2B is the companion full-50 natural-language temporal QA evaluation. It
 uses manually designed temporal QA cases, ChronoRAG answer synthesis, hard
@@ -85,7 +85,7 @@ but it is not an active Layer 2A retrieval baseline for the public v3 result.
 
 ## Final Public Artifacts
 
-The public Layer 2 result directory should keep:
+The public Layer 2 result directory contains:
 
 - `results/README.md`
 - `results/layer2_retrieval_only_v3_200_eval.md`
@@ -205,7 +205,8 @@ irrelevant in other settings.
   public result for this layer.
 - The current v3 benchmark aligns question wording, expected evidence, and
   available corpus rows more strictly.
-- The correction improved benchmark validity rather than hiding failures.
+- The correction made the benchmark contract stricter rather than hiding
+  failures.
 
 ## Reproduce
 

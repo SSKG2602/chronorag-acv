@@ -7,9 +7,9 @@ It treats validity windows, transaction/publication times, source provenance,
 temporal precision, and grounded citation checks as first-class system
 contracts.
 
-ChronoRAG reports controlled benchmark evidence for temporal retrieval behavior
-under explicitly scoped datasets and validators. The claims are limited to the
-tested settings: temporal retrieval, evidence selection, answer-contract
+The stored benchmarks provide controlled evidence for temporal retrieval
+behavior under explicitly scoped datasets and validators. The claims are limited
+to the tested settings: temporal retrieval, evidence selection, answer-contract
 validation, and component ablation behavior. The project does not generalize
 these results beyond the benchmark conditions without additional evaluation.
 
@@ -85,7 +85,7 @@ This is retrieval behavior, not answer-generation behavior.
 | Layer 1A | Temporal Eval v2 retrieval | Evidence selection, window alignment, distractor avoidance, proxy behavior. | Retrieval-focused benchmark. |
 | Layer 1B | Temporal answer validation | Cited evidence, valid-time correctness, transaction-time trap avoidance, provider/output contract. | Answer-contract validation in a controlled setting. |
 | Layer 2A | Cross-domain retrieval-only | Selected evidence IDs across 5,000 corpus rows and 200 v3 questions. | No generated natural-language answer scoring. |
-| Layer 2B | Planned temporal QA | ChronoRAG answer synthesis and validation after retrieval. | Future 50-question Vertex-backed evaluation. |
+| Layer 2B | Natural-language temporal QA | ChronoRAG answer synthesis, hard-contract validation, LLM judge scoring, and manual audit. | Answer synthesis and validation with expected evidence available where needed; retrieval quality remains Layer 2A. |
 
 ## 6. Layer 1A: Temporal Eval v2
 
@@ -236,18 +236,49 @@ Main interpretation:
 - Several ablations remain strong on explicitly anchored categories; those
   categories should be interpreted as controlled checks, not broad proof.
 
-## 11. Layer 2B Planned Natural-Language Temporal QA
+## 11. Layer 2B: Full-50 Answer Synthesis And Validation
 
-Layer 2B is planned as 50 manually designed natural-language temporal QA
-questions. The questions will be built evidence-card-first from the selected
-5,000-row corpus and will use ChronoRAG + Vertex + dynamic top-k.
+Layer 2B is the completed natural-language temporal QA evaluation. It uses 50
+manually designed temporal QA cases built from evidence cards in the selected
+Layer 2 corpus:
 
-The goal is to evaluate ChronoRAG answer synthesis and validation after
-retrieval. Metadata+LLM comparison is not the current goal for Layer 2B.
+- `benchmarks/layer2_crossdomain/data/layer2b_manual_50_qa.jsonl`
 
-Layer 2B is where generated answer quality, answer wording, and
-natural-language temporal reasoning should be evaluated. Those behaviors are
-not evaluated by Layer 2A.
+The completed Layer 2B path is:
+
+1. ChronoRAG answer synthesis with Vertex.
+2. Dynamic top-k evidence selection for answer context.
+3. Deterministic hard-contract validation.
+4. LLM judge semantic scoring.
+5. Human manual audit of validator-strictness cases.
+
+Final Layer 2B artifacts:
+
+- `benchmarks/layer2_crossdomain/results/layer2b_manual_50_qa_summary.md`
+- `benchmarks/layer2_crossdomain/results/layer2b_chronorag_full_layer2b_full50_vertex_final_results.md`
+- `benchmarks/layer2_crossdomain/results/layer2b_judge_layer2b_full50_judge_final_results.md`
+- `benchmarks/layer2_crossdomain/results/layer2b_full50_manual_audit.md`
+
+Final Layer 2B scores:
+
+| Metric | Score |
+|---|---:|
+| Deterministic hard-contract pass | 38 / 50 = 76% |
+| LLM judge semantic pass | 38 / 50 = 76% |
+| Strict combined pass | 35 / 50 = 70% |
+| Manually accepted validator-strictness cases | 3 |
+| Manual-audited acceptable pass | 41 / 50 = 82% |
+
+The strict combined score, `35 / 50 = 70%`, remains the primary conservative
+Layer 2B result because it requires both hard validation and LLM judge pass. The
+manual-audited acceptable score, `41 / 50 = 82%`, is a secondary interpretation
+after accepting 3 validator-strictness cases reviewed by the judge and a human
+audit. It does not replace the strict combined score.
+
+Layer 2B evaluates answer synthesis and answer validation. It does not prove
+retrieval quality because expected evidence was available or injected where
+needed for answer generation. Retrieval quality is evaluated separately in
+Layer 2A.
 
 ## 12. Reproducibility Commands
 
@@ -319,6 +350,10 @@ python3 benchmarks/layer2_crossdomain/run_layer2_ablations.py \
 
 - Layer 2A is retrieval-only.
 - Layer 2A does not evaluate generated natural-language answer quality.
+- Layer 2B evaluates answer synthesis and validation, not retrieval quality,
+  because expected evidence was available where needed.
+- The Layer 2B manual-audited acceptable score is secondary and does not replace
+  the strict combined score.
 - Layer 1B is controlled answer validation, not production reliability proof.
 - Conflict detection is data-contract blocked in Layer 2A until real
   conflict-pair rows exist.

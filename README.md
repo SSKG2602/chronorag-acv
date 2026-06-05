@@ -7,12 +7,10 @@ dates mistaken for fact time, broad background rows outranking exact evidence,
 and generated answers that cite evidence while misusing its temporal role.
 
 The system separates fact time from publication, filing, release, ingestion, or
-other transaction time. It evaluates evidence selection and temporal grounding
-under controlled benchmark conditions. ChronoRAG reports controlled benchmark
-evidence for temporal retrieval behavior under explicitly scoped datasets and
-validators. The claims are limited to the tested settings: temporal retrieval,
-evidence selection, answer-contract validation, and component ablation behavior.
-The project does not generalize these results beyond the benchmark conditions
+other transaction time. The stored results are controlled benchmark evidence
+under explicitly scoped datasets and validators. They cover temporal retrieval,
+evidence selection, answer-contract validation, and component ablations in the
+tested settings only; they should not be generalized beyond those conditions
 without additional evaluation.
 
 ## Why Temporal RAG Is Hard
@@ -32,7 +30,7 @@ questions need more than topical match:
 ChronoRAG makes these cases explicit in retrieval, evidence finalization, and
 answer validation.
 
-## What ChronoRAG Actually Adds
+## Core Technical Pieces
 
 ### Temporal Contextual Chunking
 
@@ -41,18 +39,18 @@ grounding while building retrieval text that states the entity, metric, source,
 document context, and temporal role more explicitly. It exists because raw rows
 often carry too little context for retrieval: a date, value, or filing mention
 can look relevant without showing whether it is the time of the claim or merely
-document metadata. The targeted failure mode is topically close evidence that
-wins ranking because its surrounding temporal context was implicit or missing.
+document metadata. This targets topically close evidence that can win ranking
+when its temporal context is implicit or missing.
 
 ### `valid_time` vs `transaction_time` separation
 
 ChronoRAG separates when a claim is true from when that claim was filed,
 published, released, observed, imported, or ingested. This distinction exists
 because RAG systems often over-trust prominent dates in a passage even when
-those dates describe document lifecycle events rather than the fact being
-asked about. The targeted failure mode is treating a publication date, SEC
-filing date, release date, or ingestion date as the valid time of the economic,
-market, legal, or software claim.
+those dates describe document lifecycle events rather than the fact being asked
+about. This targets cases where a publication date, SEC filing date, release
+date, or ingestion date is mistaken for the valid time of the economic, market,
+legal, or software claim.
 
 ### Temporal precision scoring
 
@@ -60,17 +58,17 @@ Temporal precision scoring compares the query's requested time against the
 candidate evidence at the right granularity: year, month, day, timestamp,
 quarter, daypart, range, or fuzzy range. It exists because a broad match to the
 right year or range is not equivalent to exact dated support when the question
-asks for a precise time. The targeted failure mode is letting broad-window or
-nearby-date evidence outrank exact evidence for the requested temporal slot.
+asks for a precise time. This targets broad-window or nearby-date evidence that
+can outrank exact evidence for the requested temporal slot.
 
 ### Negative/polarity-aware temporal constraints
 
 Some questions specify dates that should be excluded, such as a market movement
 that must not be explained with evidence from a nearby date. ChronoRAG treats
 target dates and forbidden dates as different retrieval signals instead of
-collapsing them into one bag of temporal tokens. The targeted failure mode is
-retrieving evidence that is lexically relevant because it mentions the excluded
-date, even though the question explicitly rules it out.
+collapsing them into one bag of temporal tokens. This targets evidence that is
+lexically relevant because it mentions an excluded date, even though the
+question explicitly rules that date out.
 
 ### Source/metric-aware ranking adjustment
 
@@ -87,9 +85,9 @@ family, wrong file, wrong metric, or wrong version role.
 Comparison, before/after, and multi-entity questions need coverage across
 multiple evidence slots rather than only the highest-scoring rows overall.
 Slot-aware assembly exists because one dominant entity, year, or source family
-can fill the final top-k and crowd out the other side of the comparison. The
-targeted failure mode is a superficially strong retrieval set that cannot
-support the actual multi-slot question.
+can fill the final top-k and crowd out the other side of the comparison. This
+targets retrieval sets that look strong by score but cannot support the actual
+multi-slot question.
 
 ### Answer-contract validation
 
@@ -97,18 +95,18 @@ Answer-contract validation checks whether a generated or deterministic answer
 cites expected evidence, uses valid time correctly, avoids transaction-time
 misuse, handles insufficient evidence, and satisfies provider-output contracts.
 It exists because a model can cite plausible evidence while still making the
-wrong temporal claim. The targeted failure mode is answer generation that looks
-grounded but violates the requested temporal role, citation contract, or
-partial/refusal behavior.
+wrong temporal claim. This targets generated answers that look grounded but
+violate the requested temporal role, citation contract, or partial/refusal
+behavior.
 
 ### Controlled benchmark correction process
 
 ChronoRAG keeps benchmark correction as part of the research process rather
 than treating every early benchmark category as final. Layer 2A revisions
 documented where question wording, expected evidence, forbidden evidence, or
-corpus availability made an earlier test invalid or under-specified. The
-targeted failure mode is evaluating retrieval behavior against hidden
-assumptions instead of aligned question text and available evidence.
+corpus availability made an earlier test invalid or under-specified. This
+prevents retrieval behavior from being scored against hidden assumptions instead
+of aligned question text and available evidence.
 
 ## Architecture
 
@@ -163,9 +161,10 @@ Vertex.
 
 What the current benchmark evidence supports:
 
-- ChronoRAG improves controlled temporal retrieval behavior in Layer 2A by
-  selecting cleaner final evidence under temporal-role, source/metric,
-  forbidden-evidence, and slot-coverage constraints.
+- The Layer 2A retrieval-only result provides controlled evidence that
+  ChronoRAG selects cleaner final evidence than the metadata temporal RAG
+  baseline under temporal-role, source/metric, forbidden-evidence, and
+  slot-coverage constraints.
 - ChronoRAG can perform grounded temporal answer synthesis in Layer 2B when
   expected evidence is available to the answer-generation path.
 - Layer 2B exposes remaining weaknesses in valid-time precision, behavior
@@ -386,6 +385,7 @@ Layer 2B full-50 artifacts:
 | Deterministic hard-contract pass | 38 / 50 = 76% |
 | LLM judge semantic pass | 38 / 50 = 76% |
 | Strict combined pass | 35 / 50 = 70% |
+| Manually accepted validator-strictness cases | 3 |
 | Manual-audited acceptable pass | 41 / 50 = 82% |
 
 The strict combined pass is the conservative score. The manual-audited
@@ -444,7 +444,7 @@ Contextual Chunking retrieval text. It removes the enriched retrieval framing
 that names temporal metadata, source context, entity context, and document
 context around the evidence row.
 
-Expected failure mode: raw rows can be underspecified, especially when values,
+Failure pattern: raw rows can be underspecified, especially when values,
 dates, release labels, or filings need surrounding context to be interpreted
 correctly. Without TCC, retrieval can over-rank rows that share surface tokens
 but do not clearly support the requested temporal claim.
@@ -459,7 +459,7 @@ What was removed: this variant disables explicit temporal precision scoring,
 including exact day, month, year, timestamp, range, and nearby-time handling
 used before final evidence assembly.
 
-Expected failure mode: evidence from a nearby date, broad range, or weaker
+Failure pattern: evidence from a nearby date, broad range, or weaker
 temporal granularity can outrank exact evidence for the requested time. It also
 weakens suppression of wrong-time evidence when the question depends on exact
 temporal alignment.
@@ -475,7 +475,7 @@ transaction-time-only evidence when the question asks for valid-time evidence.
 It reduces the system's ability to distinguish claim time from filing,
 publication, release, observation, import, or ingestion time at final selection.
 
-Expected failure mode: document lifecycle dates can remain in the final top-k
+Failure pattern: document lifecycle dates can remain in the final top-k
 as if they supported the requested fact time. This is especially important for
 SEC, Federal Register, release, and imported-data cases where transaction dates
 are prominent.
@@ -490,7 +490,7 @@ What was removed: this variant disables source and metric adjustment in
 finalization, including source-family, source-file, metric, claim, unit, and
 version anchors where those constraints are available.
 
-Expected failure mode: the retriever can select evidence that is temporally
+Failure pattern: the retriever can select evidence that is temporally
 plausible but tied to the wrong source family, file, metric, or version role.
 For example, a row may match the date but support a different measurement or
 come from the wrong source lineage.
@@ -506,7 +506,7 @@ multi-slot questions. It relies more heavily on global ranking rather than
 ensuring coverage across requested entities, dates, sources, or comparison
 sides.
 
-Expected failure mode: one dominant slot can fill the final top-k while another
+Failure pattern: one dominant slot can fill the final top-k while another
 required slot is absent. A comparison question can therefore retrieve many
 relevant rows but still fail to provide the evidence coverage needed to answer
 the actual question.
@@ -522,7 +522,7 @@ eligibility-gated selection behavior provided by the full finalization path.
 It keeps scoring but removes the stronger selection layer that applies
 constraints before final top-k evidence is accepted.
 
-Expected failure mode: high-scoring rows that are topically or temporally close
+Failure pattern: high-scoring rows that are topically or temporally close
 can remain in the final set even when they violate a forbidden-evidence,
 wrong-role, source/metric, slot-coverage, or insufficiency constraint.
 
@@ -538,14 +538,14 @@ retrieve and rank evidence, but it does not include the full ChronoRAG
 combination of TCC, precision handling, temporal-role cleanup, source/metric
 adjustment, slot-aware assembly, and final eligibility gating.
 
-Expected failure mode: the baseline can retrieve many relevant rows while still
+Failure pattern: the baseline can retrieve many relevant rows while still
 allowing wrong-role, forbidden, missing-slot, or source/metric-mismatched
 evidence into the final selected set.
 
 What it helps interpret: this comparison separates generic metadata-aware
-temporal retrieval from the fuller controlled-evidence pipeline. It provides a
-useful reference point for understanding which behaviors require ChronoRAG's
-additional finalization and contract-aware retrieval steps.
+temporal retrieval from the ChronoRAG retrieval/finalization path. It provides a
+reference point for understanding which behaviors depend on additional
+finalization and contract-aware retrieval steps.
 
 Stored result:
 
@@ -580,8 +580,9 @@ blocked data-contract note at
 
 Some early Vertex and judge artifacts were archived because they mixed
 answer-generation or provider behavior with the retrieval-only Layer 2A
-boundary. Layer 2A now reports selected-evidence retrieval behavior; provider
-backed natural-language answer behavior belongs to Layer 1B and Layer 2B. This
+boundary. Layer 2A now reports selected-evidence retrieval behavior;
+provider-backed natural-language answer behavior belongs to Layer 1B and Layer
+2B. This
 separation keeps the benchmark boundary clear.
 
 The v3 rebuild aligned question wording, expected evidence, forbidden evidence,
@@ -590,11 +591,10 @@ process: failed or invalid benchmark assumptions were documented and corrected
 rather than hidden, and the final public Layer 2A files distinguish controlled
 retrieval results from development history.
 
-## Current public branch status
+## Current Evaluation Status
 
-Current branch: `audit/core-path-scope`.
-
-This branch includes Layer 1A, Layer 1B, Layer 2A, and Layer 2B:
+The current documented checkpoint includes Layer 1A, Layer 1B, Layer 2A, and
+Layer 2B:
 
 - Layer 1A: controlled temporal retrieval benchmark.
 - Layer 1B: temporal answer-contract validation with dry-run, light-mode, and
@@ -603,11 +603,6 @@ This branch includes Layer 1A, Layer 1B, Layer 2A, and Layer 2B:
   and aligned question set.
 - Layer 2B: full-50 natural-language temporal QA answer synthesis, hard
   validation, LLM judge, and manual audit note.
-
-Older `main` and `feature/vertex-provider-mode` branch points refer to the
-Layer 1B checkpoint at commit `b98002a`. Planned repository cleanup includes
-creating or preserving a Layer 1 archive branch, then promoting this branch to
-`main` after final public cleanup is complete.
 
 ## Current Limitations And Next Work
 

@@ -1,8 +1,14 @@
 # ChronoRAG Operations Guide
 
+This is a legacy quick-start operations guide retained for Colab, macOS, and
+WSL setup notes. The current benchmark boundaries and result claims live in
+`README.md` and `docs/TECHNICAL_REPORT.md`; this file should not be used to
+introduce new benchmark claims.
+
 ## 1. Models & Execution Modes
 
-- **Embeddings**: `BAAI/bge-base-en-v1.5` (CPU/GPU friendly; swaps via `config/models.yaml`).
+- **Embeddings**: current default/light mode uses `BAAI/bge-small-en-v1.5`
+  with 384 dimensions; model profiles can be changed in `config/models.yaml`.
 - **Reranker**: `BAAI/bge-reranker-v2-m3` with fallback `cross-encoder/ms-marco-MiniLM-L-6-v2`.
 - **LLM Answerer**: local Hugging Face `Qwen/Qwen1.5-0.5B-Chat` (deterministic, GPU-friendly).
   - For higher-quality generations, point the OpenAI-compatible slot at a stronger hosted model by setting `LLM_ENDPOINT` and `LLM_API_KEY`.
@@ -10,7 +16,7 @@
   - `HARD`: strict time window adherence, fewer candidates, most conservative.
   - `INTELLIGENT`: decays outside-window evidence to surface broader context.
   - `LIGHT`: set `CHRONORAG_LIGHT=1` to use stubbed models (unit tests, quick smoke checks).
-  - `FULL`: unset `CHRONORAG_LIGHT` (or set to `0`) to download/run full models; enable for production-quality answers.
+  - `FULL`: unset `CHRONORAG_LIGHT` (or set to `0`) to download/run model-backed execution.
 - **Quantization**: optional `load_in_4bit: true` in `config/models.yaml` lowers VRAM usage (requires `bitsandbytes`).
 
 ## 2. Kaggle / Colab Workflow

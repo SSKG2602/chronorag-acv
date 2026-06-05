@@ -50,10 +50,12 @@ Layer 2B final scores:
 | Deterministic hard-contract pass | 38 / 50 = 76% |
 | LLM judge semantic pass | 38 / 50 = 76% |
 | Strict combined pass | 35 / 50 = 70% |
+| Manually accepted validator-strictness cases | 3 |
 | Manual-audited acceptable pass | 41 / 50 = 82% |
 
 The strict combined score remains the conservative score. The manual-audited
-score is recorded separately and does not replace the strict score.
+score is a secondary interpretation after manual review and does not replace
+the strict score.
 
 ## Final V3 Ablation
 

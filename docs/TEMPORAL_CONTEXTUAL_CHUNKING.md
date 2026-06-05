@@ -6,10 +6,9 @@ Temporal Contextual Chunking is ChronoRAG's chunking strategy, inspired by
 contextual retrieval but extended for valid-time retrieval, transaction-time
 tracking, temporal fusion, ChronoSanity, and attribution.
 
-The method keeps raw evidence unchanged while adding a retrieval-oriented context
-surface and explicit temporal metadata. The goal is to make each indexed chunk
-more retrievable without letting generated or inherited context overwrite the
-source text.
+The method keeps raw evidence unchanged while adding an indexing surface and
+explicit temporal metadata. The goal is to make each chunk easier to retrieve
+without letting generated or inherited context overwrite the source text.
 
 This is a ChronoRAG architecture definition. It is not a broad benchmark claim
 and should not be described as Anthropic's method.
@@ -44,9 +43,9 @@ metadata envelope for each chunk:
 - temporal metadata: valid-time and transaction-time fields used by temporal
   filtering, fusion, ChronoSanity, and attribution.
 
-The core principle is simple: never let generated or global context overwrite
-raw evidence. Raw evidence remains the truth anchor. Context is used only for
-retrieval and metadata reasoning.
+The core rule is simple: generated or global context must not overwrite raw
+evidence. Raw evidence remains the source for attribution and grounding.
+Context is used only for retrieval and metadata reasoning.
 
 ## Raw Text vs Retrieval Text
 
@@ -342,10 +341,11 @@ Recommended attribution behavior:
 - Multiple timestamps in dense table text may require smaller claim chunks.
 - Context prefixes can improve retrieval but may also bias retrieval if too long
   or too speculative.
-- The method needs benchmark evaluation before claiming measurable improvement.
+- Ablation results should be read as controlled evidence, not broad proof of
+  measurable improvement.
 - It is not an answer-quality evaluation and not a broad benchmark claim.
 
-## Implementation Plan
+## Implementation Checklist
 
 1. Extend chunk records with `raw_text`, `retrieval_text`, `global_context`, and
    temporal confidence fields.
@@ -362,9 +362,9 @@ Recommended attribution behavior:
 
 ## Reproducibility Notes
 
-Changing chunking changes retrieval behavior and invalidates old persisted
-vectors. After implementing Temporal Contextual Chunking, users should purge and
-reingest:
+Changing chunking or temporal precision rules changes retrieval behavior and
+invalidates old persisted vectors. Purge and reingest after changing those
+settings:
 
 ```bash
 python -m cli.chronorag_cli purge
