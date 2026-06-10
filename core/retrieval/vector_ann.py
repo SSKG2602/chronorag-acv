@@ -15,6 +15,23 @@ from app.light_mode import light_mode_enabled
 logger = logging.getLogger(__name__)
 
 
+@dataclass(frozen=True)
+class EmbeddingConfig:
+    model_name: str
+    dim: int
+
+
+def resolve_embedding_config(model_name: str | None = None, dim: int | str | None = None) -> EmbeddingConfig:
+    """Resolve embedding model/dim from explicit config with env overrides."""
+    resolved_name = os.getenv("CHRONORAG_EMBED_MODEL") or model_name or "BAAI/bge-small-en-v1.5"
+    raw_dim = os.getenv("CHRONORAG_EMBED_DIM") or dim or 384
+    try:
+        resolved_dim = int(raw_dim)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"Invalid CHRONORAG_EMBED_DIM value: {raw_dim!r}") from exc
+    return EmbeddingConfig(model_name=resolved_name, dim=resolved_dim)
+
+
 def _hash_embedding(text: str, dim: int) -> np.ndarray:
     """Return a deterministic pseudo-embedding for light-mode/integration tests."""
     digest = hashlib.sha256(text.encode("utf-8")).digest()
@@ -26,9 +43,10 @@ def _hash_embedding(text: str, dim: int) -> np.ndarray:
 
 
 class EmbeddingEncoder:
-    def __init__(self, name: str = "bge-small-en-v1.5", dim: int = 384):
-        self.name = name
-        self.dim = dim
+    def __init__(self, name: str = "BAAI/bge-small-en-v1.5", dim: int = 384):
+        config = resolve_embedding_config(name, dim)
+        self.name = config.model_name
+        self.dim = config.dim
         self._model = None
 
     def _ensure_model(self) -> None:
@@ -52,10 +70,15 @@ class EmbeddingEncoder:
         if self._model == "_stub_":
             vectors = [_hash_embedding(text, self.dim) for text in texts]
             return np.stack(vectors, axis=0)
-        return np.asarray(
+        vectors = np.asarray(
             self._model.encode(texts, normalize_embeddings=True, show_progress_bar=False),
             dtype=np.float32,
         )
+        if vectors.ndim != 2 or vectors.shape[1] != self.dim:
+            raise ValueError(
+                f"Embedding dimension mismatch for {self.name}: expected {self.dim}, got {vectors.shape[1] if vectors.ndim == 2 else 'unknown'}."
+            )
+        return vectors
 
 
 @dataclass
@@ -69,11 +92,15 @@ class ANNEntry:
 class InMemoryANNIndex:
     def __init__(self, model_name: str, dim: int = 384):
         self.encoder = EmbeddingEncoder(model_name, dim=dim)
+        self.model_name = self.encoder.name
+        self.dim = self.encoder.dim
         self.entries: Dict[str, ANNEntry] = {}
 
     def add(self, chunk_id: str, text: str, metadata: Dict) -> np.ndarray:
         """Encode a chunk and store it in-memory, returning the embedding vector."""
         vector = self.encoder.encode([text])[0]
+        if len(vector) != self.dim:
+            raise ValueError(f"Embedding dimension mismatch: index dim is {self.dim}, vector dim is {len(vector)}.")
         self.entries[chunk_id] = ANNEntry(
             chunk_id=chunk_id,
             text=text,

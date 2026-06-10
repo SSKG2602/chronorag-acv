@@ -111,3 +111,98 @@ def test_raw_text_is_preserved_separately_from_retrieval_text() -> None:
     assert "Document:" in chunk.retrieval_text
     assert "Temporal scope: 1870." in chunk.retrieval_text
     assert len(chunk.retrieval_text.split()) < 100
+
+
+def test_exact_iso_date_preserved_as_day_precision() -> None:
+    raw = "United States 10-year Treasury yield was 3.98 percent on 1962-08-15."
+    chunk = build_temporal_contextual_chunks(raw)[0]
+
+    assert chunk.raw_text == raw
+    assert chunk.temporal.normalized_start == "1962-08-15"
+    assert chunk.temporal.normalized_end == "1962-08-15"
+    assert chunk.temporal.precision == "day"
+    assert chunk.temporal.temporal_role == "valid_time"
+    assert "[valid_time=1962-08-15 precision=day]" in chunk.retrieval_text
+
+
+def test_datetime_preserved_to_second_precision() -> None:
+    temporal = infer_temporal_metadata("The incident happened on 2024-10-23T14:30:22.")
+
+    assert temporal.normalized_start == "2024-10-23T14:30:22"
+    assert temporal.precision == "second"
+    assert temporal.valid_from == "2024-10-23"
+
+
+def test_datetime_preserved_to_minute_precision() -> None:
+    temporal = infer_temporal_metadata("The incident happened on 2024-10-23 14:30.")
+
+    assert temporal.normalized_start == "2024-10-23T14:30:00"
+    assert temporal.precision == "minute"
+
+
+def test_noon_and_midnight_normalize_to_exact_times() -> None:
+    noon = infer_temporal_metadata("The event happened at noon.")
+    midnight = infer_temporal_metadata("The event happened at midnight.")
+
+    assert noon.normalized_start == "12:00:00"
+    assert midnight.normalized_start == "00:00:00"
+
+
+def test_dayparts_become_ranges() -> None:
+    morning = infer_temporal_metadata("The update happened in the morning.")
+    night = infer_temporal_metadata("The update happened at night.")
+
+    assert morning.normalized_start == "06:00:00"
+    assert morning.normalized_end == "11:59:59"
+    assert morning.precision == "daypart"
+    assert night.normalized_start == "21:00:00"
+    assert night.normalized_end == "05:59:59"
+
+
+def test_mid_december_2024_becomes_fuzzy_range() -> None:
+    temporal = infer_temporal_metadata("The rule changed in mid December 2024.")
+
+    assert temporal.normalized_start == "2024-12-11"
+    assert temporal.normalized_end == "2024-12-20"
+    assert temporal.precision == "fuzzy"
+
+
+def test_q2_2024_becomes_quarter_range() -> None:
+    temporal = infer_temporal_metadata("The filing applied in Q2 2024.")
+
+    assert temporal.normalized_start == "2024-04-01"
+    assert temporal.normalized_end == "2024-06-30"
+    assert temporal.precision == "range"
+
+
+def test_transaction_time_phrase_is_not_marked_valid_time() -> None:
+    temporal = infer_temporal_metadata("The document was published on 2025-05-19.")
+
+    assert temporal.valid_from is None
+    assert temporal.tx_start == "2025-05-19"
+    assert temporal.temporal_role == "publication_time"
+
+
+def test_valid_time_phrase_is_not_marked_transaction_time() -> None:
+    temporal = infer_temporal_metadata("The yield was 3.98 percent on 1962-08-15.")
+
+    assert temporal.valid_from == "1962-08-15"
+    assert temporal.temporal_role == "valid_time"
+
+
+def test_valid_time_and_publication_time_remain_separate() -> None:
+    temporal = infer_temporal_metadata("Data for 1870 was published in 2006.")
+
+    assert temporal.valid_from == "1870-01-01"
+    assert temporal.tx_start == "2006-01-01"
+    assert temporal.temporal_role == "valid_time"
+    roles = {item["original_text"]: item["temporal_role"] for item in temporal.temporal_constraints}
+    assert roles["1870"] == "valid_time"
+    assert roles["2006"] == "publication_time"
+
+
+def test_ambiguous_numeric_date_is_marked_ambiguous() -> None:
+    temporal = infer_temporal_metadata("The event happened on 03/04/2024.")
+
+    assert temporal.ambiguous_parse is True
+    assert temporal.temporal_ambiguity is True

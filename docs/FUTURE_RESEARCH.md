@@ -1,14 +1,23 @@
 # Future Research Direction
 
-ChronoRAG currently has Layer 1A retrieval evaluation and Layer 1B
-answer-validation evaluation over a controlled temporal corpus. The next work
-should broaden evidence, domains, and baselines without claiming SOTA or
-publication-grade proof prematurely.
+ChronoRAG currently has four completed evaluation checkpoints: Layer 1A
+temporal retrieval, Layer 1B answer validation, Layer 2A cross-domain retrieval
+quality, and Layer 2B answer synthesis/validation. Future work should extend
+external baselines, larger corpora, conflict-pair datasets, paper drafting, and
+production hardening.
 
-## 1. Layer 2 Cross-Domain Benchmark
+Temporal Contextual Chunking is the current architectural center. Older helper
+layers such as DHQC may still be useful for controller and heuristic
+support, but they are not the main research claim of the present checkpoint.
+Graph retrieval is still future work rather than an active subsystem.
 
-Build a second-domain benchmark with questions that require correct valid-time
-and transaction-time reasoning outside the current historical GDP-style corpus.
+## 1. Layer 2 Cross-Domain Extensions
+
+Layer 2A and Layer 2B now provide public cross-domain checkpoints. The next
+research step is broader coverage: larger corpora, more source families,
+conflict-pair datasets, external baselines, and additional review of failure
+categories. Those extensions should remain controlled benchmark work, not a
+superiority claim.
 
 Minimum dataset fields:
 
@@ -31,6 +40,21 @@ Candidate domains:
 - scientific literature revisions
 - medical guideline changes
 - legal case history
+
+Layer 2A currently compares an independent metadata temporal RAG baseline
+against ChronoRAG full using the existing TCC/retrieval framework. Future
+extensions can add more baselines and larger corpora. Direct Gemini
+full-context remains deprecated for serious Layer 2A retrieval evaluation
+because it is not retrieval-based and can truncate heavily.
+
+A small diagnostic pilot exposed an exact-date retrieval weakness on dense FRED
+daily series, where year-level scoring could retrieve wrong same-year rows.
+Adapter-side precision fixed the ChronoRAG-only pilot from 2/5 to 5/5, and core
+TCC now preserves multi-granularity temporal metadata for year, month, day,
+hour, minute, second, ranges, quarters, dayparts, and fuzzy phrases. This
+precision should remain separate from embedding-model experiments: stronger
+embeddings can help recall, but exact valid-time matching should not be
+delegated only to semantic similarity.
 
 Each domain needs a metadata schema, source-family disclosure, sample corpus,
 expected evidence IDs, expected behavior labels, and readable expected answers.

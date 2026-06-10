@@ -1,5 +1,9 @@
 # Answer Validation Benchmark v2
 
+Status note: this document describes the historical Layer 1B answer-validation
+benchmark. Layer 2A and Layer 2B now exist as separate cross-domain checkpoints
+and should be cited separately.
+
 Layer 1B evaluates ChronoRAG's evidence-grounded temporal answer behavior over
 the Temporal Eval v2 corpus. It is not Layer 2, not an external benchmark, and
 not a broad performance claim.
@@ -12,7 +16,8 @@ right temporal evidence.
 Layer 1B is the answer-validation benchmark. It tests whether final answers use
 retrieved TCC-enriched evidence cards correctly.
 
-Layer 2 is future cross-domain generalization.
+At the time of this Layer 1B design, cross-domain generalization was future
+work. It is now covered separately by Layer 2A and Layer 2B.
 
 ## Pipeline
 

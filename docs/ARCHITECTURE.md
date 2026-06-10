@@ -37,10 +37,9 @@ The core layer holds reusable research modules.
 | Module | Responsibility |
 |---|---|
 | `core/router/` | Converts query + time hints into mode, axis, domain, and target window. |
-| `core/dhqc/` | Plans retrieval hops from coverage/authority signals. |
+| `core/dhqc/` | Plans retrieval hops from coverage/authority signals inside answer orchestration. This is active, but auxiliary to the main TCC plus retrieval path. |
 | `core/retrieval/` | BM25, cross-encoder, and LLM judge retrieval components. |
 | `core/generator/` | Prompt construction, backend selection, structured answer generation. |
-| `core/gsm/` | Source risk, intent, and grounding heuristics. |
 
 ### 4. Storage Layer: `storage/`
 
@@ -51,6 +50,10 @@ Storage currently supports local/research persistence and cache-oriented helpers
 | `storage/pvdb/` | Persistent vector DB abstraction, chunk models, DAO. |
 | `storage/cache/` | Redis-backed cache/freshness hooks. |
 | `storage/graph/` | Graph-oriented storage experiments. |
+
+`core/retrieval/graph_paths.py` is currently a stub that raises
+`GraphNotConfigured`. Graph retrieval should be treated as future work rather
+than an implemented part of the Layer 1B path.
 
 ## Temporal Concepts
 
@@ -155,5 +158,8 @@ sequenceDiagram
   benchmark is still required.
 - Temporal Contextual Chunking is implemented and wired into ingestion. Broader
   external validation and multi-domain benchmarking remain future work.
+- DHQC is an active support module, but the current proof does not depend
+  on it as a novel research claim.
+- Graph path retrieval is not implemented beyond a disabled stub.
 - No UI/demo surface yet.
 - No external observability stack yet.

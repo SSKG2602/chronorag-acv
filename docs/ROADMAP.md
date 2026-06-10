@@ -1,9 +1,12 @@
 # ChronoRAG Roadmap
 
 ChronoRAG is a research scaffold for temporal RAG. It implements bitemporal
-retrieval concepts and validates them with Temporal Eval v2, a controlled
-multi-source retrieval diagnostic. Layer 1B answer validation is implemented;
-the next major benchmark step is a Layer 2 multi-domain benchmark.
+retrieval concepts and validates them with controlled retrieval and grounding
+diagnostics. Layer 1A, Layer 1B, Layer 2A, and Layer 2B are completed
+evaluation checkpoints. Layer 2A has a completed public retrieval-quality
+checkpoint. Layer 2B has a completed 50-case natural-language QA checkpoint.
+Further runs may expand coverage, but they are not prerequisites for the
+current public artifact map.
 
 ## P0: Credibility Cleanup
 
@@ -42,12 +45,44 @@ the next major benchmark step is a Layer 2 multi-domain benchmark.
 - Use `--result-suffix` for comparative result files without overwriting the
   default benchmark outputs.
 
-## P3: Layer 2 Generalization
+## P3: Layer 2 Completed Checkpoints And Extensions
 
-- Add at least one second domain beyond historical GDP/debt style data.
-- Evaluate generalization across domains.
-- Add answer-quality evaluation after retrieval quality is measurable.
-- Separate retrieval metrics from provider-backed answer synthesis quality.
+- Maintain the completed Layer 2A 5,000-row / 200-question retrieval-quality
+  checkpoint as the current public cross-domain retrieval artifact.
+- Maintain the completed Layer 2B 50-case natural-language QA checkpoint as the
+  current public answer-synthesis and validation artifact.
+- Expand generalization coverage across domains using independent metadata
+  temporal RAG, ChronoRAG full, and future external baselines under the same
+  corpus and questions.
+- Treat small Vertex pilots as diagnostics, not final benchmark results.
+- Keep deterministic Layer 2A validation retrieval-only. It reads
+  `selected_evidence_ids` and scores expected evidence Hit@1/Hit@k, acceptable
+  evidence Hit@k, forbidden evidence absent@k, and category-specific temporal
+  trap checks.
+- Do not interpret dry-run answer placeholders as answer-quality results.
+- Keep generated answer quality in a separate provider-backed grounded answer
+  judge.
+- Use the `benchmarks/layer2_crossdomain/` framework to compare metadata
+  temporal RAG and ChronoRAG full under the same corpus and questions.
+- Maintain the Layer 2A v3 question contract: generated questions must expose
+  exact target dates, source anchors, metrics, versions, and comparison slots
+  whenever those fields are expected by retrieval-only scoring.
+- Keep `conflict_detection` out of the scored v3 retrieval categories until the
+  corpus has real two-sided conflict evidence pairs. Missing synthetic conflict
+  IDs should remain a data-contract diagnostic, not a scored retrieval target.
+- Use multi-granularity symbolic temporal precision for dense time-series rows:
+  exact dates/timestamps must outrank same-year wrong-date evidence before
+  embedding similarity is considered sufficient.
+- Keep temporal constraint polarity explicit so dates after local negation
+  phrases such as `not` or `instead of` are penalized during retrieval scoring.
+- Keep Layer 2A retrieval finalization small and evidence-selection focused:
+  exact-time cleanup, valid-time/transaction-time separation, source/metric
+  ranking adjustments, and conservative comparison/conflict diversification.
+- Keep core TCC precision metadata backward-compatible while extending
+  `normalized_start`, `normalized_end`, `precision`, `temporal_role`, and
+  ambiguity fields across ingestion paths.
+- Further retrieval-only and answer-validation runs may expand coverage. They
+  are not prerequisites for the current public artifact map.
 
 ## P4: ChronoSanity Strengthening
 
@@ -55,3 +90,13 @@ the next major benchmark step is a Layer 2 multi-domain benchmark.
 - Measure conflict precision and recall.
 - Evaluate when evidence-only degradation changes trust.
 - Add better counterfactual/alternative-window reporting.
+
+## Scope Note
+
+- Temporal Contextual Chunking, temporal retrieval, and grounded answer
+  validation define the current core path.
+- DHQC remains an active support module and may continue to evolve, but it is
+  not the main claim of the current checkpoint. Historical Layer 2A experiments
+  are outside the active benchmark surface.
+- Graph retrieval remains future work until `graph_paths.py` is replaced with a
+  real implementation.

@@ -53,3 +53,15 @@ __pycache__/
 # Local environments
 .venv/
 venv/
+
+# Generated Layer 2 benchmark corpus
+benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl
+
+# Layer 2 runtime logs
+benchmarks/layer2_crossdomain/run_logs/
+
+# Local-only Layer 2B smoke/dry/debug artifacts
+benchmarks/layer2_crossdomain/debug_chronorag_retrieval.py
+benchmarks/layer2_crossdomain/results/*smoke3*
+benchmarks/layer2_crossdomain/results/*dry*
+benchmarks/layer2_crossdomain/results/*prompt_contract_patch*

@@ -1,0 +1,59 @@
+Mode: vertex
+Input results: benchmarks/layer2_crossdomain/results/layer2b_chronorag_full_layer2b_full50_vertex_final_results.jsonl
+Cases selected: 50
+Output JSONL: benchmarks/layer2_crossdomain/results/layer2b_judge_layer2b_full50_judge_final_results.jsonl
+Output Markdown: benchmarks/layer2_crossdomain/results/layer2b_judge_layer2b_full50_judge_final_results.md
+Judge runs per case: 1
+Judge sleep seconds: 20.0
+[1/50] l2b_manual_001
+[2/50] l2b_manual_002
+[3/50] l2b_manual_003
+[4/50] l2b_manual_004
+[5/50] l2b_manual_005
+[6/50] l2b_manual_006
+[7/50] l2b_manual_007
+[8/50] l2b_manual_008
+[9/50] l2b_manual_009
+[10/50] l2b_manual_010
+[11/50] l2b_manual_011
+[12/50] l2b_manual_012
+[13/50] l2b_manual_013
+[14/50] l2b_manual_014
+[15/50] l2b_manual_015
+[16/50] l2b_manual_016
+[17/50] l2b_manual_017
+[18/50] l2b_manual_018
+[19/50] l2b_manual_019
+[20/50] l2b_manual_020
+[21/50] l2b_manual_021
+[22/50] l2b_manual_022
+[23/50] l2b_manual_023
+[24/50] l2b_manual_024
+[25/50] l2b_manual_025
+[26/50] l2b_manual_026
+[27/50] l2b_manual_027
+[28/50] l2b_manual_028
+[29/50] l2b_manual_029
+[30/50] l2b_manual_030
+[31/50] l2b_manual_031
+[32/50] l2b_manual_032
+[33/50] l2b_manual_033
+[34/50] l2b_manual_034
+[35/50] l2b_manual_035
+[36/50] l2b_manual_036
+[37/50] l2b_manual_037
+[38/50] l2b_manual_038
+[39/50] l2b_manual_039
+[40/50] l2b_manual_040
+[41/50] l2b_manual_041
+[42/50] l2b_manual_042
+[43/50] l2b_manual_043
+[44/50] l2b_manual_044
+[45/50] l2b_manual_045
+[46/50] l2b_manual_046
+[47/50] l2b_manual_047
+[48/50] l2b_manual_048
+[49/50] l2b_manual_049
+[50/50] l2b_manual_050
+Wrote: benchmarks/layer2_crossdomain/results/layer2b_judge_layer2b_full50_judge_final_results.jsonl
+Wrote: benchmarks/layer2_crossdomain/results/layer2b_judge_layer2b_full50_judge_final_results.md

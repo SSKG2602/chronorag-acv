@@ -1,0 +1,3151 @@
+{
+  "benchmark": "layer2_crossdomain",
+  "method": "chronorag_full",
+  "mode": "vertex",
+  "result_suffix": "vertex_chrono25_json_hardened",
+  "corpus_rows": 5000,
+  "question_count": 25,
+  "estimated_calls": 25,
+  "top_k": 5,
+  "prompt_truncation_count": 0,
+  "average_selected_evidence": 5.0,
+  "latency_ms": 764397.8,
+  "summary": {
+    "overall_pass": 0.13636363636363635,
+    "behavior_correct": 0.9545454545454546,
+    "evidence_correct": 1.0,
+    "valid_time_correct": 1.0,
+    "transaction_time_not_misused": 1.0,
+    "conflict_warning_correct": 1.0,
+    "partial_refusal_correct": 1.0,
+    "clarification_correct": 1.0,
+    "cross_domain_dependency_correct": 1.0,
+    "infrastructure_failure_count": 3,
+    "provider_error_count": 3,
+    "retry_attempts_total": 8,
+    "json_parse_failure_count": 3,
+    "scored_case_count": 22
+  },
+  "results": [
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0000:exact_valid_time_retrieval",
+      "question": "What was kubernetes release v1.30.6 on 2024-10-23?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:github_releases:kubernetes:181360153",
+        "l2:github_releases:kubernetes:181442196",
+        "l2:github_releases:kubernetes:182555499",
+        "l2:github_releases:pandas:137829288",
+        "l2:github_releases:pandas:143372919"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 7671.75,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "kubernetes released v1.30.6 on 2024-10-23.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:github_releases:kubernetes:181360153"
+        ],
+        "valid_time_used": [
+          "2024-10-23"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "2024-10-23",
+            "normalized_start": "2024-10-23",
+            "normalized_end": "2024-10-23",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "release_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "release_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:github_releases:kubernetes:181360153": 0.9,
+          "l2:github_releases:kubernetes:181442196": 0.5847,
+          "l2:github_releases:kubernetes:182555499": 0.3537,
+          "l2:github_releases:pandas:137829288": 0.3232,
+          "l2:github_releases:pandas:143372919": 0.3232
+        },
+        "selected_tcc_precision": {
+          "l2:github_releases:kubernetes:181360153": {
+            "normalized_start": "2024-10-23",
+            "normalized_end": "2024-10-23",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:github_releases:kubernetes:181442196": {
+            "normalized_start": "2024-10-23",
+            "normalized_end": "2024-10-23",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:github_releases:kubernetes:182555499": {
+            "normalized_start": "2024-10-29",
+            "normalized_end": "2024-10-29",
+            "precision": "range",
+            "temporal_role": "valid_time"
+          },
+          "l2:github_releases:pandas:137829288": {
+            "normalized_start": "2024-01-20",
+            "normalized_end": "2024-01-20",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:github_releases:pandas:143372919": {
+            "normalized_start": "2024-02-23",
+            "normalized_end": "2024-02-23",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 6358,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0001:exact_valid_time_retrieval",
+      "question": "What was pandas release v0.20.2 on 2017-06-04?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:github_releases:pandas:6599258",
+        "l2:github_releases:pandas:56527417",
+        "l2:github_releases:pandas:134944237",
+        "l2:github_releases:pandas:278660115",
+        "l2:github_releases:pandas:116106514"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2459.31,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "pandas released v0.20.2 on 2017-06-04. This was a minor bug-fix release in the 0.20.x series, including some small regression fixes, bug fixes, and performance improvements. Users were recommended to upgrade to this version.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:github_releases:pandas:6599258"
+        ],
+        "valid_time_used": [
+          "2017-06-04"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "2017-06-04",
+            "normalized_start": "2017-06-04",
+            "normalized_end": "2017-06-04",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "release_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "release_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:github_releases:pandas:6599258": 0.9,
+          "l2:github_releases:pandas:56527417": 0.528,
+          "l2:github_releases:pandas:134944237": 0.5267,
+          "l2:github_releases:pandas:278660115": 0.5254,
+          "l2:github_releases:pandas:116106514": 0.5119
+        },
+        "selected_tcc_precision": {
+          "l2:github_releases:pandas:6599258": {
+            "normalized_start": "2017-06-04",
+            "normalized_end": "2017-06-04",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:github_releases:pandas:56527417": {
+            "normalized_start": "2022-01-06",
+            "normalized_end": "2022-01-06",
+            "precision": "range",
+            "temporal_role": "valid_time"
+          },
+          "l2:github_releases:pandas:134944237": {
+            "normalized_start": "2023-12-22",
+            "normalized_end": "2023-12-22",
+            "precision": "range",
+            "temporal_role": "valid_time"
+          },
+          "l2:github_releases:pandas:278660115": {
+            "normalized_start": "2026-01-21",
+            "normalized_end": "2026-01-21",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:github_releases:pandas:116106514": {
+            "normalized_start": "2023-08-11",
+            "normalized_end": "2023-08-11",
+            "precision": "range",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 6420,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0002:exact_valid_time_retrieval",
+      "question": "What was United States 10-year Treasury 10-year Treasury yield on 1962-08-15?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:1962-08-15",
+        "l2:macro_fred:dgs10:1962-01-18",
+        "l2:macro_fred:dgs10:1962-02-09",
+        "l2:macro_fred:dgs10:1962-03-07",
+        "l2:macro_fred:dgs10:1962-03-29"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 9928.71,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "3.98 percent",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:dgs10:1962-08-15"
+        ],
+        "valid_time_used": [
+          "1962"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "required_facts_present"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "1962-08-15",
+            "normalized_start": "1962-08-15",
+            "normalized_end": "1962-08-15",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:macro_fred:dgs10:1962-08-15": 0.9,
+          "l2:macro_fred:dgs10:1962-01-18": 0.613,
+          "l2:macro_fred:dgs10:1962-02-09": 0.613,
+          "l2:macro_fred:dgs10:1962-03-07": 0.613,
+          "l2:macro_fred:dgs10:1962-03-29": 0.613
+        },
+        "selected_tcc_precision": {
+          "l2:macro_fred:dgs10:1962-08-15": {
+            "normalized_start": "1962-08-15",
+            "normalized_end": "1962-08-15",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1962-01-18": {
+            "normalized_start": "1962-01-18",
+            "normalized_end": "1962-01-18",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1962-02-09": {
+            "normalized_start": "1962-02-09",
+            "normalized_end": "1962-02-09",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1962-03-07": {
+            "normalized_start": "1962-03-07",
+            "normalized_end": "1962-03-07",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1962-03-29": {
+            "normalized_start": "1962-03-29",
+            "normalized_end": "1962-03-29",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4613,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0003:exact_valid_time_retrieval",
+      "question": "What was United States 10-year Treasury 10-year Treasury yield on 1974-06-20?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:1974-06-20",
+        "l2:macro_fred:dgs10:1974-01-08",
+        "l2:macro_fred:dgs10:1974-01-31",
+        "l2:macro_fred:dgs10:1974-02-26",
+        "l2:macro_fred:dgs10:1974-03-20"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2165.0,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "7.55 percent",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:dgs10:1974-06-20"
+        ],
+        "valid_time_used": [
+          "1974-06-20"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "required_facts_present"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "1974-06-20",
+            "normalized_start": "1974-06-20",
+            "normalized_end": "1974-06-20",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:macro_fred:dgs10:1974-06-20": 0.9,
+          "l2:macro_fred:dgs10:1974-01-08": 0.613,
+          "l2:macro_fred:dgs10:1974-01-31": 0.613,
+          "l2:macro_fred:dgs10:1974-02-26": 0.613,
+          "l2:macro_fred:dgs10:1974-03-20": 0.613
+        },
+        "selected_tcc_precision": {
+          "l2:macro_fred:dgs10:1974-06-20": {
+            "normalized_start": "1974-06-20",
+            "normalized_end": "1974-06-20",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1974-01-08": {
+            "normalized_start": "1974-01-08",
+            "normalized_end": "1974-01-08",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1974-01-31": {
+            "normalized_start": "1974-01-31",
+            "normalized_end": "1974-01-31",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1974-02-26": {
+            "normalized_start": "1974-02-26",
+            "normalized_end": "1974-02-26",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1974-03-20": {
+            "normalized_start": "1974-03-20",
+            "normalized_end": "1974-03-20",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4613,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0004:exact_valid_time_retrieval",
+      "question": "What was United States 10-year Treasury 10-year Treasury yield on 1986-05-22?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:1986-05-22",
+        "l2:macro_fred:dgs10:1986-01-02",
+        "l2:macro_fred:dgs10:1986-01-27",
+        "l2:macro_fred:dgs10:1986-02-19",
+        "l2:macro_fred:dgs10:1986-03-14"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 1929.05,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "7.88 percent",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:dgs10:1986-05-22"
+        ],
+        "valid_time_used": [
+          "1986-05-22"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "required_facts_present"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "1986-05-22",
+            "normalized_start": "1986-05-22",
+            "normalized_end": "1986-05-22",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:macro_fred:dgs10:1986-05-22": 0.9,
+          "l2:macro_fred:dgs10:1986-01-02": 0.613,
+          "l2:macro_fred:dgs10:1986-01-27": 0.613,
+          "l2:macro_fred:dgs10:1986-02-19": 0.613,
+          "l2:macro_fred:dgs10:1986-03-14": 0.613
+        },
+        "selected_tcc_precision": {
+          "l2:macro_fred:dgs10:1986-05-22": {
+            "normalized_start": "1986-05-22",
+            "normalized_end": "1986-05-22",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1986-01-02": {
+            "normalized_start": "1986-01-02",
+            "normalized_end": "1986-01-02",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1986-01-27": {
+            "normalized_start": "1986-01-27",
+            "normalized_end": "1986-01-27",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1986-02-19": {
+            "normalized_start": "1986-02-19",
+            "normalized_end": "1986-02-19",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1986-03-14": {
+            "normalized_start": "1986-03-14",
+            "normalized_end": "1986-03-14",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4613,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0005:exact_valid_time_retrieval",
+      "question": "What was United States 10-year Treasury 10-year Treasury yield on 1998-03-11?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:1998-03-11",
+        "l2:macro_fred:dgs10:1998-01-23",
+        "l2:macro_fred:dgs10:1998-02-17",
+        "l2:macro_fred:dgs10:1998-04-03",
+        "l2:macro_fred:dgs10:1998-04-28"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2200.12,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "5.63 percent",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:dgs10:1998-03-11"
+        ],
+        "valid_time_used": [
+          "1998"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "required_facts_present"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "1998-03-11",
+            "normalized_start": "1998-03-11",
+            "normalized_end": "1998-03-11",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:macro_fred:dgs10:1998-03-11": 0.9,
+          "l2:macro_fred:dgs10:1998-01-23": 0.613,
+          "l2:macro_fred:dgs10:1998-02-17": 0.613,
+          "l2:macro_fred:dgs10:1998-04-03": 0.613,
+          "l2:macro_fred:dgs10:1998-04-28": 0.613
+        },
+        "selected_tcc_precision": {
+          "l2:macro_fred:dgs10:1998-03-11": {
+            "normalized_start": "1998-03-11",
+            "normalized_end": "1998-03-11",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1998-01-23": {
+            "normalized_start": "1998-01-23",
+            "normalized_end": "1998-01-23",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1998-02-17": {
+            "normalized_start": "1998-02-17",
+            "normalized_end": "1998-02-17",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1998-04-03": {
+            "normalized_start": "1998-04-03",
+            "normalized_end": "1998-04-03",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1998-04-28": {
+            "normalized_start": "1998-04-28",
+            "normalized_end": "1998-04-28",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4613,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0006:exact_valid_time_retrieval",
+      "question": "What was United States 10-year Treasury 10-year Treasury yield on 2010-01-21?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:2010-01-21",
+        "l2:macro_fred:dgs10:2010-02-12",
+        "l2:macro_fred:dgs10:2010-03-09",
+        "l2:macro_fred:dgs10:2010-03-31",
+        "l2:macro_fred:dgs10:2010-04-23"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 3188.34,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "3.62 percent",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:dgs10:2010-01-21"
+        ],
+        "valid_time_used": [
+          "2010-01-21"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "required_facts_present"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "2010-01-21",
+            "normalized_start": "2010-01-21",
+            "normalized_end": "2010-01-21",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:macro_fred:dgs10:2010-01-21": 0.9,
+          "l2:macro_fred:dgs10:2010-02-12": 0.613,
+          "l2:macro_fred:dgs10:2010-03-09": 0.613,
+          "l2:macro_fred:dgs10:2010-03-31": 0.613,
+          "l2:macro_fred:dgs10:2010-04-23": 0.613
+        },
+        "selected_tcc_precision": {
+          "l2:macro_fred:dgs10:2010-01-21": {
+            "normalized_start": "2010-01-21",
+            "normalized_end": "2010-01-21",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:2010-02-12": {
+            "normalized_start": "2010-02-12",
+            "normalized_end": "2010-02-12",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:2010-03-09": {
+            "normalized_start": "2010-03-09",
+            "normalized_end": "2010-03-09",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:2010-03-31": {
+            "normalized_start": "2010-03-31",
+            "normalized_end": "2010-03-31",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:2010-04-23": {
+            "normalized_start": "2010-04-23",
+            "normalized_end": "2010-04-23",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4613,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0007:exact_valid_time_retrieval",
+      "question": "What was United States 10-year Treasury 10-year Treasury yield on 2021-11-04?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:2021-11-04",
+        "l2:macro_fred:dgs10:2021-11-30",
+        "l2:macro_fred:dgs10:2021-01-08",
+        "l2:macro_fred:dgs10:2021-02-02",
+        "l2:macro_fred:dgs10:2021-02-25"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 4137.34,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "1.53 percent",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:dgs10:2021-11-04"
+        ],
+        "valid_time_used": [
+          "2021-11-04"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "required_facts_present"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "2021-11-04",
+            "normalized_start": "2021-11-04",
+            "normalized_end": "2021-11-04",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:macro_fred:dgs10:2021-11-04": 0.9,
+          "l2:macro_fred:dgs10:2021-11-30": 0.669,
+          "l2:macro_fred:dgs10:2021-01-08": 0.613,
+          "l2:macro_fred:dgs10:2021-02-02": 0.613,
+          "l2:macro_fred:dgs10:2021-02-25": 0.613
+        },
+        "selected_tcc_precision": {
+          "l2:macro_fred:dgs10:2021-11-04": {
+            "normalized_start": "2021-11-04",
+            "normalized_end": "2021-11-04",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:2021-11-30": {
+            "normalized_start": "2021-11-30",
+            "normalized_end": "2021-11-30",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:2021-01-08": {
+            "normalized_start": "2021-01-08",
+            "normalized_end": "2021-01-08",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:2021-02-02": {
+            "normalized_start": "2021-02-02",
+            "normalized_end": "2021-02-02",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:2021-02-25": {
+            "normalized_start": "2021-02-25",
+            "normalized_end": "2021-02-25",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4613,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0008:exact_valid_time_retrieval",
+      "question": "What was Dow Jones Industrial Average index close on 2016-06-21?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:market_index:djia:2016-06-21",
+        "l2:market_index:djia:2016-05-27",
+        "l2:market_index:djia:2016-07-14",
+        "l2:market_index:djia:2016-08-05",
+        "l2:market_index:djia:2016-08-30"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2555.89,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "17829.73 index_points",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:market_index:djia:2016-06-21"
+        ],
+        "valid_time_used": [
+          "2016-06-21"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "required_facts_present"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "2016-06-21",
+            "normalized_start": "2016-06-21",
+            "normalized_end": "2016-06-21",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:market_index:djia:2016-06-21": 0.9,
+          "l2:market_index:djia:2016-05-27": 0.613,
+          "l2:market_index:djia:2016-07-14": 0.613,
+          "l2:market_index:djia:2016-08-05": 0.613,
+          "l2:market_index:djia:2016-08-30": 0.613
+        },
+        "selected_tcc_precision": {
+          "l2:market_index:djia:2016-06-21": {
+            "normalized_start": "2016-06-21",
+            "normalized_end": "2016-06-21",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:djia:2016-05-27": {
+            "normalized_start": "2016-05-27",
+            "normalized_end": "2016-05-27",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:djia:2016-07-14": {
+            "normalized_start": "2016-07-14",
+            "normalized_end": "2016-07-14",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:djia:2016-08-05": {
+            "normalized_start": "2016-08-05",
+            "normalized_end": "2016-08-05",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:djia:2016-08-30": {
+            "normalized_start": "2016-08-30",
+            "normalized_end": "2016-08-30",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4580,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0009:exact_valid_time_retrieval",
+      "question": "What was NASDAQ Composite index close on 1972-12-26?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:market_index:nasdaqcom:1972-12-26",
+        "l2:market_index:nasdaqcom:1972-12-01",
+        "l2:market_index:nasdaqcom:1972-01-11",
+        "l2:market_index:nasdaqcom:1972-02-02",
+        "l2:market_index:nasdaqcom:1972-02-25"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2717.51,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "131.180 index_points",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:market_index:nasdaqcom:1972-12-26"
+        ],
+        "valid_time_used": [
+          "1972-12-26"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "required_facts_present"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "1972-12-26",
+            "normalized_start": "1972-12-26",
+            "normalized_end": "1972-12-26",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:market_index:nasdaqcom:1972-12-26": 0.9,
+          "l2:market_index:nasdaqcom:1972-12-01": 0.669,
+          "l2:market_index:nasdaqcom:1972-01-11": 0.613,
+          "l2:market_index:nasdaqcom:1972-02-02": 0.613,
+          "l2:market_index:nasdaqcom:1972-02-25": 0.613
+        },
+        "selected_tcc_precision": {
+          "l2:market_index:nasdaqcom:1972-12-26": {
+            "normalized_start": "1972-12-26",
+            "normalized_end": "1972-12-26",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:nasdaqcom:1972-12-01": {
+            "normalized_start": "1972-12-01",
+            "normalized_end": "1972-12-01",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:nasdaqcom:1972-01-11": {
+            "normalized_start": "1972-01-11",
+            "normalized_end": "1972-01-11",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:nasdaqcom:1972-02-02": {
+            "normalized_start": "1972-02-02",
+            "normalized_end": "1972-02-02",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:nasdaqcom:1972-02-25": {
+            "normalized_start": "1972-02-25",
+            "normalized_end": "1972-02-25",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4538,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0010:exact_valid_time_retrieval",
+      "question": "What was NASDAQ Composite index close on 1984-10-24?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:market_index:nasdaqcom:1984-10-24",
+        "l2:market_index:nasdaqcom:1984-10-02",
+        "l2:market_index:nasdaqcom:1984-01-19",
+        "l2:market_index:nasdaqcom:1984-02-13",
+        "l2:market_index:nasdaqcom:1984-03-07"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2311.27,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "250.830 index_points",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:market_index:nasdaqcom:1984-10-24"
+        ],
+        "valid_time_used": [
+          "1984-10-24"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "required_facts_present"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "1984-10-24",
+            "normalized_start": "1984-10-24",
+            "normalized_end": "1984-10-24",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:market_index:nasdaqcom:1984-10-24": 0.9,
+          "l2:market_index:nasdaqcom:1984-10-02": 0.669,
+          "l2:market_index:nasdaqcom:1984-01-19": 0.613,
+          "l2:market_index:nasdaqcom:1984-02-13": 0.613,
+          "l2:market_index:nasdaqcom:1984-03-07": 0.613
+        },
+        "selected_tcc_precision": {
+          "l2:market_index:nasdaqcom:1984-10-24": {
+            "normalized_start": "1984-10-24",
+            "normalized_end": "1984-10-24",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:nasdaqcom:1984-10-02": {
+            "normalized_start": "1984-10-02",
+            "normalized_end": "1984-10-02",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:nasdaqcom:1984-01-19": {
+            "normalized_start": "1984-01-19",
+            "normalized_end": "1984-01-19",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:nasdaqcom:1984-02-13": {
+            "normalized_start": "1984-02-13",
+            "normalized_end": "1984-02-13",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:nasdaqcom:1984-03-07": {
+            "normalized_start": "1984-03-07",
+            "normalized_end": "1984-03-07",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4538,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0011:exact_valid_time_retrieval",
+      "question": "What was NASDAQ Composite index close on 1996-07-30?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:market_index:nasdaqcom:1996-07-30",
+        "l2:market_index:nasdaqcom:1996-07-08",
+        "l2:market_index:nasdaqcom:1996-01-03",
+        "l2:market_index:nasdaqcom:1996-01-25",
+        "l2:market_index:nasdaqcom:1996-02-16"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2282.67,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "1071.950 index_points",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:market_index:nasdaqcom:1996-07-30"
+        ],
+        "valid_time_used": [
+          "1996-07-30"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "required_facts_present"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "1996-07-30",
+            "normalized_start": "1996-07-30",
+            "normalized_end": "1996-07-30",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:market_index:nasdaqcom:1996-07-30": 0.9,
+          "l2:market_index:nasdaqcom:1996-07-08": 0.669,
+          "l2:market_index:nasdaqcom:1996-01-03": 0.613,
+          "l2:market_index:nasdaqcom:1996-01-25": 0.613,
+          "l2:market_index:nasdaqcom:1996-02-16": 0.613
+        },
+        "selected_tcc_precision": {
+          "l2:market_index:nasdaqcom:1996-07-30": {
+            "normalized_start": "1996-07-30",
+            "normalized_end": "1996-07-30",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:nasdaqcom:1996-07-08": {
+            "normalized_start": "1996-07-08",
+            "normalized_end": "1996-07-08",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:nasdaqcom:1996-01-03": {
+            "normalized_start": "1996-01-03",
+            "normalized_end": "1996-01-03",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:nasdaqcom:1996-01-25": {
+            "normalized_start": "1996-01-25",
+            "normalized_end": "1996-01-25",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:nasdaqcom:1996-02-16": {
+            "normalized_start": "1996-02-16",
+            "normalized_end": "1996-02-16",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4548,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0012:exact_valid_time_retrieval",
+      "question": "What was NASDAQ Composite index close on 2008-06-16?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:market_index:nasdaqcom:2008-06-16",
+        "l2:market_index:nasdaqcom:2008-01-03",
+        "l2:market_index:nasdaqcom:2008-01-29",
+        "l2:market_index:nasdaqcom:2008-02-21",
+        "l2:market_index:nasdaqcom:2008-03-14"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 1922.87,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "2474.780 index_points",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:market_index:nasdaqcom:2008-06-16"
+        ],
+        "valid_time_used": [
+          "2008"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "required_facts_present"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "2008-06-16",
+            "normalized_start": "2008-06-16",
+            "normalized_end": "2008-06-16",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:market_index:nasdaqcom:2008-06-16": 0.9,
+          "l2:market_index:nasdaqcom:2008-01-03": 0.613,
+          "l2:market_index:nasdaqcom:2008-01-29": 0.613,
+          "l2:market_index:nasdaqcom:2008-02-21": 0.613,
+          "l2:market_index:nasdaqcom:2008-03-14": 0.613
+        },
+        "selected_tcc_precision": {
+          "l2:market_index:nasdaqcom:2008-06-16": {
+            "normalized_start": "2008-06-16",
+            "normalized_end": "2008-06-16",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:nasdaqcom:2008-01-03": {
+            "normalized_start": "2008-01-03",
+            "normalized_end": "2008-01-03",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:nasdaqcom:2008-01-29": {
+            "normalized_start": "2008-01-29",
+            "normalized_end": "2008-01-29",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:nasdaqcom:2008-02-21": {
+            "normalized_start": "2008-02-21",
+            "normalized_end": "2008-02-21",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:nasdaqcom:2008-03-14": {
+            "normalized_start": "2008-03-14",
+            "normalized_end": "2008-03-14",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4548,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0013:exact_valid_time_retrieval",
+      "question": "What was NASDAQ Composite index close on 2020-04-06?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:market_index:nasdaqcom:2020-04-06",
+        "l2:market_index:nasdaqcom:2020-04-30",
+        "l2:market_index:nasdaqcom:2020-01-03",
+        "l2:market_index:nasdaqcom:2020-01-28",
+        "l2:market_index:nasdaqcom:2020-02-20"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 1850.79,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "7913.240 index_points",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:market_index:nasdaqcom:2020-04-06"
+        ],
+        "valid_time_used": [
+          "2020"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "required_facts_present"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "2020-04-06",
+            "normalized_start": "2020-04-06",
+            "normalized_end": "2020-04-06",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:market_index:nasdaqcom:2020-04-06": 0.9,
+          "l2:market_index:nasdaqcom:2020-04-30": 0.669,
+          "l2:market_index:nasdaqcom:2020-01-03": 0.613,
+          "l2:market_index:nasdaqcom:2020-01-28": 0.613,
+          "l2:market_index:nasdaqcom:2020-02-20": 0.613
+        },
+        "selected_tcc_precision": {
+          "l2:market_index:nasdaqcom:2020-04-06": {
+            "normalized_start": "2020-04-06",
+            "normalized_end": "2020-04-06",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:nasdaqcom:2020-04-30": {
+            "normalized_start": "2020-04-30",
+            "normalized_end": "2020-04-30",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:nasdaqcom:2020-01-03": {
+            "normalized_start": "2020-01-03",
+            "normalized_end": "2020-01-03",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:nasdaqcom:2020-01-28": {
+            "normalized_start": "2020-01-28",
+            "normalized_end": "2020-01-28",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:nasdaqcom:2020-02-20": {
+            "normalized_start": "2020-02-20",
+            "normalized_end": "2020-02-20",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4548,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0014:exact_valid_time_retrieval",
+      "question": "What was S&P 500 index close on 2022-02-22?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:market_index:sp500:2022-02-22",
+        "l2:market_index:sp500:2022-01-04",
+        "l2:market_index:sp500:2022-01-27",
+        "l2:market_index:sp500:2022-03-16",
+        "l2:market_index:sp500:2022-04-07"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 3112.34,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "4304.76 index_points",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:market_index:sp500:2022-02-22"
+        ],
+        "valid_time_used": [
+          "2022-02-22"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "required_facts_present"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "2022-02-22",
+            "normalized_start": "2022-02-22",
+            "normalized_end": "2022-02-22",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:market_index:sp500:2022-02-22": 0.9,
+          "l2:market_index:sp500:2022-01-04": 0.613,
+          "l2:market_index:sp500:2022-01-27": 0.613,
+          "l2:market_index:sp500:2022-03-16": 0.613,
+          "l2:market_index:sp500:2022-04-07": 0.613
+        },
+        "selected_tcc_precision": {
+          "l2:market_index:sp500:2022-02-22": {
+            "normalized_start": "2022-02-22",
+            "normalized_end": "2022-02-22",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:sp500:2022-01-04": {
+            "normalized_start": "2022-01-04",
+            "normalized_end": "2022-01-04",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:sp500:2022-01-27": {
+            "normalized_start": "2022-01-27",
+            "normalized_end": "2022-01-27",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:sp500:2022-03-16": {
+            "normalized_start": "2022-03-16",
+            "normalized_end": "2022-03-16",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:market_index:sp500:2022-04-07": {
+            "normalized_start": "2022-04-07",
+            "normalized_end": "2022-04-07",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4359,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0015:exact_valid_time_retrieval",
+      "question": "What was Apple Inc. 8-K filing on 2015-10-27?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:sec_submissions:aapl:0001193125-15-354756",
+        "l2:sec_submissions:aapl:0001193125-15-273023",
+        "l2:sec_submissions:aapl:0000320193-18-000098",
+        "l2:sec_submissions:aapl:0000320193-18-000142",
+        "l2:sec_submissions:aapl:0000320193-19-000002"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2965.67,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "Apple Inc. filed an 8-K on 2015-10-27 for report date 2015-10-27; primary document description: 8-K.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:sec_submissions:aapl:0001193125-15-354756"
+        ],
+        "valid_time_used": [
+          "2015-10-27"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": true,
+        "failure_reasons": []
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "2015-10-27",
+            "normalized_start": "2015-10-27",
+            "normalized_end": "2015-10-27",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "filing_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "filing_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:sec_submissions:aapl:0001193125-15-354756": 0.9,
+          "l2:sec_submissions:aapl:0001193125-15-273023": 0.6068,
+          "l2:sec_submissions:aapl:0000320193-18-000098": 0.557,
+          "l2:sec_submissions:aapl:0000320193-18-000142": 0.557,
+          "l2:sec_submissions:aapl:0000320193-19-000002": 0.557
+        },
+        "selected_tcc_precision": {
+          "l2:sec_submissions:aapl:0001193125-15-354756": {
+            "normalized_start": "2015-10-27",
+            "normalized_end": "2015-10-27",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:sec_submissions:aapl:0001193125-15-273023": {
+            "normalized_start": "2015-07-24",
+            "normalized_end": "2015-07-24",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:sec_submissions:aapl:0000320193-18-000098": {
+            "normalized_start": "2018-07-31",
+            "normalized_end": "2018-07-31",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:sec_submissions:aapl:0000320193-18-000142": {
+            "normalized_start": "2018-11-01",
+            "normalized_end": "2018-11-01",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:sec_submissions:aapl:0000320193-19-000002": {
+            "normalized_start": "2019-01-02",
+            "normalized_end": "2019-01-02",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4831,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0016:exact_valid_time_retrieval",
+      "question": "What was Alphabet Inc. 4 filing on 2024-02-07?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:sec_submissions:googl:0001209191-24-003063",
+        "l2:sec_submissions:googl:0001209191-24-003227",
+        "l2:sec_submissions:googl:0001209191-24-003823",
+        "l2:sec_submissions:googl:0001209191-24-004133",
+        "l2:sec_submissions:googl:0001209191-24-000150"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 4106.42,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "Alphabet Inc. filed a 4 filing on 2024-02-07.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:sec_submissions:googl:0001209191-24-003063"
+        ],
+        "valid_time_used": [
+          "2024-02-07"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": false,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "forbidden_facts_absent"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "2024-02-07",
+            "normalized_start": "2024-02-07",
+            "normalized_end": "2024-02-07",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "filing_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "filing_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:sec_submissions:googl:0001209191-24-003063": 0.669,
+          "l2:sec_submissions:googl:0001209191-24-003227": 0.669,
+          "l2:sec_submissions:googl:0001209191-24-003823": 0.669,
+          "l2:sec_submissions:googl:0001209191-24-004133": 0.669,
+          "l2:sec_submissions:googl:0001209191-24-000150": 0.613
+        },
+        "selected_tcc_precision": {
+          "l2:sec_submissions:googl:0001209191-24-003063": {
+            "normalized_start": "2024-02-07",
+            "normalized_end": "2024-02-07",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:sec_submissions:googl:0001209191-24-003227": {
+            "normalized_start": "2023-12-31",
+            "normalized_end": "2023-12-31",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:sec_submissions:googl:0001209191-24-003823": {
+            "normalized_start": "2024-02-20",
+            "normalized_end": "2024-02-20",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:sec_submissions:googl:0001209191-24-004133": {
+            "normalized_start": "2024-02-29",
+            "normalized_end": "2024-02-29",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:sec_submissions:googl:0001209191-24-000150": {
+            "normalized_start": "2024-01-02",
+            "normalized_end": "2024-01-02",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 5082,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0017:exact_valid_time_retrieval",
+      "question": "What was MICROSOFT CORP 8-K filing on 2020-06-26?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:sec_submissions:msft:0001193125-20-180036",
+        "l2:sec_submissions:msft:0001193125-20-128779",
+        "l2:sec_submissions:msft:0001193125-20-207517",
+        "l2:sec_submissions:msft:0001193125-20-278410",
+        "l2:sec_submissions:msft:0001193125-21-134213"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 3222.83,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "MICROSOFT CORP filed an 8-K.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:sec_submissions:msft:0001193125-20-180036"
+        ],
+        "valid_time_used": [
+          "2020-06-26"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "required_facts_present"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "2020-06-26",
+            "normalized_start": "2020-06-26",
+            "normalized_end": "2020-06-26",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "filing_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "filing_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:sec_submissions:msft:0001193125-20-180036": 0.9,
+          "l2:sec_submissions:msft:0001193125-20-128779": 0.613,
+          "l2:sec_submissions:msft:0001193125-20-207517": 0.613,
+          "l2:sec_submissions:msft:0001193125-20-278410": 0.613,
+          "l2:sec_submissions:msft:0001193125-21-134213": 0.557
+        },
+        "selected_tcc_precision": {
+          "l2:sec_submissions:msft:0001193125-20-180036": {
+            "normalized_start": "2020-06-26",
+            "normalized_end": "2020-06-26",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:sec_submissions:msft:0001193125-20-128779": {
+            "normalized_start": "2020-04-30",
+            "normalized_end": "2020-04-30",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:sec_submissions:msft:0001193125-20-207517": {
+            "normalized_start": "2020-08-02",
+            "normalized_end": "2020-08-02",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:sec_submissions:msft:0001193125-20-278410": {
+            "normalized_start": "2020-10-27",
+            "normalized_end": "2020-10-27",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:sec_submissions:msft:0001193125-21-134213": {
+            "normalized_start": "2021-04-27",
+            "normalized_end": "2021-04-27",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4935,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0018:exact_valid_time_retrieval",
+      "question": "What was NVIDIA CORP 8-K filing on 2026-01-20?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:sec_submissions:nvda:0001045810-26-000003",
+        "l2:sec_submissions:nvda:0001045810-26-000019",
+        "l2:sec_submissions:nvda:0001045810-26-000028",
+        "l2:sec_submissions:nvda:0001045810-21-000007",
+        "l2:sec_submissions:nvda:0001045810-21-000034"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 21395.15,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "NVIDIA CORP filed an 8-K on 2026-01-23 for report date 2026-01-20.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:sec_submissions:nvda:0001045810-26-000003"
+        ],
+        "valid_time_used": [
+          "2026-01-20"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": false,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "forbidden_facts_absent"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "2026-01-20",
+            "normalized_start": "2026-01-20",
+            "normalized_end": "2026-01-20",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "filing_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "filing_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:sec_submissions:nvda:0001045810-26-000003": 0.669,
+          "l2:sec_submissions:nvda:0001045810-26-000019": 0.613,
+          "l2:sec_submissions:nvda:0001045810-26-000028": 0.613,
+          "l2:sec_submissions:nvda:0001045810-21-000007": 0.557,
+          "l2:sec_submissions:nvda:0001045810-21-000034": 0.557
+        },
+        "selected_tcc_precision": {
+          "l2:sec_submissions:nvda:0001045810-26-000003": {
+            "normalized_start": "2026-01-20",
+            "normalized_end": "2026-01-20",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:sec_submissions:nvda:0001045810-26-000019": {
+            "normalized_start": "2026-02-25",
+            "normalized_end": "2026-02-25",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:sec_submissions:nvda:0001045810-26-000028": {
+            "normalized_start": "2026-05-07",
+            "normalized_end": "2026-05-07",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:sec_submissions:nvda:0001045810-21-000007": {
+            "normalized_start": "2021-02-24",
+            "normalized_end": "2021-02-24",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:sec_submissions:nvda:0001045810-21-000034": {
+            "normalized_start": "2021-03-15",
+            "normalized_end": "2021-03-15",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4902,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0019:exact_valid_time_retrieval",
+      "question": "What was Tesla, Inc. 4 filing on 2025-06-12?",
+      "category": "exact_valid_time_retrieval",
+      "selected_evidence_ids": [
+        "l2:sec_submissions:tsla:0001104659-25-057932",
+        "l2:sec_submissions:tsla:0001972928-25-000003",
+        "l2:sec_submissions:tsla:0000950170-25-003585",
+        "l2:sec_submissions:tsla:0001104659-25-043637",
+        "l2:sec_submissions:tsla:0001104659-25-073753"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 2238.85,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "Tesla, Inc. filed a 4 on 2025-06-16 for report date 2025-06-12; primary document description: PRIMARY DOCUMENT.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:sec_submissions:tsla:0001972928-25-000003"
+        ],
+        "valid_time_used": [
+          "2025-06-12"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": true,
+        "forbidden_facts_absent": false,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "forbidden_facts_absent"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "2025-06-12",
+            "normalized_start": "2025-06-12",
+            "normalized_end": "2025-06-12",
+            "granularity": "day",
+            "precision": 0.9,
+            "confidence": 0.95,
+            "ambiguous_parse": false,
+            "temporal_role": "filing_time"
+          }
+        ],
+        "exact_date_query": true,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "day",
+        "temporal_role_detected": "filing_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:sec_submissions:tsla:0001104659-25-057932": 0.6374,
+          "l2:sec_submissions:tsla:0001972928-25-000003": 0.6374,
+          "l2:sec_submissions:tsla:0000950170-25-003585": 0.5872,
+          "l2:sec_submissions:tsla:0001104659-25-043637": 0.5814,
+          "l2:sec_submissions:tsla:0001104659-25-073753": 0.5814
+        },
+        "selected_tcc_precision": {
+          "l2:sec_submissions:tsla:0001104659-25-057932": {
+            "normalized_start": "2025-06-05",
+            "normalized_end": "2025-06-05",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:sec_submissions:tsla:0001972928-25-000003": {
+            "normalized_start": "2025-06-12",
+            "normalized_end": "2025-06-12",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:sec_submissions:tsla:0000950170-25-003585": {
+            "normalized_start": "2025-01-06",
+            "normalized_end": "2025-01-06",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:sec_submissions:tsla:0001104659-25-043637": {
+            "normalized_start": "2025-05-01",
+            "normalized_end": "2025-05-01",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:sec_submissions:tsla:0001104659-25-073753": {
+            "normalized_start": "2025-08-03",
+            "normalized_end": "2025-08-03",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4946,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0020:same_entity_wrong_year_trap",
+      "question": "For United States CPI, answer CPI index for 1948, not 1947.",
+      "category": "same_entity_wrong_year_trap",
+      "selected_evidence_ids": [
+        "l2:macro_fred:cpi:1947-01-01",
+        "l2:macro_fred:cpi:1948-05-01",
+        "l2:macro_fred:unrate:1948-09-01",
+        "l2:macro_fred:cpi:1949-09-01",
+        "l2:macro_fred:cpi:1951-01-01"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 4589.54,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "The CPI index for United States was 24.010 index_1982_84 on 1948-05-01.",
+        "behavior": "answer",
+        "cited_evidence_ids": [
+          "l2:macro_fred:cpi:1948-05-01"
+        ],
+        "valid_time_used": [
+          "1948-05-01"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": false,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": true,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": true,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "required_facts_present"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "1948",
+            "normalized_start": "1948-01-01",
+            "normalized_end": "1948-12-31",
+            "granularity": "year",
+            "precision": 0.45,
+            "confidence": 0.85,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          },
+          {
+            "original_text": "1947",
+            "normalized_start": "1947-01-01",
+            "normalized_end": "1947-12-31",
+            "granularity": "year",
+            "precision": 0.45,
+            "confidence": 0.85,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": false,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "year",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:macro_fred:cpi:1947-01-01": 0.802,
+          "l2:macro_fred:cpi:1948-05-01": 0.5822,
+          "l2:macro_fred:unrate:1948-09-01": 0.3884,
+          "l2:macro_fred:cpi:1949-09-01": 0.3442,
+          "l2:macro_fred:cpi:1951-01-01": 0.3442
+        },
+        "selected_tcc_precision": {
+          "l2:macro_fred:cpi:1947-01-01": {
+            "normalized_start": "1947-01-01",
+            "normalized_end": "1947-01-01",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:cpi:1948-05-01": {
+            "normalized_start": "1948-05-01",
+            "normalized_end": "1948-05-01",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:unrate:1948-09-01": {
+            "normalized_start": "1948-09-01",
+            "normalized_end": "1948-09-01",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:cpi:1949-09-01": {
+            "normalized_start": "1949-09-01",
+            "normalized_end": "1949-09-01",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:cpi:1951-01-01": {
+            "normalized_start": "1951-01-01",
+            "normalized_end": "1951-01-01",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4433,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0021:same_entity_wrong_year_trap",
+      "question": "For United States 10-year Treasury, answer 10-year Treasury yield for 1968, not 1968.",
+      "category": "same_entity_wrong_year_trap",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:1968-01-12",
+        "l2:macro_fred:dgs10:1968-02-05",
+        "l2:macro_fred:dgs10:1968-02-29",
+        "l2:macro_fred:dgs10:1968-03-22",
+        "l2:macro_fred:dgs10:1968-04-17"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 112113.43,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "",
+        "behavior": "partial",
+        "cited_evidence_ids": [],
+        "valid_time_used": [],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": true,
+        "clarification_requested": false,
+        "confidence": "low"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": true,
+        "evidence_correct": false,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": false,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": false,
+        "partial_refusal_correct": false,
+        "clarification_correct": false,
+        "confidence_correct": true,
+        "behavior_correct": false,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": false,
+        "overall_pass": false,
+        "infrastructure_failure": true,
+        "failure_reasons": [
+          "JSON Parse Failure"
+        ]
+      },
+      "status": "provider_error",
+      "infrastructure_failure": true,
+      "provider_error": "JSON retry limit reached after 2 attempts: Vertex response contained incomplete JSON.; raw_response_preview={\"answer\": \"The evidence provides multiple 10-year Treasury yield values for different dates within 1968. Please specify a particular date or an aggregate (e.g., average, end-of-year) for 1968 to get a single value.\", \"behavior\": \"clarify\", \"cited_evidence_ids\": [\"l2:macro_fred:",
+      "failure_type": "JSON Parse Failure",
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "1968",
+            "normalized_start": "1968-01-01",
+            "normalized_end": "1968-12-31",
+            "granularity": "year",
+            "precision": 0.45,
+            "confidence": 0.85,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          },
+          {
+            "original_text": "1968",
+            "normalized_start": "1968-01-01",
+            "normalized_end": "1968-12-31",
+            "granularity": "year",
+            "precision": 0.45,
+            "confidence": 0.85,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": false,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "year",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:macro_fred:dgs10:1968-01-12": 0.802,
+          "l2:macro_fred:dgs10:1968-02-05": 0.802,
+          "l2:macro_fred:dgs10:1968-02-29": 0.802,
+          "l2:macro_fred:dgs10:1968-03-22": 0.802,
+          "l2:macro_fred:dgs10:1968-04-17": 0.802
+        },
+        "selected_tcc_precision": {
+          "l2:macro_fred:dgs10:1968-01-12": {
+            "normalized_start": "1968-01-12",
+            "normalized_end": "1968-01-12",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1968-02-05": {
+            "normalized_start": "1968-02-05",
+            "normalized_end": "1968-02-05",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1968-02-29": {
+            "normalized_start": "1968-02-29",
+            "normalized_end": "1968-02-29",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1968-03-22": {
+            "normalized_start": "1968-03-22",
+            "normalized_end": "1968-03-22",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1968-04-17": {
+            "normalized_start": "1968-04-17",
+            "normalized_end": "1968-04-17",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4621,
+        "retry_attempts": 3,
+        "json_parse_failures": 2,
+        "provider_error_preview": "JSON retry limit reached after 2 attempts: Vertex response contained incomplete JSON.; raw_response_preview={\"answer\": \"The evidence provides multiple 10-year Treasury yield values for different dates within 1968. Please specify a particular date or an aggregate (e.g., average, end-of-year) for 1968 to get a single value.\", \"behavior\": \"clarify\", \"cited_evidence_ids\": [\"l2:macro_fred:"
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0022:same_entity_wrong_year_trap",
+      "question": "For United States 10-year Treasury, answer 10-year Treasury yield for 1979, not 1979.",
+      "category": "same_entity_wrong_year_trap",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:1979-01-17",
+        "l2:macro_fred:dgs10:1979-02-08",
+        "l2:macro_fred:dgs10:1979-03-06",
+        "l2:macro_fred:dgs10:1979-03-28",
+        "l2:macro_fred:dgs10:1979-04-20"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 193198.56,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "",
+        "behavior": "partial",
+        "cited_evidence_ids": [],
+        "valid_time_used": [],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": true,
+        "clarification_requested": false,
+        "confidence": "low"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": true,
+        "evidence_correct": false,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": false,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": false,
+        "partial_refusal_correct": false,
+        "clarification_correct": false,
+        "confidence_correct": true,
+        "behavior_correct": false,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": false,
+        "overall_pass": false,
+        "infrastructure_failure": true,
+        "failure_reasons": [
+          "JSON Parse Failure"
+        ]
+      },
+      "status": "provider_error",
+      "infrastructure_failure": true,
+      "provider_error": "JSON retry limit reached after 2 attempts: Vertex response contained incomplete JSON.; raw_response_preview={\"answer\": \"9.18 percent\", \"behavior\": \"partial\", \"cited_evidence_ids\": [\"l2:macro_fred:dgs10:1979-01-17\"], \"clarification_requested\": false, \"confidence\": \"medium\", \"conflict_warning\": false, \"partial_or_refusal\": true, \"",
+      "failure_type": "JSON Parse Failure",
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "1979",
+            "normalized_start": "1979-01-01",
+            "normalized_end": "1979-12-31",
+            "granularity": "year",
+            "precision": 0.45,
+            "confidence": 0.85,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          },
+          {
+            "original_text": "1979",
+            "normalized_start": "1979-01-01",
+            "normalized_end": "1979-12-31",
+            "granularity": "year",
+            "precision": 0.45,
+            "confidence": 0.85,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": false,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "year",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:macro_fred:dgs10:1979-01-17": 0.802,
+          "l2:macro_fred:dgs10:1979-02-08": 0.802,
+          "l2:macro_fred:dgs10:1979-03-06": 0.802,
+          "l2:macro_fred:dgs10:1979-03-28": 0.802,
+          "l2:macro_fred:dgs10:1979-04-20": 0.802
+        },
+        "selected_tcc_precision": {
+          "l2:macro_fred:dgs10:1979-01-17": {
+            "normalized_start": "1979-01-17",
+            "normalized_end": "1979-01-17",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1979-02-08": {
+            "normalized_start": "1979-02-08",
+            "normalized_end": "1979-02-08",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1979-03-06": {
+            "normalized_start": "1979-03-06",
+            "normalized_end": "1979-03-06",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1979-03-28": {
+            "normalized_start": "1979-03-28",
+            "normalized_end": "1979-03-28",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1979-04-20": {
+            "normalized_start": "1979-04-20",
+            "normalized_end": "1979-04-20",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4621,
+        "retry_attempts": 4,
+        "json_parse_failures": 2,
+        "provider_error_preview": "JSON retry limit reached after 2 attempts: Vertex response contained incomplete JSON.; raw_response_preview={\"answer\": \"9.18 percent\", \"behavior\": \"partial\", \"cited_evidence_ids\": [\"l2:macro_fred:dgs10:1979-01-17\"], \"clarification_requested\": false, \"confidence\": \"medium\", \"conflict_warning\": false, \"partial_or_refusal\": true, \""
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0023:same_entity_wrong_year_trap",
+      "question": "For United States 10-year Treasury, answer 10-year Treasury yield for 1990, not 1990.",
+      "category": "same_entity_wrong_year_trap",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:1990-01-18",
+        "l2:macro_fred:dgs10:1990-02-09",
+        "l2:macro_fred:dgs10:1990-03-06",
+        "l2:macro_fred:dgs10:1990-03-28",
+        "l2:macro_fred:dgs10:1990-04-20"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 13432.95,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "Multiple values for the 10-year Treasury yield are available for 1990. Please specify a particular date or an aggregation method (e.g., average, highest, lowest) for the year.",
+        "behavior": "clarify",
+        "cited_evidence_ids": [
+          "l2:macro_fred:dgs10:1990-01-18",
+          "l2:macro_fred:dgs10:1990-02-09",
+          "l2:macro_fred:dgs10:1990-03-06",
+          "l2:macro_fred:dgs10:1990-03-28",
+          "l2:macro_fred:dgs10:1990-04-20"
+        ],
+        "valid_time_used": [
+          "1990"
+        ],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": false,
+        "clarification_requested": true,
+        "confidence": "high"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": false,
+        "evidence_correct": true,
+        "forbidden_evidence_absent": false,
+        "valid_time_correct": true,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": true,
+        "partial_refusal_correct": true,
+        "clarification_correct": true,
+        "confidence_correct": true,
+        "behavior_correct": false,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": true,
+        "overall_pass": false,
+        "failure_reasons": [
+          "required_facts_present",
+          "forbidden_facts_absent",
+          "forbidden_evidence_absent",
+          "behavior_correct"
+        ]
+      },
+      "status": "completed",
+      "infrastructure_failure": false,
+      "provider_error": null,
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "1990",
+            "normalized_start": "1990-01-01",
+            "normalized_end": "1990-12-31",
+            "granularity": "year",
+            "precision": 0.45,
+            "confidence": 0.85,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          },
+          {
+            "original_text": "1990",
+            "normalized_start": "1990-01-01",
+            "normalized_end": "1990-12-31",
+            "granularity": "year",
+            "precision": 0.45,
+            "confidence": 0.85,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": false,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "year",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:macro_fred:dgs10:1990-01-18": 0.802,
+          "l2:macro_fred:dgs10:1990-02-09": 0.802,
+          "l2:macro_fred:dgs10:1990-03-06": 0.802,
+          "l2:macro_fred:dgs10:1990-03-28": 0.802,
+          "l2:macro_fred:dgs10:1990-04-20": 0.802
+        },
+        "selected_tcc_precision": {
+          "l2:macro_fred:dgs10:1990-01-18": {
+            "normalized_start": "1990-01-18",
+            "normalized_end": "1990-01-18",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1990-02-09": {
+            "normalized_start": "1990-02-09",
+            "normalized_end": "1990-02-09",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1990-03-06": {
+            "normalized_start": "1990-03-06",
+            "normalized_end": "1990-03-06",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1990-03-28": {
+            "normalized_start": "1990-03-28",
+            "normalized_end": "1990-03-28",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:1990-04-20": {
+            "normalized_start": "1990-04-20",
+            "normalized_end": "1990-04-20",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4621,
+        "retry_attempts": 0,
+        "json_parse_failures": 0,
+        "dry_run_prompts": false
+      }
+    },
+    {
+      "method": "chronorag_full",
+      "case_id": "l2q:0024:same_entity_wrong_year_trap",
+      "question": "For United States 10-year Treasury, answer 10-year Treasury yield for 2000, not 2000.",
+      "category": "same_entity_wrong_year_trap",
+      "selected_evidence_ids": [
+        "l2:macro_fred:dgs10:2000-01-19",
+        "l2:macro_fred:dgs10:2000-02-10",
+        "l2:macro_fred:dgs10:2000-03-06",
+        "l2:macro_fred:dgs10:2000-03-28",
+        "l2:macro_fred:dgs10:2000-04-19"
+      ],
+      "prompt_truncated": false,
+      "provider_mode": "vertex",
+      "latency_ms": 36000.47,
+      "prompt_preview": null,
+      "answer": {
+        "answer": "",
+        "behavior": "partial",
+        "cited_evidence_ids": [],
+        "valid_time_used": [],
+        "transaction_time_used_as_valid_time": false,
+        "conflict_warning": false,
+        "partial_or_refusal": true,
+        "clarification_requested": false,
+        "confidence": "low"
+      },
+      "validation": {
+        "required_facts_present": false,
+        "forbidden_facts_absent": true,
+        "evidence_correct": false,
+        "forbidden_evidence_absent": true,
+        "valid_time_correct": false,
+        "transaction_time_not_misused": true,
+        "conflict_warning_correct": false,
+        "partial_refusal_correct": false,
+        "clarification_correct": false,
+        "confidence_correct": true,
+        "behavior_correct": false,
+        "grounding_correct": true,
+        "cross_domain_dependency_correct": false,
+        "overall_pass": false,
+        "infrastructure_failure": true,
+        "failure_reasons": [
+          "JSON Parse Failure"
+        ]
+      },
+      "status": "provider_error",
+      "infrastructure_failure": true,
+      "provider_error": "JSON retry limit reached after 2 attempts: Vertex response contained incomplete JSON.; raw_response_preview={\"answer\": \"Multiple 10-year Treasury yields are available for the year 2000. Please specify if you are looking for an average, a range, or a specific date's value.\", \"behavior\": \"clarify\", \"cited_evidence_ids\": [\"l2:macro_fred:dgs10:2000-01-19\", \"l2:macro_fred:dgs10:2000-02-10\", \"l2:macro_fred:dgs10:2000-03-06\", \"l2:macro_fred:dgs10:2000-03-28\", \"l2:macro_fred:dgs10:2000-04-19\"], \"clarification_requested\": true, \"confidence\": \"low\", \"conflict_warning\": false, \"partial_or_refusal\": true, \"transa",
+      "failure_type": "JSON Parse Failure",
+      "metadata": {
+        "method_family": "chronorag_full",
+        "uses_existing_chronorag_framework": true,
+        "adapter_used": true,
+        "uses_tcc": true,
+        "uses_tcc_precision_metadata": true,
+        "uses_monotone_temporal_fusion": true,
+        "temporal_precision_applied": true,
+        "extracted_temporal_constraints": [
+          {
+            "original_text": "2000",
+            "normalized_start": "2000-01-01",
+            "normalized_end": "2000-12-31",
+            "granularity": "year",
+            "precision": 0.45,
+            "confidence": 0.85,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          },
+          {
+            "original_text": "2000",
+            "normalized_start": "2000-01-01",
+            "normalized_end": "2000-12-31",
+            "granularity": "year",
+            "precision": 0.45,
+            "confidence": 0.85,
+            "ambiguous_parse": false,
+            "temporal_role": "valid_time"
+          }
+        ],
+        "exact_date_query": false,
+        "exact_timestamp_query": false,
+        "temporal_granularity": "year",
+        "temporal_role_detected": "valid_time",
+        "adapter_note": "Layer 2 rows are mapped through ChronoRAG TCC and monotone temporal fusion without rewriting Layer 1.",
+        "selected_scores": {
+          "l2:macro_fred:dgs10:2000-01-19": 0.802,
+          "l2:macro_fred:dgs10:2000-02-10": 0.802,
+          "l2:macro_fred:dgs10:2000-03-06": 0.802,
+          "l2:macro_fred:dgs10:2000-03-28": 0.802,
+          "l2:macro_fred:dgs10:2000-04-19": 0.802
+        },
+        "selected_tcc_precision": {
+          "l2:macro_fred:dgs10:2000-01-19": {
+            "normalized_start": "2000-01-19",
+            "normalized_end": "2000-01-19",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:2000-02-10": {
+            "normalized_start": "2000-02-10",
+            "normalized_end": "2000-02-10",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:2000-03-06": {
+            "normalized_start": "2000-03-06",
+            "normalized_end": "2000-03-06",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:2000-03-28": {
+            "normalized_start": "2000-03-28",
+            "normalized_end": "2000-03-28",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          },
+          "l2:macro_fred:dgs10:2000-04-19": {
+            "normalized_start": "2000-04-19",
+            "normalized_end": "2000-04-19",
+            "precision": "day",
+            "temporal_role": "valid_time"
+          }
+        },
+        "prompt_chars": 4621,
+        "retry_attempts": 1,
+        "json_parse_failures": 2,
+        "provider_error_preview": "JSON retry limit reached after 2 attempts: Vertex response contained incomplete JSON.; raw_response_preview={\"answer\": \"Multiple 10-year Treasury yields are available for the year 2000. Please specify if you are looking for an average, a range, or a specific date's value.\", \"behavior\": \"clarify\", \"cited_evidence_ids\": [\"l2:macro_fred:dgs10:2000-01-19\", \"l2:macro_fred:dgs10:2000-02-10\", \"l2:macro_fred:dgs10:2000-03-06\", \"l2:macro_fred:dgs10:2000-03-28\", \"l2:macro_fred:dgs10:2000-04-19\"], \"clarification_requested\": true, \"confidence\": \"low\", \"conflict_warning\": false, \"partial_or_refusal\": true, \"transa"
+      }
+    }
+  ]
+}

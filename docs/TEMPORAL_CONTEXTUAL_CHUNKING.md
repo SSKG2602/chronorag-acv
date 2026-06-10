@@ -6,10 +6,9 @@ Temporal Contextual Chunking is ChronoRAG's chunking strategy, inspired by
 contextual retrieval but extended for valid-time retrieval, transaction-time
 tracking, temporal fusion, ChronoSanity, and attribution.
 
-The method keeps raw evidence unchanged while adding a retrieval-oriented context
-surface and explicit temporal metadata. The goal is to make each indexed chunk
-more retrievable without letting generated or inherited context overwrite the
-source text.
+The method keeps raw evidence unchanged while adding an indexing surface and
+explicit temporal metadata. The goal is to make each chunk easier to retrieve
+without letting generated or inherited context overwrite the source text.
 
 This is a ChronoRAG architecture definition. It is not a broad benchmark claim
 and should not be described as Anthropic's method.
@@ -44,9 +43,9 @@ metadata envelope for each chunk:
 - temporal metadata: valid-time and transaction-time fields used by temporal
   filtering, fusion, ChronoSanity, and attribution.
 
-The core principle is simple: never let generated or global context overwrite
-raw evidence. Raw evidence remains the truth anchor. Context is used only for
-retrieval and metadata reasoning.
+The core rule is simple: generated or global context must not overwrite raw
+evidence. Raw evidence remains the source for attribution and grounding.
+Context is used only for retrieval and metadata reasoning.
 
 ## Raw Text vs Retrieval Text
 
@@ -65,6 +64,13 @@ Original chunk: GDP per capita in Western Europe was 1,960 in 1870.
 
 BM25 and vector search should use `retrieval_text`. Attribution cards and answer
 grounding should cite `raw_text`.
+
+When a precise temporal expression is detected, `retrieval_text` may also carry
+a compact normalized hint while `raw_text` remains unchanged, for example:
+
+```text
+Temporal hint: [valid_time=1962-08-15 precision=day]. Original chunk: United States 10-year Treasury yield was 3.98 percent on 1962-08-15.
+```
 
 ## Global Context
 
@@ -113,6 +119,21 @@ Field meanings:
 - `temporal_confidence`: confidence in the valid-time assignment.
 - `temporal_ambiguity`: whether the time signal may apply to multiple facts or
   only broad context.
+
+Layer 1 mostly exercises year/window discrimination. A Layer 2 diagnostic pilot
+exposed a dense daily exact-date retrieval failure: reducing time to year
+granularity caused wrong same-year FRED rows to outrank the exact requested
+date. Adapter-side precision fixed the 5-case ChronoRAG pilot from 2/5 to 5/5,
+and the reusable parser now lives in `core/ingestion/temporal_precision.py` so
+core TCC preserves multi-granularity metadata too.
+
+The precision parser supports year, month, day, hour, minute, second, ranges,
+quarters, dayparts, and fuzzy phrases while still separating valid time from
+transaction/publication/filing/release time. TCC now preserves
+`normalized_start`, `normalized_end`, `precision`, `temporal_role`,
+`original_temporal_expression`, `ambiguous_parse`, `temporal_constraints`, and
+`interval_confidence` alongside the older valid-time and transaction-time
+fields.
 
 ## Temporal Inference Hierarchy
 
@@ -320,10 +341,11 @@ Recommended attribution behavior:
 - Multiple timestamps in dense table text may require smaller claim chunks.
 - Context prefixes can improve retrieval but may also bias retrieval if too long
   or too speculative.
-- The method needs benchmark evaluation before claiming measurable improvement.
+- Ablation results should be read as controlled evidence, not broad proof of
+  measurable improvement.
 - It is not an answer-quality evaluation and not a broad benchmark claim.
 
-## Implementation Plan
+## Implementation Checklist
 
 1. Extend chunk records with `raw_text`, `retrieval_text`, `global_context`, and
    temporal confidence fields.
@@ -340,9 +362,9 @@ Recommended attribution behavior:
 
 ## Reproducibility Notes
 
-Changing chunking changes retrieval behavior and invalidates old persisted
-vectors. After implementing Temporal Contextual Chunking, users should purge and
-reingest:
+Changing chunking or temporal precision rules changes retrieval behavior and
+invalidates old persisted vectors. Purge and reingest after changing those
+settings:
 
 ```bash
 python -m cli.chronorag_cli purge

@@ -8,8 +8,9 @@ ChronoRAG should be presented honestly as a temporal-RAG research scaffold, not 
    - The repo documents local and notebook workflows, not a live production URL.
 
 2. **Benchmark coverage is still limited**
-   - The project has a controlled diagnostic benchmark, but broader validation
-     requires a larger multi-source, multi-domain temporal QA benchmark.
+   - The project has controlled Layer 1A, Layer 1B, Layer 2A, and Layer 2B
+     checkpoints, but broader validation still requires larger corpora,
+     external baselines, and more conflict-pair data.
 
 3. **Domain coverage is uneven**
    - World-economy/Maddison-style data appears to be the strongest path.
@@ -49,5 +50,5 @@ Temporal RAG research scaffold with Temporal Contextual Chunking architecture, a
 Avoid:
 
 ```text
-Production-ready enterprise temporal intelligence platform.
+Finished enterprise temporal intelligence platform.
 ```

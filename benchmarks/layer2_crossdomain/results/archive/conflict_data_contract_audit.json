@@ -1,0 +1,209 @@
+{
+  "cases": [
+    {
+      "case_id": "l2q:0080:conflict_detection",
+      "missing_ids": [
+        "synthetic:conflict:l2:github_releases:kubernetes:181360153"
+      ],
+      "present_ids": [
+        "l2:github_releases:kubernetes:181360153"
+      ],
+      "question": "Two sources disagree about kubernetes release v1.30.6 for 2024. What should the answer do?"
+    },
+    {
+      "case_id": "l2q:0081:conflict_detection",
+      "missing_ids": [
+        "synthetic:conflict:l2:github_releases:pandas:6599258"
+      ],
+      "present_ids": [
+        "l2:github_releases:pandas:6599258"
+      ],
+      "question": "Two sources disagree about pandas release v0.20.2 for 2017. What should the answer do?"
+    },
+    {
+      "case_id": "l2q:0082:conflict_detection",
+      "missing_ids": [
+        "synthetic:conflict:l2:macro_fred:dgs10:1962-08-15"
+      ],
+      "present_ids": [
+        "l2:macro_fred:dgs10:1962-08-15"
+      ],
+      "question": "Two sources disagree about United States 10-year Treasury 10-year Treasury yield for 1962. What should the answer do?"
+    },
+    {
+      "case_id": "l2q:0083:conflict_detection",
+      "missing_ids": [
+        "synthetic:conflict:l2:macro_fred:dgs10:1974-06-20"
+      ],
+      "present_ids": [
+        "l2:macro_fred:dgs10:1974-06-20"
+      ],
+      "question": "Two sources disagree about United States 10-year Treasury 10-year Treasury yield for 1974. What should the answer do?"
+    },
+    {
+      "case_id": "l2q:0084:conflict_detection",
+      "missing_ids": [
+        "synthetic:conflict:l2:macro_fred:dgs10:1986-05-22"
+      ],
+      "present_ids": [
+        "l2:macro_fred:dgs10:1986-05-22"
+      ],
+      "question": "Two sources disagree about United States 10-year Treasury 10-year Treasury yield for 1986. What should the answer do?"
+    },
+    {
+      "case_id": "l2q:0085:conflict_detection",
+      "missing_ids": [
+        "synthetic:conflict:l2:macro_fred:dgs10:1998-03-11"
+      ],
+      "present_ids": [
+        "l2:macro_fred:dgs10:1998-03-11"
+      ],
+      "question": "Two sources disagree about United States 10-year Treasury 10-year Treasury yield for 1998. What should the answer do?"
+    },
+    {
+      "case_id": "l2q:0086:conflict_detection",
+      "missing_ids": [
+        "synthetic:conflict:l2:macro_fred:dgs10:2010-01-21"
+      ],
+      "present_ids": [
+        "l2:macro_fred:dgs10:2010-01-21"
+      ],
+      "question": "Two sources disagree about United States 10-year Treasury 10-year Treasury yield for 2010. What should the answer do?"
+    },
+    {
+      "case_id": "l2q:0087:conflict_detection",
+      "missing_ids": [
+        "synthetic:conflict:l2:macro_fred:dgs10:2021-11-04"
+      ],
+      "present_ids": [
+        "l2:macro_fred:dgs10:2021-11-04"
+      ],
+      "question": "Two sources disagree about United States 10-year Treasury 10-year Treasury yield for 2021. What should the answer do?"
+    },
+    {
+      "case_id": "l2q:0088:conflict_detection",
+      "missing_ids": [
+        "synthetic:conflict:l2:market_index:djia:2016-06-21"
+      ],
+      "present_ids": [
+        "l2:market_index:djia:2016-06-21"
+      ],
+      "question": "Two sources disagree about Dow Jones Industrial Average index close for 2016. What should the answer do?"
+    },
+    {
+      "case_id": "l2q:0089:conflict_detection",
+      "missing_ids": [
+        "synthetic:conflict:l2:market_index:nasdaqcom:1972-12-26"
+      ],
+      "present_ids": [
+        "l2:market_index:nasdaqcom:1972-12-26"
+      ],
+      "question": "Two sources disagree about NASDAQ Composite index close for 1972. What should the answer do?"
+    },
+    {
+      "case_id": "l2q:0090:conflict_detection",
+      "missing_ids": [
+        "synthetic:conflict:l2:market_index:nasdaqcom:1984-10-24"
+      ],
+      "present_ids": [
+        "l2:market_index:nasdaqcom:1984-10-24"
+      ],
+      "question": "Two sources disagree about NASDAQ Composite index close for 1984. What should the answer do?"
+    },
+    {
+      "case_id": "l2q:0091:conflict_detection",
+      "missing_ids": [
+        "synthetic:conflict:l2:market_index:nasdaqcom:1996-07-30"
+      ],
+      "present_ids": [
+        "l2:market_index:nasdaqcom:1996-07-30"
+      ],
+      "question": "Two sources disagree about NASDAQ Composite index close for 1996. What should the answer do?"
+    },
+    {
+      "case_id": "l2q:0092:conflict_detection",
+      "missing_ids": [
+        "synthetic:conflict:l2:market_index:nasdaqcom:2008-06-16"
+      ],
+      "present_ids": [
+        "l2:market_index:nasdaqcom:2008-06-16"
+      ],
+      "question": "Two sources disagree about NASDAQ Composite index close for 2008. What should the answer do?"
+    },
+    {
+      "case_id": "l2q:0093:conflict_detection",
+      "missing_ids": [
+        "synthetic:conflict:l2:market_index:nasdaqcom:2020-04-06"
+      ],
+      "present_ids": [
+        "l2:market_index:nasdaqcom:2020-04-06"
+      ],
+      "question": "Two sources disagree about NASDAQ Composite index close for 2020. What should the answer do?"
+    },
+    {
+      "case_id": "l2q:0094:conflict_detection",
+      "missing_ids": [
+        "synthetic:conflict:l2:market_index:sp500:2022-02-22"
+      ],
+      "present_ids": [
+        "l2:market_index:sp500:2022-02-22"
+      ],
+      "question": "Two sources disagree about S&P 500 index close for 2022. What should the answer do?"
+    },
+    {
+      "case_id": "l2q:0095:conflict_detection",
+      "missing_ids": [
+        "synthetic:conflict:l2:sec_submissions:aapl:0001193125-15-354756"
+      ],
+      "present_ids": [
+        "l2:sec_submissions:aapl:0001193125-15-354756"
+      ],
+      "question": "Two sources disagree about Apple Inc. 8-K filing for 2015. What should the answer do?"
+    },
+    {
+      "case_id": "l2q:0096:conflict_detection",
+      "missing_ids": [
+        "synthetic:conflict:l2:sec_submissions:googl:0001209191-24-003063"
+      ],
+      "present_ids": [
+        "l2:sec_submissions:googl:0001209191-24-003063"
+      ],
+      "question": "Two sources disagree about Alphabet Inc. 4 filing for 2024. What should the answer do?"
+    },
+    {
+      "case_id": "l2q:0097:conflict_detection",
+      "missing_ids": [
+        "synthetic:conflict:l2:sec_submissions:msft:0001193125-20-180036"
+      ],
+      "present_ids": [
+        "l2:sec_submissions:msft:0001193125-20-180036"
+      ],
+      "question": "Two sources disagree about MICROSOFT CORP 8-K filing for 2020. What should the answer do?"
+    },
+    {
+      "case_id": "l2q:0098:conflict_detection",
+      "missing_ids": [
+        "synthetic:conflict:l2:sec_submissions:nvda:0001045810-26-000003"
+      ],
+      "present_ids": [
+        "l2:sec_submissions:nvda:0001045810-26-000003"
+      ],
+      "question": "Two sources disagree about NVIDIA CORP 8-K filing for 2026. What should the answer do?"
+    },
+    {
+      "case_id": "l2q:0099:conflict_detection",
+      "missing_ids": [
+        "synthetic:conflict:l2:sec_submissions:tsla:0001972928-25-000003"
+      ],
+      "present_ids": [
+        "l2:sec_submissions:tsla:0001972928-25-000003"
+      ],
+      "question": "Two sources disagree about Tesla, Inc. 4 filing for 2025. What should the answer do?"
+    }
+  ],
+  "conflict_case_count": 20,
+  "corpus_path": "benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl",
+  "missing_id_count": 20,
+  "present_id_count": 20,
+  "questions_path": "benchmarks/layer2_crossdomain/data/layer2_questions.jsonl"
+}

@@ -2,248 +2,360 @@
 
 ## Abstract
 
-ChronoRAG is a temporal retrieval-augmented generation research scaffold for
-time-sensitive question answering. It treats validity windows, transaction
-windows, provenance, and temporal alignment as first-class retrieval
-constraints. The current implementation is a reproducible prototype, not a
-production service and not a broad external benchmark claim.
+ChronoRAG is a temporal retrieval and grounded answer-validation RAG framework.
+It treats validity windows, transaction/publication times, source provenance,
+temporal precision, and grounded citation checks as first-class system
+contracts.
+
+The stored benchmarks provide controlled evidence for temporal retrieval
+behavior under explicitly scoped datasets and validators. The claims are limited
+to the tested settings: temporal retrieval, evidence selection, answer-contract
+validation, and component ablation behavior. The project does not generalize
+these results beyond the benchmark conditions without additional evaluation.
 
 ## 1. Problem Statement
 
-Standard RAG systems usually rank evidence by lexical or semantic relevance.
-This is insufficient when the answer depends on when a claim was valid. A
-passage can be topically relevant but temporally wrong.
+Temporal QA fails when a system retrieves topically relevant but temporally
+wrong evidence. Common failures include wrong-year rows, broad historical
+windows, publication time used as valid time, negated dates treated as targets,
+and comparison questions where one slot dominates the retrieved context.
 
-ChronoRAG studies this failure mode by separating ordinary relevance from
-temporal correctness.
+ChronoRAG studies these failures as retrieval and grounding problems before
+asking an LLM to write an answer.
 
 ## 2. Temporal Model
 
-ChronoRAG separates three time dimensions:
+ChronoRAG separates:
 
-- Valid time: when the claim is true in the real world.
-- Transaction time: when the system observed or stored the claim.
-- Query time: the time window requested by the user.
+- `valid_time`: when a claim is true in the world.
+- `transaction_time`: when the claim was observed, filed, published, released,
+  ingested, or otherwise entered the system.
+- Query time: the temporal target requested by the user or benchmark question.
 
-This separation lets the system reject evidence that is semantically relevant
-but invalid for the requested period.
+This separation is enforced in retrieval scoring, answer prompts, and answer
+validation. A publication or filing timestamp is not treated as valid time
+unless the question explicitly asks for publication, filing, release, or
+transaction timing.
 
-## 3. System Architecture
+## 3. Retrieval Architecture
 
-The system is organized into:
+The current public path is:
 
-- Ingestion layer
-- Temporal Contextual Chunking layer
-- Persistent vector database abstraction
-- BM25 lexical retrieval
-- Vector retrieval
-- Temporal filtering
-- Monotone temporal fusion
-- Optional reranking
-- ChronoSanity conflict detection
-- Optional provider-backed answer synthesis or evidence-only fallback
-- Attribution card generation
+1. Ingest rows/documents with provenance and temporal metadata.
+2. Build Temporal Contextual Chunks.
+3. Store raw evidence separately from retrieval text.
+4. Retrieve candidates with lexical/vector-compatible surfaces.
+5. Score temporal precision at year, month, day, timestamp, range, quarter, and
+   fuzzy granularities.
+6. Apply polarity-aware temporal constraints, including negative dates.
+7. Fuse relevance, temporal alignment, authority, and transaction-role
+   penalties with monotone temporal fusion.
+8. Finalize selected evidence with source/metric and slot-aware policies.
+9. Optionally synthesize a grounded answer.
+10. Validate citations, temporal role use, provider contract, and behavior.
 
-## 4. Retrieval Pipeline
+Temporal Contextual Chunking is the evidence representation layer. It preserves
+unchanged `raw_text` for attribution while creating `retrieval_text` with
+document title, section, entity, unit, region, source, and temporal context.
 
-Before retrieval, ChronoRAG needs chunk records that carry both searchable
-context and trustworthy temporal metadata. Temporal Contextual Chunking is
-ChronoRAG's chunking strategy, inspired by contextual retrieval but extended for
-valid-time retrieval, transaction-time tracking, temporal fusion, ChronoSanity,
-and attribution.
+Temporal precision scoring is separate from embedding similarity. Stronger
+embeddings can improve candidate quality, but exact-date and transaction-role
+behavior are symbolic contracts.
 
-The method separates unchanged `raw_text` from `retrieval_text`. `raw_text`
-remains the quoteable evidence used for attribution and answer grounding.
-`retrieval_text` may add a short context prefix with document title, section,
-unit, entity, region, and temporal scope. This gives BM25/vector retrieval more
-structured context without letting generated context overwrite the source
-evidence.
+## 4. Evidence Finalization
 
-Temporal Contextual Chunking also separates claim-valid time from transaction
-time. A publication year can be stored as `tx_start`, but it must not become
-`valid_from` unless the source explicitly supports that interpretation. This
-prevents a 2006 publication date from being mistaken as the valid year for an
-1870 GDP claim.
+Layer 2A exposed that ranking alone is not enough for hard temporal retrieval.
+ChronoRAG therefore applies a final evidence-selection pass after temporal
+fusion. The pass:
 
-This layer is needed before temporal filtering and fusion because broad windows
-such as `1000-01-01` to `2006-12-31` are weak for exact-year retrieval. Exact
-chunk-level or row-level valid-time evidence should outrank broad section or
-document windows when the query asks for a specific year.
+- prefers exact valid-time evidence over broad windows when exact evidence is
+  available;
+- keeps valid-time evidence separate from transaction-time-only evidence;
+- respects local negative temporal constraints such as `not 1990-03-28`;
+- applies source and metric/form constraints;
+- assembles comparison and multi-slot evidence so all required slots can appear
+  in top-k.
 
-After chunking, the retrieval pipeline gathers candidate passages using lexical
-and vector search. Candidates are then checked against requested valid-time
-windows. Time-aligned evidence receives priority before answer synthesis.
+This is retrieval behavior, not answer-generation behavior.
 
-Provider-backed synthesis is optional and occurs only after retrieval has
-selected evidence. Light mode keeps synthesis deterministic by returning an
-evidence digest, while provider mode can use Vertex AI Gemini to turn retrieved
-evidence into a grounded answer.
+## 5. Evaluation Layers
 
-## 5. Monotone Temporal Fusion
+| Layer | Scope | Evaluated Behavior | Boundary |
+|---|---|---|---|
+| Layer 1A | Temporal Eval v2 retrieval | Evidence selection, window alignment, distractor avoidance, proxy behavior. | Retrieval-focused benchmark. |
+| Layer 1B | Temporal answer validation | Cited evidence, valid-time correctness, transaction-time trap avoidance, provider/output contract. | Answer-contract validation in a controlled setting. |
+| Layer 2A | Cross-domain retrieval-only | Selected evidence IDs across 5,000 corpus rows and 200 v3 questions. | No generated natural-language answer scoring. |
+| Layer 2B | Natural-language temporal QA | ChronoRAG answer synthesis, hard-contract validation, LLM judge scoring, and manual audit. | Answer synthesis and validation with expected evidence available where needed; retrieval quality remains Layer 2A. |
 
-Monotone temporal fusion combines relevance, temporal alignment, authority,
-transaction-time mismatch, and age penalty. The key design constraint is that
-worse temporal compliance must not improve the final score.
+## 6. Layer 1A: Temporal Eval v2
 
-This makes time alignment part of ranking, not a post-hoc display field.
+Layer 1A is the controlled temporal retrieval benchmark.
 
-## 6. ChronoSanity Conflict Detection
+Files:
 
-ChronoSanity is a conflict-checking layer. It examines overlapping evidence
-windows and incompatible claims. When conflict risk is high or grounding is
-weak, the system should degrade to evidence-only output instead of producing
-unsupported confidence.
+- `benchmarks/run_temporal_eval_v2.py`
+- `benchmarks/temporal_eval_v2_15.jsonl`
+- `data/sample/temporal_eval_v2/`
+- `benchmarks/results/temporal_eval_v2_results.md`
+- `benchmarks/results/temporal_eval_v2_results.json`
 
-## 7. Attribution Card
+Stored light-mode result:
 
-The attribution card exposes source URI, valid window, authority signal,
-confidence, and alternative/counterfactual windows where available. Its purpose
-is auditability.
+| Method | Hit@5 Evidence | Top1 Window | Hit@5 Window | Source Family Hit@5 | Distractor Avoidance | Proxy Behavior Correct |
+|---|---:|---:|---:|---:|---:|---:|
+| Hybrid + temporal fusion + rerank | 0.80 | 0.80 | 0.93 | 0.87 | 0.93 | 0.80 |
 
-## 8. Ablation Study
+Layer 1A measures retrieval and proxy behavior over a 15-case controlled set.
+It tests whether temporally correct evidence appears in top-k and whether
+nearby temporal distractors are avoided.
 
-The current ablation compares:
+## 7. Layer 1B: Temporal Answer Validation
 
-- BM25 only
-- Vector only
-- Hybrid without temporal filter
-- Hybrid with temporal filter
-- Hybrid + temporal fusion
-- Hybrid + temporal fusion + rerank
+Layer 1B evaluates answer behavior after temporal retrieval. It supports:
 
-The internal `benchmarks/temporal_qa_15.jsonl` benchmark is a smoke benchmark.
-It validates that the pipeline runs over a small local dataset. The older v1
-hard benchmark is archived as a diagnostic because it had only 15 cases, 19
-rows/chunks, and limited source diversity.
+- dry-run prompts, with no provider call;
+- deterministic light mode;
+- Vertex mode, with grounded answer synthesis and contract validation.
 
-Temporal Eval v2 is now the main controlled retrieval benchmark. It is built
-from multiple source families under `data/raw/temporal_eval_v2/` and generated
-into `data/sample/temporal_eval_v2/`. It has six case categories:
+Files:
 
-- exact valid-time retrieval
-- same entity / wrong year traps
-- broad-window distractors
-- transaction-time vs valid-time traps
-- conflict / ChronoSanity cases
-- expected partial, refusal, or ambiguous cases
+- `benchmarks/run_temporal_answer_validation_v2.py`
+- `benchmarks/temporal_answer_validation_v2_15.jsonl`
+- `benchmarks/results/temporal_answer_validation_v2_*.md`
+- `benchmarks/results/temporal_answer_validation_v2_*.json`
 
-Current Temporal Eval v2 light-mode result:
+The primary stored Vertex top-k 5 result is
+`benchmarks/results/temporal_answer_validation_v2_vertex_topk5_results.md`.
+It reports:
 
-| Method | Hit@5 Evidence | Top1 Window | Hit@5 Window | Source Family Hit@5 | Distractor Avoidance | Proxy Conflict Correct | Proxy Partial/Refusal Correct | Proxy Behavior Correct | Latency ms |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| BM25 only | 0.47 | 0.47 | 0.80 | 0.73 | 0.73 | 0.00 | 0.07 | 0.33 | 1.96 |
-| Vector only | 0.47 | 0.53 | 0.80 | 0.93 | 0.73 | 0.00 | 0.07 | 0.33 | 1.93 |
-| Hybrid without temporal filter | 0.53 | 0.47 | 0.80 | 0.80 | 0.73 | 0.07 | 0.07 | 0.27 | 1.94 |
-| Hybrid with temporal filter | 0.67 | 0.60 | 0.93 | 0.80 | 0.73 | 0.07 | 0.13 | 0.47 | 2.00 |
-| Hybrid + temporal fusion | 0.60 | 0.80 | 0.93 | 0.87 | 0.93 | 0.07 | 0.07 | 0.60 | 2.00 |
-| Hybrid + temporal fusion + rerank | 0.80 | 0.80 | 0.93 | 0.87 | 0.93 | 0.07 | 0.07 | 0.80 | 2.08 |
+| Metric | Score |
+|---|---:|
+| Answer Overall Pass | 0.80 |
+| Required Facts Present | 0.80 |
+| Expected Evidence Cited | 1.00 |
+| Valid-Time Correct | 1.00 |
+| Transaction-Time Trap Avoided | 1.00 |
+| Provider Contract Pass | 1.00 |
+| Grounding Validation Pass | 1.00 |
+| Temporal Rule Validation Pass | 0.93 |
 
-Temporal Eval v2 is a controlled benchmark, not an external benchmark and not a
-broad performance claim. It makes `Source Hit@5` more meaningful than v1 because
-it includes multiple source families, but Layer 2 generalization still requires
-at least one second domain and a larger natural benchmark.
-
-The retrieval ablation is independent of provider mode. It evaluates whether
-retrieval returns temporally correct evidence; it does not evaluate LLM writing
-quality.
-
-Current E2 validates temporal retrieval behavior. It does not fully validate
-LLM-mediated answer decisions. Conflict and refusal are system-level behaviors
-that require answer-time reasoning over retrieved evidence, evidence cards,
-ChronoSanity signals, and answer validation. These belong in Layer 1B, not Layer
-2.
-
-Layer 1B is implemented as `benchmarks/run_temporal_answer_validation_v2.py`.
-Light mode is deterministic and CI-safe. Vertex mode runs the ChronoRAG grounded
-temporal synthesis prompt through Vertex Gemini and uses hybrid lexical + BGE
-vector retrieval by default. Passing `--skip-vector` is an explicit downgrade for
-machines that cannot run local embeddings.
-
-The Layer 1B Vertex path validates the prompt contract, extracts raw/fenced or
-short prose-wrapped JSON, normalizes harmless schema shape drift, validates
-response schema, checks cited evidence IDs, and applies deterministic
-temporal-rule validation. Provider JSON Parse Failure is treated as a
-provider-output contract failure, not as temporal reasoning failure. One retry
-is allowed only for provider-contract failures; grounding and temporal-rule
-failures are not retried away. A failed retry cannot overwrite a usable initial
+Provider JSON failures are treated as provider/output-contract failures, not as
+retrieval wins or losses. A failed retry cannot overwrite a usable initial
 response.
 
-A full Vertex 15-case run has been executed. Its failure analysis showed
-answer-completeness and provider-output contract issues rather than grounding or
-temporal-rule failures. The follow-up repair simplified the prompt, added
-schema normalization, preserved usable initial output across failed retries, and
-kept default `--top-k 5` and the embedding model unchanged while preserving the
-controlled benchmark framing. Comparative runs can be stored with
-`--result-suffix` without changing default result paths. The final cleanup
-accepts correct q02/q11/q13 behavior via deterministic validation while keeping
-grounding, valid-time, and transaction-time checks strict.
+## 8. Layer 2A: Cross-Domain Retrieval-Only
 
-The stored primary Layer 1B result is
-`benchmarks/results/temporal_answer_validation_v2_vertex_topk5_results.md`.
-It uses top-k 5 and reports 0.80 answer overall pass, 1.00 expected evidence
-citation, 1.00 valid-time correctness, 1.00 transaction-time trap avoidance,
-1.00 provider-contract pass, 1.00 grounding validation pass, and 0.93 temporal
-rule validation pass. The failed cases are q08, q11, and q14. The dynamic top-k
-run is stored separately as a diagnostic result and is not the primary
-benchmark claim.
+Layer 2A expands retrieval evaluation to a selected cross-domain corpus:
 
-## 9. Metrics
+- about 46,503 detected rows/items in the larger raw pool;
+- 5,000 selected corpus rows for controlled benchmark execution;
+- 200 v3 aligned temporal questions;
+- FRED macro, market/index, SEC submissions, Federal Register, and GitHub
+  release source families;
+- retrieval-only scoring over `selected_evidence_ids`;
+- no Vertex and no generated answer scoring in the public result.
 
-Window Hit@5: whether the top five results contain evidence from the expected
-valid-time window.
+The full 5,000-row corpus is generated/working benchmark data and may not be
+fully tracked in Git. The public repository contains builders, validators,
+tracked samples, question definitions, final result artifacts, and commands
+that distinguish sample files from generated full-corpus files.
 
-Top1 Window: whether the first result is from the expected valid-time window.
-This is more discriminative than Hit@5 on small controlled corpora.
+Active methods:
 
-Source Hit@5: whether the top five results contain the expected source/document.
+- `chronorag_full`
+- `metadata_temporal_rag`
 
-Unit Hit@5: whether the top five results contain the expected unit signal.
+Final public result files:
 
-Text Hit@5: whether the top five results contain expected textual clues such as
-year, GDP, or per-capita wording.
+- `benchmarks/layer2_crossdomain/results/layer2_retrieval_only_v3_200_eval.md`
+- `benchmarks/layer2_crossdomain/results/layer2_retrieval_only_v3_200_eval.json`
+- `benchmarks/layer2_crossdomain/results/layer2_ablation_v3_ablation200.md`
+- `benchmarks/layer2_crossdomain/results/layer2_ablation_v3_ablation200.json`
+- `benchmarks/layer2_crossdomain/results/conflict_data_contract_blocked_v3.md`
+- `benchmarks/layer2_crossdomain/results/conflict_data_contract_blocked_v3.json`
 
-Latency ms: wall-clock runtime for the method.
+Layer 2A v3 retrieval-only summary:
 
-## 10. Limitations
+| Method | Cases | Generic Hit@1 | Generic Hit@5 | Forbidden absent@5 | Category primary pass |
+|---|---:|---:|---:|---:|---:|
+| `chronorag_full` | 200 | 0.82 | 0.90 | 0.99 | 0.96 |
+| `metadata_temporal_rag` | 200 | 0.69 | 0.86 | 0.69 | 0.48 |
 
-- The smoke benchmark is easy by design.
-- Temporal Eval v2 has 15 controlled cases.
-- Generalization beyond historical GDP/debt style data is not yet proven.
-- Layer 2 evaluation needs at least one second domain.
-- Temporal metadata extraction is partly heuristic.
-- The strongest tested path is world-economy style data.
-- Full LLM mode depends on local or provider model availability.
-- Vertex AI Gemini provider mode is validated as a smoke demo unless a separate
-  answer-quality evaluation is added.
-- CI currently validates light mode, not full model-backed generation.
-- ChronoSanity quality depends on passage granularity and metadata quality.
-- The system is not production-hardened for authentication, multi-tenancy,
-  monitoring, or deployment.
+The category-primary score is the more meaningful Layer 2A metric because some
+categories require slot coverage, forbidden-evidence avoidance, or
+source/metric/time constraints rather than generic Hit@k alone.
 
-## 11. Reproducibility
+## 9. Benchmark Correction And Failure Analysis
 
-Run in light mode:
+Several public-branch corrections were made before treating Layer 2A v3 as the
+current retrieval-only result:
+
+- Earlier broad-window style questions were reframed because vague year-only
+  wording cannot fairly require a hidden exact date.
+- Earlier conflict-detection questions were blocked because real conflict-pair
+  evidence rows were absent in the current corpus.
+- Earlier intermediate Layer 2 Vertex and judge artifacts were archived because
+  they were not the final Layer 2A retrieval-only result.
+- The v3 benchmark aligns question wording, expected evidence, and available
+  corpus rows more strictly.
+- The correction improved benchmark validity rather than hiding failures.
+
+The conflict status is documented in:
+
+- `benchmarks/layer2_crossdomain/results/conflict_data_contract_blocked_v3.md`
+- `benchmarks/layer2_crossdomain/results/conflict_data_contract_blocked_v3.json`
+
+Synthetic conflict IDs are not used in the public v3 scoring path.
+
+## 10. Ablation Interpretation
+
+The public ablation file evaluates:
+
+| Variant | Interpretation Boundary |
+|---|---|
+| `chronorag_full` | Full ChronoRAG retrieval and finalization path. |
+| `chronorag_no_tcc` | Tests whether TCC retrieval text and temporal metadata help in this selected corpus. |
+| `chronorag_no_temporal_precision` | Tests exact-time ranking, broad-window preference, and wrong-time suppression. |
+| `chronorag_no_transaction_role` | Tests final valid-time versus transaction-time cleanup. |
+| `chronorag_no_source_metric` | Tests source and metric/form normalization. |
+| `chronorag_no_slot_assembler` | Tests comparison and multi-slot evidence coverage. |
+| `chronorag_score_only` | Tests ranking without final evidence-selection components. |
+| `metadata_temporal_rag` | Provides a metadata-oriented retrieval comparison point. |
+
+Stored result:
+
+- `benchmarks/layer2_crossdomain/results/layer2_ablation_v3_ablation200.md`
+
+Main interpretation:
+
+- Temporal precision contributes to wrong-time suppression and exact-time
+  ranking.
+- Slot assembly contributes strongly to multi-slot and cross-domain coverage.
+- Score-only ranking is weaker than final evidence selection in the v3 tested
+  setting.
+- Several ablations remain strong on explicitly anchored categories; those
+  categories should be interpreted as controlled checks, not broad proof.
+
+## 11. Layer 2B: Full-50 Answer Synthesis And Validation
+
+Layer 2B is the completed natural-language temporal QA evaluation. It uses 50
+manually designed temporal QA cases built from evidence cards in the selected
+Layer 2 corpus:
+
+- `benchmarks/layer2_crossdomain/data/layer2b_manual_50_qa.jsonl`
+
+The completed Layer 2B path is:
+
+1. ChronoRAG answer synthesis with Vertex.
+2. Dynamic top-k evidence selection for answer context.
+3. Deterministic hard-contract validation.
+4. LLM judge semantic scoring.
+5. Human manual audit of validator-strictness cases.
+
+Final Layer 2B artifacts:
+
+- `benchmarks/layer2_crossdomain/results/layer2b_manual_50_qa_summary.md`
+- `benchmarks/layer2_crossdomain/results/layer2b_chronorag_full_layer2b_full50_vertex_final_results.md`
+- `benchmarks/layer2_crossdomain/results/layer2b_judge_layer2b_full50_judge_final_results.md`
+- `benchmarks/layer2_crossdomain/results/layer2b_full50_manual_audit.md`
+
+Final Layer 2B scores:
+
+| Metric | Score |
+|---|---:|
+| Deterministic hard-contract pass | 38 / 50 = 76% |
+| LLM judge semantic pass | 38 / 50 = 76% |
+| Strict combined pass | 35 / 50 = 70% |
+| Manually accepted validator-strictness cases | 3 |
+| Manual-audited acceptable pass | 41 / 50 = 82% |
+
+The strict combined score, `35 / 50 = 70%`, remains the primary conservative
+Layer 2B result because it requires both hard validation and LLM judge pass. The
+manual-audited acceptable score, `41 / 50 = 82%`, is a secondary interpretation
+after accepting 3 validator-strictness cases reviewed by the judge and a human
+audit. It does not replace the strict combined score.
+
+Layer 2B evaluates answer synthesis and answer validation. It does not prove
+retrieval quality because expected evidence was available or injected where
+needed for answer generation. Retrieval quality is evaluated separately in
+Layer 2A.
+
+## 12. Reproducibility Commands
+
+Layer 1A:
 
 ```bash
-export CHRONORAG_LIGHT=1
-python -m cli.chronorag_cli ingest data/sample/smoke/*
+python3 benchmarks/build_temporal_eval_v2.py
+python3 benchmarks/run_temporal_eval_v2.py --light
+```
 
-python -m benchmarks.run_ablation \
-  --cases benchmarks/temporal_qa_15.jsonl \
+Layer 1B dry-run:
+
+```bash
+python3 benchmarks/run_temporal_answer_validation_v2.py \
+  --mode vertex \
+  --dry-run-prompts \
   --top-k 5 \
-  --candidate-k 50
-
-python benchmarks/build_temporal_eval_v2.py
-python benchmarks/run_temporal_eval_v2.py --light
+  --result-suffix dry_run_prompts
 ```
 
-Optional Vertex provider smoke mode:
+Layer 1B light mode:
 
 ```bash
-export CHRONORAG_LIGHT=0
-export CHRONORAG_PROVIDER=vertex
-export GOOGLE_CLOUD_PROJECT=your-gcp-project-id
-export GOOGLE_CLOUD_LOCATION=us-central1
-export VERTEX_MODEL_ID=gemini-2.5-flash
-python -m benchmarks.run_provider_smoke
+python3 benchmarks/run_temporal_answer_validation_v2.py \
+  --mode light \
+  --top-k 5
 ```
+
+Layer 2A dataset validation:
+
+```bash
+python3 benchmarks/layer2_crossdomain/validate_layer2_dataset.py \
+  --corpus benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl \
+  --questions benchmarks/layer2_crossdomain/data/layer2_questions.jsonl
+```
+
+Layer 2A retrieval comparison:
+
+```bash
+python3 benchmarks/layer2_crossdomain/run_layer2_comparison.py \
+  --method all \
+  --mode dry_run \
+  --dataset real \
+  --limit 200 \
+  --top-k 5 \
+  --result-suffix v3_200
+
+python3 benchmarks/layer2_crossdomain/evaluate_retrieval_only.py \
+  --results benchmarks/layer2_crossdomain/results/layer2_chronorag_full_v3_200_results.json \
+            benchmarks/layer2_crossdomain/results/layer2_metadata_temporal_rag_v3_200_results.json \
+  --questions benchmarks/layer2_crossdomain/data/layer2_questions.jsonl \
+  --save-json benchmarks/layer2_crossdomain/results/layer2_retrieval_only_v3_200_eval.json \
+  --save-md benchmarks/layer2_crossdomain/results/layer2_retrieval_only_v3_200_eval.md
+```
+
+Layer 2A ablation:
+
+```bash
+python3 benchmarks/layer2_crossdomain/run_layer2_ablations.py \
+  --corpus benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl \
+  --questions benchmarks/layer2_crossdomain/data/layer2_questions.jsonl \
+  --mode dry_run \
+  --limit 200 \
+  --top-k 5 \
+  --result-suffix v3_ablation200
+```
+
+## 13. Limitations
+
+- Layer 2A is retrieval-only.
+- Layer 2A does not evaluate generated natural-language answer quality.
+- Layer 2B evaluates answer synthesis and validation, not retrieval quality,
+  because expected evidence was available where needed.
+- The Layer 2B manual-audited acceptable score is secondary and does not replace
+  the strict combined score.
+- Layer 1B is controlled answer validation, not production reliability proof.
+- Conflict detection is data-contract blocked in Layer 2A until real
+  conflict-pair rows exist.
+- The current service is not production-hardened for multi-tenant storage,
+  authentication, observability, or deployment.

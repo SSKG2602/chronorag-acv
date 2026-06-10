@@ -1,0 +1,6 @@
+{
+  "conflict_claim_rows": 0,
+  "reason": "No real two-sided conflict pairs are present in layer2_corpus.jsonl; synthetic conflict IDs are not used in v3 questions.",
+  "scored_category": "removed",
+  "status": "data_contract_blocked"
+}
