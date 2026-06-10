@@ -9,7 +9,7 @@ This is a controlled Layer 2B manual-QA runner report, not a SOTA or publication
 - Result suffix: `layer2b_full50_vertex_final`
 - Provider errors: 0
 - JSON/schema failures: 0
-- Expected evidence retrieved before injection: 0 / 50
+- Expected evidence retrieved before injection: 37 / 50
 - Expected evidence available to model after injection: 50 / 50
 - Injected expected evidence rows: 21
 - Cases with injected expected evidence: 18
@@ -19,6 +19,8 @@ This is a controlled Layer 2B manual-QA runner report, not a SOTA or publication
 - Overall contract pass: 38 / 50
 
 Expected-evidence injection was used for at least one case. Injected evidence is gold evidence made available to evaluate answer synthesis with the right evidence in context; it must not be interpreted as retrieval quality.
+
+The row table reports expected evidence availability after injection. Retrieval-before-injection is tracked separately in the JSONL under `retrieval_metadata.expected_evidence_retrieved_before_injection`; the 37 / 50 summary counts cases with at least one expected evidence ID in `retrieval_metadata.retrieved_evidence_ids_before_injection`.
 
 | Question ID | Type | Expected Behavior | Status | Retrieved Expected Evidence | Available To Model | Injected Evidence IDs | Contract Pass | Failure Reasons |
 |---|---|---|---|---:|---:|---|---:|---|

@@ -1,3 +1,10 @@
+"""Slot assembly for comparison and multi-evidence retrieval cases.
+
+This module fills required evidence slots before final top-k selection,
+especially for comparison questions that need more than one temporally valid
+row. It supports retrieval completeness; it does not perform answer synthesis.
+"""
+
 from __future__ import annotations
 
 import json
@@ -155,6 +162,8 @@ def candidate_score(candidate: Any) -> float:
 
 def classify_query_intent(query_text: str, constraints: Any = None, candidates: list[Any] | None = None) -> QueryIntent:
     text = query_text or ""
+    # Slot detection starts from explicit temporal, source, metric, and
+    # comparison signals in the question.
     years = extract_years(text)
     dates = extract_dates(text)
     versions = extract_versions(text)
@@ -243,6 +252,8 @@ def assemble_top_k(candidates: list[Any], intent: QueryIntent, top_k: int) -> tu
         return [], _report(intent, [], {}, [], {}, [], [], {})
 
     ordered = sorted(candidates, key=candidate_score, reverse=True)
+    # Candidate grouping classifies temporal, source, metric, version, and slot
+    # fit before the required-slot pass mutates the selected set.
     classes = {row_evidence_id(candidate): classify_candidate(candidate, intent) for candidate in ordered}
     selected: list[Any] = []
     selected_ids: set[str] = set()
@@ -262,8 +273,8 @@ def assemble_top_k(candidates: list[Any], intent: QueryIntent, top_k: int) -> tu
         selected_ids.add(evidence_id)
         slot_filled.append(slot_name)
 
-    # Required slots are filled first so a single high-scoring side of a
-    # comparison cannot crowd out the other side before top-k is capped.
+    # Required-slot filling runs before generic filler so one high-scoring side
+    # of a comparison cannot crowd out the other side before top-k is capped.
     if intent.is_comparison:
         for index, _slot in enumerate(intent.comparison_slots):
             candidate = _best_for_slot(ordered, classes, intent, index, selected_ids)
@@ -328,6 +339,8 @@ def assemble_top_k(candidates: list[Any], intent: QueryIntent, top_k: int) -> tu
         if candidate is not None:
             add(candidate, "suppressed_emergency_fallback")
 
+    # Final selected evidence handoff includes the audit report used by the
+    # Layer 2A retrieval-only result files.
     suppressed_ids = [evidence_id for evidence_id, state in eligibility.items() if state == Eligibility.SUPPRESSED]
     return selected, _report(
         intent,

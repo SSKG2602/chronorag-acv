@@ -1,3 +1,11 @@
+"""CLI entry point for the Layer 2B semantic judge.
+
+The judge maps generated Layer 2B answers into an independent
+semantic-evaluation pass while preserving deterministic hard-contract results.
+It is a secondary evaluation layer, not a replacement for strict contract
+scoring.
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -155,6 +163,7 @@ def write_markdown_summary(
 
 
 def render_markdown_summary(rows: list[dict[str, Any]], *, mode: str, result_suffix: str, input_results: str) -> str:
+    """Render judge metrics while keeping hard-contract and semantic scores separate."""
     deterministic_pass = sum(1 for row in rows if row.get("deterministic_overall_contract_pass") is True)
     judge_pass = sum(1 for row in rows if (row.get("judge_validation") or {}).get("overall_judge_pass") is True)
     combined_pass = sum(1 for row in rows if row.get("combined_pass") is True)
@@ -223,6 +232,7 @@ def _build_mapped_result(
     input_results: str,
     result_suffix: str,
 ) -> dict[str, Any]:
+    """Map one answer-result row to the case, evidence, and judge input shape."""
     question_id = str(answer_row.get("question_id") or "")
     case = cases.get(question_id)
     evidence_rows, missing_evidence_ids = _evidence_rows_for_result(answer_row, corpus_lookup)
@@ -277,6 +287,7 @@ def _build_mapped_result(
 
 
 def _finalize_vertex_result(row: dict[str, Any], judge: dict[str, Any], latency_ms: float) -> dict[str, Any]:
+    """Attach Vertex judge output without replacing deterministic validation."""
     deterministic_pass = row.get("deterministic_overall_contract_pass") is True
     judge_pass = judge.get("overall_judge_pass") is True
     row["judge_validation"] = judge
@@ -334,6 +345,7 @@ def _strip_internal_fields(row: dict[str, Any]) -> dict[str, Any]:
 
 
 def _dry_run_judge_validation() -> dict[str, Any]:
+    """Return the explicit non-scoring judge payload used for dry runs."""
     return {
         "overall_judge_pass": None,
         "severity": "not_applicable",

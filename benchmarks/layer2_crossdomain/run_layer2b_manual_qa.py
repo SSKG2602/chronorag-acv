@@ -1,3 +1,10 @@
+"""CLI entry point for the Layer 2B manual 50-case QA run.
+
+This script runs answer generation over an existing manual QA dataset. It does
+not create the dataset, does not judge semantic quality, and does not modify
+retrieval benchmarks.
+"""
+
 from __future__ import annotations
 
 import argparse

@@ -1,3 +1,12 @@
+"""Layer 2B manual QA runner utilities.
+
+Layer 2B evaluates answer synthesis and contract validation over fixed manual
+QA cases. Expected evidence may be injected when needed to isolate answer
+behavior from retrieval misses. Retrieval quality is evaluated separately in
+Layer 2A, so this module must not be used to claim cross-domain retrieval
+performance.
+"""
+
 from __future__ import annotations
 
 import json
@@ -189,6 +198,12 @@ def retrieve_layer2b_evidence(
     ensure_expected_evidence: bool,
     corpus_lookup: dict[str, CorpusRow],
 ) -> tuple[list[CorpusRow], dict[str, Any]]:
+    """Retrieve Layer 2B evidence and optionally inject expected evidence.
+
+    The retrieval-before-injection fields are retained for audit visibility,
+    while the returned evidence may include expected rows so Layer 2B can test
+    answer synthesis and validation with the needed evidence in context.
+    """
     attempts = _top_k_progression(top_k, max_top_k) if dynamic_top_k else [top_k]
     final_rows: list[CorpusRow] = []
     final_metadata: dict[str, Any] = {}
@@ -235,6 +250,12 @@ def retrieve_layer2b_evidence(
 
 
 def build_layer2b_prompt(case: Layer2BQACase, evidence_rows: list[CorpusRow]) -> str:
+    """Build the grounded answer prompt for one manual Layer 2B QA case.
+
+    The prompt constrains answer synthesis to supplied evidence and makes
+    valid-time, transaction-time, citation, and partial/refusal contracts
+    explicit for downstream validation.
+    """
     cards = "\n".join(json.dumps(_evidence_card(row, index), ensure_ascii=True, sort_keys=True) for index, row in enumerate(evidence_rows, start=1))
     schema = {
         "answer": "...",
@@ -300,6 +321,12 @@ def validate_answer_contract(
     retrieved_evidence_ids: list[str],
     corpus_lookup: dict[str, CorpusRow],
 ) -> dict[str, Any]:
+    """Score a generated Layer 2B answer against the deterministic contract.
+
+    This validator checks schema, citations, valid-time use, behavior labels,
+    and evidence availability for answer quality. It does not score
+    cross-domain retrieval quality.
+    """
     normalized = normalize_answer_payload(answer_payload)
     schema_pass = normalized is not None
     cited = normalized.get("cited_evidence_ids", []) if normalized else []
@@ -639,14 +666,21 @@ def write_markdown_summary(
     top_k: int,
     result_suffix: str,
 ) -> None:
+    """Write the human-readable Layer 2B answer-validation summary."""
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(render_markdown_summary(rows, mode=mode, top_k=top_k, result_suffix=result_suffix), encoding="utf-8")
 
 
 def render_markdown_summary(rows: list[dict[str, Any]], *, mode: str, top_k: int, result_suffix: str) -> str:
+    """Render Layer 2B answer-validation metrics without altering result rows.
+
+    Retrieval-before-injection is read from retrieval metadata; answer-contract
+    metrics are read from validation fields so the summary preserves the Layer
+    2A versus Layer 2B boundary.
+    """
     provider_errors = sum(1 for row in rows if row.get("status") == "provider_error")
     schema_failures = _count_validation_false(rows, "schema_pass")
-    retrieved_expected = sum(1 for row in rows if row.get("validation", {}).get("expected_evidence_retrieved_at_k"))
+    retrieved_expected = sum(1 for row in rows if _any_expected_evidence_retrieved_before_injection(row))
     available_expected = sum(1 for row in rows if row.get("validation", {}).get("expected_evidence_available_to_model"))
     injected_rows = [
         row
@@ -695,6 +729,8 @@ def render_markdown_summary(rows: list[dict[str, Any]], *, mode: str, top_k: int
             [
                 "Expected-evidence injection was used for at least one case. Injected evidence is gold evidence made available to evaluate answer synthesis with the right evidence in context; it must not be interpreted as retrieval quality.",
                 "",
+                "The row table reports expected evidence availability after injection. Retrieval-before-injection is tracked separately in the JSONL under `retrieval_metadata.expected_evidence_retrieved_before_injection`; the summary count uses case-level overlap with `retrieval_metadata.retrieved_evidence_ids_before_injection`.",
+                "",
             ]
         )
     lines.extend(
@@ -737,6 +773,12 @@ def render_markdown_summary(rows: list[dict[str, Any]], *, mode: str, top_k: int
 def sleep_between_vertex_requests(seconds: float) -> None:
     if seconds > 0:
         time.sleep(seconds)
+
+
+def _any_expected_evidence_retrieved_before_injection(row: dict[str, Any]) -> bool:
+    expected = set(row.get("expected_evidence_ids") or [])
+    before = set((row.get("retrieval_metadata") or {}).get("retrieved_evidence_ids_before_injection") or [])
+    return bool(expected & before)
 
 
 def _evidence_card(row: CorpusRow, rank: int) -> dict[str, Any]:

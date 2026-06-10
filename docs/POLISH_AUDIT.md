@@ -1,12 +1,17 @@
 # ChronoRAG Repo Polish Audit
 
+Status note: this is a historical cleanup audit, not the current roadmap. Later
+Layer 2A and Layer 2B public checkpoints supersede the forward-looking items
+below.
+
 ## Current Status
 
 ChronoRAG now has a consistent public quickstart, verified light-mode demo path,
 committed demo assets under `assets/demo/`, Temporal Eval v2 retrieval results,
-and Layer 1B answer-validation results. The repository should still be
-presented as a temporal-RAG research-demo scaffold, not as a production service
-or publication-grade proof.
+Layer 1B answer-validation results, a Layer 2A public retrieval-quality
+checkpoint, and a Layer 2B public answer-synthesis/validation checkpoint. The
+repository should still be presented as a temporal-RAG research-demo scaffold,
+not as a production service or publication-grade proof.
 
 ## Completed Polish Items
 
@@ -87,10 +92,10 @@ polarity in temporal constraints. Valid time remains separate from
 transaction/publication/filing/release time. This is retrieval precision
 hardening, not a benchmark win.
 
-Next planned step: rerun 50-case and 200-case retrieval-only Layer 2A with
-the v3 question set, polarity-aware temporal scoring, and retrieval
-finalization. Active hybrid retrieval with embeddings should remain a separate
-patch if the retrieval-only rerun shows it is needed.
+Historical next step at the time: rerun 50-case and 200-case retrieval-only
+Layer 2A with the v3 question set, polarity-aware temporal scoring, and
+retrieval finalization. Later public Layer 2A and Layer 2B checkpoints supersede
+that forward-looking item.
 
 ### P2: External Baselines
 

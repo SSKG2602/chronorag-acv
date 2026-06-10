@@ -1,3 +1,10 @@
+"""Post-fusion evidence finalization for ChronoRAG Layer 2A retrieval.
+
+This module cleans and ranks candidate evidence after temporal fusion. It
+handles valid-time fit, transaction-role penalties, source/metric adjustment,
+and top-k diversification. It does not generate natural-language answers.
+"""
+
 from __future__ import annotations
 
 import re
@@ -69,15 +76,19 @@ def finalize_chronorag_evidence(
     source_metric_count = 0
 
     if not config.disable_temporal_precision:
+        # Exact valid-time cleanup keeps precise fact-time rows ahead of nearby
+        # or broad-window rows in single-target retrieval cases.
         adjusted, exact_count = _apply_exact_valid_time_cleanup(adjusted, constraints, query_text)
     if not config.disable_transaction_role:
+        # Transaction-role cleanup prevents lifecycle dates from standing in
+        # for requested valid-time evidence.
         adjusted, transaction_count = _apply_transaction_role_cleanup(adjusted, constraints, query_text)
     if not config.disable_source_metric:
+        # Source/metric adjustment rewards explicit source, metric, unit, and
+        # version matches when those anchors appear in the question.
         adjusted, source_metric_count = _apply_source_metric_adjustments(adjusted, query_text)
 
     adjusted.sort(key=lambda item: item.score, reverse=True)
-    # The assembler only needs a bounded high-scoring pool; the benchmark still
-    # scores the final top-k selected evidence IDs, not the full candidate list.
     assembler_pool = adjusted[: min(len(adjusted), 200)]
     intent = classify_query_intent(query_text=query_text, constraints=constraints, candidates=assembler_pool)
     if config.disable_slot_assembler:
@@ -87,6 +98,8 @@ def finalize_chronorag_evidence(
             "selected_evidence_ids": [item.row.id for item in selected],
         }
     else:
+        # Diversified top-k selection keeps comparison and conflict-style
+        # questions from collapsing to one high-scoring slot.
         selected, slot_report = assemble_top_k(assembler_pool, intent, top_k)
 
     metadata = {

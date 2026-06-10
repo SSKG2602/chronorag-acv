@@ -2,9 +2,11 @@
 
 ChronoRAG is a research scaffold for temporal RAG. It implements bitemporal
 retrieval concepts and validates them with controlled retrieval and grounding
-diagnostics. Layer 1B answer validation is implemented. Layer 2A is currently a
-controlled benchmark/debugging layer for temporal retrieval and grounding, not a
-SOTA claim or publication-grade proof.
+diagnostics. Layer 1A, Layer 1B, Layer 2A, and Layer 2B are completed
+evaluation checkpoints. Layer 2A has a completed public retrieval-quality
+checkpoint. Layer 2B has a completed 50-case natural-language QA checkpoint.
+Further runs may expand coverage, but they are not prerequisites for the
+current public artifact map.
 
 ## P0: Credibility Cleanup
 
@@ -43,12 +45,15 @@ SOTA claim or publication-grade proof.
 - Use `--result-suffix` for comparative result files without overwriting the
   default benchmark outputs.
 
-## P3: Layer 2 Generalization
+## P3: Layer 2 Completed Checkpoints And Extensions
 
-- Maintain the 5,000-row / 200-question generated dataset path before claiming
-  cross-domain performance.
-- Evaluate generalization across domains using independent metadata temporal
-  RAG and ChronoRAG full under the same corpus and questions.
+- Maintain the completed Layer 2A 5,000-row / 200-question retrieval-quality
+  checkpoint as the current public cross-domain retrieval artifact.
+- Maintain the completed Layer 2B 50-case natural-language QA checkpoint as the
+  current public answer-synthesis and validation artifact.
+- Expand generalization coverage across domains using independent metadata
+  temporal RAG, ChronoRAG full, and future external baselines under the same
+  corpus and questions.
 - Treat small Vertex pilots as diagnostics, not final benchmark results.
 - Keep deterministic Layer 2A validation retrieval-only. It reads
   `selected_evidence_ids` and scores expected evidence Hit@1/Hit@k, acceptable
@@ -76,9 +81,8 @@ SOTA claim or publication-grade proof.
 - Keep core TCC precision metadata backward-compatible while extending
   `normalized_start`, `normalized_end`, `precision`, `temporal_role`, and
   ambiguity fields across ingestion paths.
-- Next planned step: rerun 50-case and 200-case retrieval-only Layer 2A with
-  retrieval finalization, then add active hybrid retrieval with embeddings as a
-  separate patch if needed.
+- Further retrieval-only and answer-validation runs may expand coverage. They
+  are not prerequisites for the current public artifact map.
 
 ## P4: ChronoSanity Strengthening
 

@@ -36,68 +36,92 @@ answer validation.
 
 Temporal Contextual Chunking keeps the original evidence row available for
 grounding while building retrieval text that states the entity, metric, source,
-document context, and temporal role more explicitly. It exists because raw rows
-often carry too little context for retrieval: a date, value, or filing mention
-can look relevant without showing whether it is the time of the claim or merely
-document metadata. This targets topically close evidence that can win ranking
-when its temporal context is implicit or missing.
+document context, and temporal role more explicitly. Raw rows often carry too
+little context to be retrieved safely on their own. TCC wraps each row with a
+compact global context and explicit temporal metadata before embedding, so the
+retriever sees both the fact and its time scope.
 
 ### `valid_time` vs `transaction_time` separation
 
 ChronoRAG separates when a claim is true from when that claim was filed,
-published, released, observed, imported, or ingested. This distinction exists
-because RAG systems often over-trust prominent dates in a passage even when
-those dates describe document lifecycle events rather than the fact being asked
-about. This targets cases where a publication date, SEC filing date, release
-date, or ingestion date is mistaken for the valid time of the economic, market,
-legal, or software claim.
+published, released, observed, imported, or ingested. RAG systems often
+over-trust prominent dates in a passage even when those dates describe document
+lifecycle events rather than the fact being asked about. The separation keeps
+publication dates, SEC filing dates, release dates, and ingestion dates from
+being mistaken for the valid time of an economic, market, legal, or software
+claim.
 
 ### Temporal precision scoring
 
 Temporal precision scoring compares the query's requested time against the
 candidate evidence at the right granularity: year, month, day, timestamp,
-quarter, daypart, range, or fuzzy range. It exists because a broad match to the
-right year or range is not equivalent to exact dated support when the question
-asks for a precise time. This targets broad-window or nearby-date evidence that
-can outrank exact evidence for the requested temporal slot.
+quarter, daypart, range, or fuzzy range. A broad match to the right year or
+range is not equivalent to exact dated support when the question asks for a
+precise time, so broad-window and nearby-date evidence are penalized when exact
+evidence is required for the requested temporal slot.
+
+### Temporal Fusion
+
+Semantic similarity alone can rank a temporally wrong row above the right one.
+Temporal Fusion combines semantic score, valid-time fit, interval overlap,
+as-of preference, and transaction-role penalties before final ranking.
 
 ### Negative/polarity-aware temporal constraints
 
 Some questions specify dates that should be excluded, such as a market movement
 that must not be explained with evidence from a nearby date. ChronoRAG treats
 target dates and forbidden dates as different retrieval signals instead of
-collapsing them into one bag of temporal tokens. This targets evidence that is
-lexically relevant because it mentions an excluded date, even though the
-question explicitly rules that date out.
+collapsing them into one bag of temporal tokens. Evidence that mentions an
+excluded date can be lexically relevant, but the retriever should still demote
+it when the question explicitly rules that date out.
 
 ### Source/metric-aware ranking adjustment
 
 ChronoRAG uses source family, source file, metric, claim, unit, and version
-anchors when the question asks for a specific source or measurement. This
-exists because temporal retrieval errors are often source or metric errors in
-disguise: a GDP row can be confused with GDP per capita, or a release note can
-be confused with a market index series if time alone is scored. The targeted
-failure mode is selecting temporally plausible evidence with the wrong source
-family, wrong file, wrong metric, or wrong version role.
+anchors when the question asks for a specific source or measurement. Temporal
+retrieval errors are often source or metric errors in disguise: a GDP row can
+be confused with GDP per capita, or a release note can be confused with a
+market index series if time alone is scored. This adjustment reduces
+temporally plausible evidence with the wrong source family, wrong file, wrong
+metric, or wrong version role.
 
 ### Slot-aware final evidence assembly
 
 Comparison, before/after, and multi-entity questions need coverage across
 multiple evidence slots rather than only the highest-scoring rows overall.
-Slot-aware assembly exists because one dominant entity, year, or source family
-can fill the final top-k and crowd out the other side of the comparison. This
-targets retrieval sets that look strong by score but cannot support the actual
-multi-slot question.
+Slot-aware assembly prevents one dominant entity, year, or source family from
+filling the final top-k and crowding out the other side of the comparison. A
+retrieval set can look strong by score while still failing to support the
+actual multi-slot question.
+
+### ChronoSanity
+
+ChronoSanity is the conflict guardrail. It catches cases where multiple rows
+are topically relevant but disagree across valid time, transaction time, or
+revision history, then forces the answer path to expose that ambiguity instead
+of smoothing it away.
 
 ### Answer-contract validation
 
 Answer-contract validation checks whether a generated or deterministic answer
 cites expected evidence, uses valid time correctly, avoids transaction-time
 misuse, handles insufficient evidence, and satisfies provider-output contracts.
-It exists because a model can cite plausible evidence while still making the
-wrong temporal claim. This targets generated answers that look grounded but
+A model can cite plausible evidence while still making the wrong temporal
+claim, so the validator checks generated answers that look grounded but
 violate the requested temporal role, citation contract, or partial/refusal
 behavior.
+
+### Attribution Cards
+
+Attribution Cards make the final evidence auditable. Each selected row carries
+source ID, valid-time range, transaction-time notes, and confidence metadata so
+a reader can inspect why the answer used that evidence.
+
+### Light Mode
+
+Light Mode exists for reproducible local runs. It keeps the temporal evidence
+path deterministic and avoids depending on provider behavior when the goal is
+to test retrieval and validation mechanics.
 
 ### Controlled benchmark correction process
 
@@ -107,6 +131,18 @@ documented where question wording, expected evidence, forbidden evidence, or
 corpus availability made an earlier test invalid or under-specified. This
 prevents retrieval behavior from being scored against hidden assumptions instead
 of aligned question text and available evidence.
+
+### Layer 2A Cross-Domain Retrieval
+
+Layer 2A tests retrieval under mixed domains rather than answer generation. It
+scores selected_evidence_ids against expected evidence, forbidden traps,
+temporal fit, and category-specific constraints.
+
+### Layer 2B Manual QA
+
+Layer 2B moves from evidence selection to natural-language answers. Expected
+evidence can be injected where needed, which isolates answer behavior and
+validation quality; it must not be used as a retrieval-quality claim.
 
 ## Architecture
 
@@ -185,9 +221,9 @@ whether it can find a semantically related passage.
 
 It tests exact valid-time retrieval, wrong-year and wrong-time traps, broad
 window distractors, valid-time versus transaction-time behavior, proxy conflict
-cases, and partial/refusal proxy behavior. In simple terms, the benchmark checks
-whether the system finds evidence that is true at the requested time and avoids
-nearby evidence that merely looks relevant.
+cases, and partial/refusal proxy behavior. Layer 1A checks whether the system
+finds evidence that is true at the requested time and avoids nearby evidence
+that merely looks relevant.
 
 Benchmark files:
 
@@ -236,8 +272,12 @@ boundary.
 
 ## Layer 2A: Cross-Domain Retrieval-Only
 
-Layer 2A is a controlled cross-domain retrieval-only benchmark. It validates
-selected evidence behavior, not generated natural-language answers.
+Layer 2A is a controlled cross-domain retrieval-only benchmark. Layer 2A
+scores evidence selection, not answer prose. Its metrics operate on
+selected_evidence_ids and therefore measure whether the retriever selected the
+right temporally valid rows, avoided forbidden traps, and satisfied category
+constraints. Generated wording, fluency, and natural-language reasoning are
+evaluated separately in Layer 2B.
 
 ### Layer 2A dataset and method setup
 
@@ -281,8 +321,8 @@ Methods compared:
 
 Scoring boundary:
 
-- Layer 2A scores `selected_evidence_ids` only.
-- It does not score generated natural-language answers.
+- As above, Layer 2A is evidence-selection only; answer wording is evaluated
+  separately in Layer 2B.
 - Diagnostic categories are separated where applicable so source, temporal,
   slot, forbidden-evidence, and insufficiency behavior can be interpreted
   without blending them into one opaque aggregate.
@@ -346,9 +386,6 @@ Layer 2A v3 retrieval-only summary:
 |---|---:|---:|---:|---:|---:|
 | `chronorag_full` | 200 | 0.82 | 0.90 | 0.99 | 0.96 |
 | `metadata_temporal_rag` | 200 | 0.69 | 0.86 | 0.69 | 0.48 |
-
-These metrics score `selected_evidence_ids`. They do not evaluate generated
-answer wording, fluency, or natural-language reasoning.
 
 ### What the Layer 2A result means
 
@@ -439,113 +476,79 @@ and final eligibility-gated selection.
 
 ### `chronorag_no_tcc`
 
-What was removed: this variant uses raw row text instead of Temporal
-Contextual Chunking retrieval text. It removes the enriched retrieval framing
-that names temporal metadata, source context, entity context, and document
-context around the evidence row.
-
-Failure pattern: raw rows can be underspecified, especially when values,
-dates, release labels, or filings need surrounding context to be interpreted
-correctly. Without TCC, retrieval can over-rank rows that share surface tokens
-but do not clearly support the requested temporal claim.
-
-What it helps interpret: this ablation isolates the value of contextual
-retrieval text and structured row framing before later scoring and finalization
-steps operate on candidate evidence.
+This ablation uses raw row text instead of Temporal Contextual Chunking
+retrieval text, removing the enriched framing that names temporal metadata,
+source context, entity context, and document context around the evidence row.
+Raw rows can be underspecified when values, dates, release labels, or filings
+need surrounding context to be interpreted correctly, so retrieval can over-rank
+rows that share surface tokens but do not support the requested temporal claim.
+The result isolates the value of contextual retrieval text and structured row
+framing before later scoring and finalization operate on candidate evidence.
 
 ### `chronorag_no_temporal_precision`
 
-What was removed: this variant disables explicit temporal precision scoring,
-including exact day, month, year, timestamp, range, and nearby-time handling
-used before final evidence assembly.
-
-Failure pattern: evidence from a nearby date, broad range, or weaker
-temporal granularity can outrank exact evidence for the requested time. It also
-weakens suppression of wrong-time evidence when the question depends on exact
-temporal alignment.
-
-What it helps interpret: this ablation shows how much of the controlled
-retrieval behavior comes from explicit temporal precision rather than ordinary
-semantic or metadata relevance.
+This ablation disables explicit temporal precision scoring, including exact
+day, month, year, timestamp, range, and nearby-time handling before final
+evidence assembly. Evidence from a nearby date, broad range, or weaker temporal
+granularity can then outrank exact evidence for the requested time, and
+wrong-time suppression becomes weaker when the question depends on exact
+temporal alignment. The result shows how much of the controlled retrieval
+behavior comes from explicit temporal precision rather than ordinary semantic
+or metadata relevance.
 
 ### `chronorag_no_transaction_role`
 
-What was removed: this variant disables the final cleanup that demotes
-transaction-time-only evidence when the question asks for valid-time evidence.
-It reduces the system's ability to distinguish claim time from filing,
-publication, release, observation, import, or ingestion time at final selection.
-
-Failure pattern: document lifecycle dates can remain in the final top-k
-as if they supported the requested fact time. This is especially important for
-SEC, Federal Register, release, and imported-data cases where transaction dates
-are prominent.
-
-What it helps interpret: this ablation tests whether valid-time and
-transaction-time separation is only descriptive metadata or whether it changes
-the selected evidence behavior in the benchmark.
+This ablation disables the final cleanup that demotes transaction-time-only
+evidence when the question asks for valid-time evidence. Document lifecycle
+dates can remain in the final top-k as if they supported the requested fact
+time, which matters for SEC, Federal Register, release, and imported-data cases
+where transaction dates are prominent. The result tests whether valid-time and
+transaction-time separation is only descriptive metadata or changes selected
+evidence behavior in the benchmark.
 
 ### `chronorag_no_source_metric`
 
-What was removed: this variant disables source and metric adjustment in
-finalization, including source-family, source-file, metric, claim, unit, and
-version anchors where those constraints are available.
-
-Failure pattern: the retriever can select evidence that is temporally
-plausible but tied to the wrong source family, file, metric, or version role.
-For example, a row may match the date but support a different measurement or
-come from the wrong source lineage.
-
-What it helps interpret: this ablation separates temporal matching from the
+This ablation disables source and metric adjustment in finalization, including
+source-family, source-file, metric, claim, unit, and version anchors where those
+constraints are available. The retriever can still select temporally plausible
+evidence, but the evidence may come from the wrong source family, file, metric,
+or version role; a row can match the date while supporting a different
+measurement or source lineage. The result separates temporal matching from the
 source and measurement constraints needed for evidence contracts that ask for a
 specific series, filing family, release family, metric, or version.
 
 ### `chronorag_no_slot_assembler`
 
-What was removed: this variant disables slot-aware evidence assembly for
-multi-slot questions. It relies more heavily on global ranking rather than
-ensuring coverage across requested entities, dates, sources, or comparison
-sides.
-
-Failure pattern: one dominant slot can fill the final top-k while another
-required slot is absent. A comparison question can therefore retrieve many
-relevant rows but still fail to provide the evidence coverage needed to answer
-the actual question.
-
-What it helps interpret: this ablation tests whether final evidence assembly is
-needed for multi-slot temporal retrieval, beyond simply scoring each candidate
-row independently.
+This ablation disables slot-aware evidence assembly for multi-slot questions,
+so the path relies more heavily on global ranking instead of ensuring coverage
+across requested entities, dates, sources, or comparison sides. One dominant
+slot can fill the final top-k while another required slot is absent, letting a
+comparison question retrieve many relevant rows but still miss the coverage
+needed to answer the actual question. The result tests whether final evidence
+assembly is needed for multi-slot temporal retrieval beyond independently
+scoring each candidate row.
 
 ### `chronorag_score_only`
 
-What was removed: this variant uses fused score ordering without the final
-eligibility-gated selection behavior provided by the full finalization path.
-It keeps scoring but removes the stronger selection layer that applies
-constraints before final top-k evidence is accepted.
-
-Failure pattern: high-scoring rows that are topically or temporally close
-can remain in the final set even when they violate a forbidden-evidence,
-wrong-role, source/metric, slot-coverage, or insufficiency constraint.
-
-What it helps interpret: this ablation tests whether fused ranking alone is
-enough, or whether controlled temporal retrieval needs a final evidence gate
-that enforces eligibility after scores are computed.
+This ablation uses fused score ordering without the final eligibility-gated
+selection behavior provided by the full finalization path. High-scoring rows
+that are topically or temporally close can remain in the final set even when
+they violate a forbidden-evidence, wrong-role, source/metric, slot-coverage, or
+insufficiency constraint. The result tests whether fused ranking alone is
+enough or whether controlled temporal retrieval needs a final evidence gate
+after scores are computed.
 
 ### `metadata_temporal_rag`
 
-What was changed: this is an independent temporal metadata retrieval baseline,
-not a deliberately weakened copy of ChronoRAG. It uses temporal metadata to
-retrieve and rank evidence, but it does not include the full ChronoRAG
-combination of TCC, precision handling, temporal-role cleanup, source/metric
-adjustment, slot-aware assembly, and final eligibility gating.
-
-Failure pattern: the baseline can retrieve many relevant rows while still
-allowing wrong-role, forbidden, missing-slot, or source/metric-mismatched
-evidence into the final selected set.
-
-What it helps interpret: this comparison separates generic metadata-aware
-temporal retrieval from the ChronoRAG retrieval/finalization path. It provides a
-reference point for understanding which behaviors depend on additional
-finalization and contract-aware retrieval steps.
+This independent temporal metadata retrieval baseline is not a deliberately
+weakened copy of ChronoRAG. It uses temporal metadata to retrieve and rank
+evidence, but it does not include the full ChronoRAG combination of TCC,
+precision handling, temporal-role cleanup, source/metric adjustment, slot-aware
+assembly, and final eligibility gating. The baseline can retrieve many relevant
+rows while still allowing wrong-role, forbidden, missing-slot, or
+source/metric-mismatched evidence into the final selected set, giving a
+reference point for which behaviors depend on additional finalization and
+contract-aware retrieval steps.
 
 Stored result:
 
@@ -620,7 +623,7 @@ result artifacts, and reproducibility commands visible, while distinguishing
 tracked samples from generated working data.
 
 Conflict detection requires real conflict-pair data. The current corpus did not
-provide reliable real conflict-pair rows for the planned Layer 2A conflict
+provide reliable real conflict-pair rows for the blocked Layer 2A conflict
 category, so that category is documented as data-contract blocked rather than
 reported as a normal retrieval metric.
 
@@ -657,9 +660,9 @@ rebuilt from the raw/source families above.
 
 ### Research/report work
 
-Planned research and communication work includes a technical report,
-arXiv-style draft, LinkedIn/build-log posts, and a professor or lab outreach
-summary. These are planned reporting artifacts, not completed benchmark layers.
+Public technical report material exists in `docs/TECHNICAL_REPORT.md`; an
+arXiv-style paper and outreach summaries remain future work. These are
+reporting artifacts, not completed benchmark layers.
 
 ### Layer 2B natural-language QA result
 
@@ -671,10 +674,10 @@ and manual audit of selected validator-strictness cases.
 
 ### Technical report / arXiv-style draft
 
-The technical report and arXiv-style draft remain planned reporting work. The
-report should use the current Layer 1A, Layer 1B, Layer 2A, and Layer 2B
-results while keeping retrieval-quality claims separate from answer-validation
-claims.
+Public technical report material exists in `docs/TECHNICAL_REPORT.md`; an
+arXiv-style paper remains future work. Reporting should use the current Layer
+1A, Layer 1B, Layer 2A, and Layer 2B results while keeping retrieval-quality
+claims separate from answer-validation claims.
 
 ### Outreach and portfolio work
 

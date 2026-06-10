@@ -1,3 +1,10 @@
+"""Validator for the Layer 2B manual QA seed file.
+
+The validator checks that each manual question references corpus evidence
+consistently before answer generation or judging. It protects the benchmark
+input contract; it does not score model answers.
+"""
+
 from __future__ import annotations
 
 import argparse
