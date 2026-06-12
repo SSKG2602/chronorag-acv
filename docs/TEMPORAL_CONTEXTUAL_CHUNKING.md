@@ -28,8 +28,8 @@ depends on time because a chunk can lose:
 
 For temporal RAG, a passage can be topically relevant but temporally wrong. A
 chunk about GDP per capita may mention Western Europe and 1990 international
-dollars, but if it lacks the year or inherits a broad document window, it is weak
-evidence for an exact-year query.
+dollars, but if it lacks the year or inherits a broad document window, it is
+less reliable evidence for an exact-year query.
 
 ## Method Overview
 
@@ -201,7 +201,7 @@ Publication year exists:
 
 Broad windows such as `1000-01-01` to `2006-12-31`:
 
-- Treat them as weak for exact temporal retrieval.
+- Treat them as low-confidence evidence for exact temporal retrieval.
 - Penalize them when exact-year evidence exists.
 
 ## Examples

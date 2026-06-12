@@ -79,5 +79,5 @@ normalization, and preserved usable initial provider output when repair fails.
 Default `--top-k` remains 5, the embedding model is unchanged, and optional
 `--dynamic-top-k` exists only for complex-case experiments. Comparative runs can
 be stored with `--result-suffix` without overwriting default outputs. The final
-cleanup makes q02/q11/q13 validation behavior-aware without weakening grounding,
-valid-time, or transaction-time checks.
+cleanup makes q02/q11/q13 validation behavior-aware while preserving grounding,
+valid-time, and transaction-time checks.

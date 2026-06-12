@@ -202,7 +202,7 @@ Current benchmark evidence supports:
   slot-coverage constraints.
 - ChronoRAG can perform grounded temporal answer synthesis in Layer 2B when
   expected evidence is available to the answer-generation path.
-- Layer 2B exposes remaining weaknesses in valid-time precision, behavior
+- Layer 2B exposes remaining error modes in valid-time precision, behavior
   labels, and unsupported detail control.
 
 Interpretation boundaries:
@@ -397,7 +397,7 @@ must stay out of the final top-k.
 `metadata_temporal_rag` still retrieves many relevant rows, especially under
 generic Hit@5. The benchmark shows that relevant retrieval alone is not always
 enough when the final evidence set must satisfy temporal role, source/metric,
-slot coverage, and forbidden-evidence constraints. Weaker finalization or
+slot coverage, and forbidden-evidence constraints. Less precise finalization or
 constraint handling can allow wrong-role or forbidden evidence to remain in the
 selected evidence set.
 
@@ -463,7 +463,7 @@ These scores are copied from
 | `chronorag_no_transaction_role` | 200 | 0.8250 | 0.8950 | 0.9950 | 0.9625 | 0.0000 | Same overall category-primary pass as full in this controlled run. |
 | `chronorag_no_source_metric` | 200 | 0.8300 | 0.8900 | 1.0000 | 0.9688 | 0.0062 | Source/metric ablation did not reduce overall primary pass in this run. |
 | `chronorag_no_slot_assembler` | 200 | 0.8300 | 0.8900 | 0.8150 | 0.7750 | -0.1875 | Lower forbidden-absence and category-primary pass without slot assembly. |
-| `chronorag_score_only` | 200 | 0.8150 | 0.9850 | 0.6500 | 0.5625 | -0.4000 | High generic Hit@5 but weaker final selected-evidence behavior. |
+| `chronorag_score_only` | 200 | 0.8150 | 0.9850 | 0.6500 | 0.5625 | -0.4000 | High generic Hit@5 but lower final selected-evidence behavior. |
 | `metadata_temporal_rag` | 200 | 0.6900 | 0.8600 | 0.6950 | 0.4813 | -0.4813 | Independent metadata baseline with lower category-primary pass here. |
 
 The ablation score table is the fastest way to see which component removals
@@ -488,9 +488,9 @@ framing before later scoring and finalization operate on candidate evidence.
 
 This ablation disables explicit temporal precision scoring, including exact
 day, month, year, timestamp, range, and nearby-time handling before final
-evidence assembly. Evidence from a nearby date, broad range, or weaker temporal
-granularity can then outrank exact evidence for the requested time, and
-wrong-time suppression becomes weaker when the question depends on exact
+evidence assembly. Evidence from a nearby date, broad range, or less specific
+temporal granularity can then outrank exact evidence for the requested time, and
+wrong-time suppression drops when the question depends on exact
 temporal alignment. The result shows how much of the controlled retrieval
 behavior comes from explicit temporal precision rather than ordinary semantic
 or metadata relevance.
@@ -540,7 +540,7 @@ after scores are computed.
 ### `metadata_temporal_rag`
 
 This independent temporal metadata retrieval baseline is not a deliberately
-weakened copy of ChronoRAG. It uses temporal metadata to retrieve and rank
+reduced copy of ChronoRAG. It uses temporal metadata to retrieve and rank
 evidence, but it does not include the full ChronoRAG combination of TCC,
 precision handling, temporal-role cleanup, source/metric adjustment, slot-aware
 assembly, and final eligibility gating. The baseline can retrieve many relevant
@@ -812,6 +812,16 @@ The strict combined score requires both hard validation and judge pass. The LLM
 semantic score is the judge-only answer-quality score. The manual-audited
 acceptable score is a secondary interpretation after accepting 3 manually
 reviewed validator-strictness cases, and it does not replace the strict score.
+
+## Paper Preparation Assets
+
+Paper-support notes, qualitative case extracts, and figure assets are available
+under:
+
+- `docs/PAPER_SOURCE_NOTES.md`
+- `docs/PAPER_QUALITATIVE_CASES.md`
+- `docs/PAPER_FIGURE_INDEX.md`
+- `docs/paper_assets/`
 
 ## Data and Artifact Structure
 

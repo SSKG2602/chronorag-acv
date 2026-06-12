@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="520" viewBox="0 0 980 520">
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<path d="M0,0 L0,6 L9,3 z" fill="#2f3a45" />
+</marker>
+</defs>
+<rect x="0" y="0" width="980" height="520" fill="#ffffff" />
+<text x="490" y="34" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#1f2933">Evidence Finalization Schematic</text>
+<text x="170" y="84" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#1f2933">Generic candidate evidence list</text>
+<rect x="40" y="115" width="260" height="46" rx="8" fill="#f8fafc" stroke="#45607a" stroke-width="1.4" />
+<text x="170.0" y="143.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">high semantic score, wrong date</text>
+<rect x="40" y="185" width="260" height="46" rx="8" fill="#f8fafc" stroke="#45607a" stroke-width="1.4" />
+<text x="170.0" y="206.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">correct entity, transaction-time</text>
+<text x="170.0" y="220.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">mismatch</text>
+<rect x="40" y="255" width="260" height="46" rx="8" fill="#f8fafc" stroke="#45607a" stroke-width="1.4" />
+<text x="170.0" y="283.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">correct source, forbidden date</text>
+<rect x="40" y="325" width="260" height="46" rx="8" fill="#f8fafc" stroke="#45607a" stroke-width="1.4" />
+<text x="170.0" y="353.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">correct date, wrong metric</text>
+<rect x="40" y="395" width="260" height="46" rx="8" fill="#f8fafc" stroke="#45607a" stroke-width="1.4" />
+<text x="170.0" y="423.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">required slot missing</text>
+<text x="490" y="84" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#1f2933">Temporal finalization controls</text>
+<rect x="360" y="115" width="260" height="46" rx="8" fill="#f8fafc" stroke="#45607a" stroke-width="1.4" />
+<text x="490.0" y="143.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">valid-time fit</text>
+<rect x="360" y="185" width="260" height="46" rx="8" fill="#f8fafc" stroke="#45607a" stroke-width="1.4" />
+<text x="490.0" y="213.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">transaction-role penalty</text>
+<rect x="360" y="255" width="260" height="46" rx="8" fill="#f8fafc" stroke="#45607a" stroke-width="1.4" />
+<text x="490.0" y="283.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">forbidden-time exclusion</text>
+<rect x="360" y="325" width="260" height="46" rx="8" fill="#f8fafc" stroke="#45607a" stroke-width="1.4" />
+<text x="490.0" y="353.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">source/metric anchors</text>
+<rect x="360" y="395" width="260" height="46" rx="8" fill="#f8fafc" stroke="#45607a" stroke-width="1.4" />
+<text x="490.0" y="423.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">slot coverage</text>
+<text x="810" y="84" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#1f2933">Final evidence set</text>
+<rect x="680" y="115" width="260" height="46" rx="8" fill="#f8fafc" stroke="#45607a" stroke-width="1.4" />
+<text x="810.0" y="143.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">valid date</text>
+<rect x="680" y="185" width="260" height="46" rx="8" fill="#f8fafc" stroke="#45607a" stroke-width="1.4" />
+<text x="810.0" y="213.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">correct source family</text>
+<rect x="680" y="255" width="260" height="46" rx="8" fill="#f8fafc" stroke="#45607a" stroke-width="1.4" />
+<text x="810.0" y="283.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">correct metric/claim</text>
+<rect x="680" y="325" width="260" height="46" rx="8" fill="#f8fafc" stroke="#45607a" stroke-width="1.4" />
+<text x="810.0" y="353.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">required slots covered</text>
+<rect x="680" y="395" width="260" height="46" rx="8" fill="#f8fafc" stroke="#45607a" stroke-width="1.4" />
+<text x="810.0" y="423.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">attribution metadata attached</text>
+<line x1="315" y1="270" x2="350" y2="270" stroke="#2f3a45" stroke-width="2" marker-end="url(#arrow)" />
+<line x1="635" y1="270" x2="670" y2="270" stroke="#2f3a45" stroke-width="2" marker-end="url(#arrow)" />
+</svg>

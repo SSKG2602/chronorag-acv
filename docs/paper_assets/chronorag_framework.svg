@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="540" viewBox="0 0 920 540">
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<path d="M0,0 L0,6 L9,3 z" fill="#2f3a45" />
+</marker>
+</defs>
+<rect x="0" y="0" width="920" height="540" fill="#ffffff" />
+<text x="460" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#1f2933">ChronoRAG Framework</text>
+<line x1="210" y1="96" x2="250" y2="96" stroke="#2f3a45" stroke-width="2" marker-end="url(#arrow)" />
+<line x1="420" y1="96" x2="460" y2="96" stroke="#2f3a45" stroke-width="2" marker-end="url(#arrow)" />
+<line x1="630" y1="96" x2="670" y2="96" stroke="#2f3a45" stroke-width="2" marker-end="url(#arrow)" />
+<line x1="755" y1="132" x2="335" y2="180" stroke="#2f3a45" stroke-width="2" marker-end="url(#arrow)" />
+<line x1="420" y1="216" x2="460" y2="216" stroke="#2f3a45" stroke-width="2" marker-end="url(#arrow)" />
+<line x1="630" y1="216" x2="670" y2="216" stroke="#2f3a45" stroke-width="2" marker-end="url(#arrow)" />
+<line x1="755" y1="252" x2="335" y2="300" stroke="#2f3a45" stroke-width="2" marker-end="url(#arrow)" />
+<line x1="420" y1="336" x2="460" y2="336" stroke="#2f3a45" stroke-width="2" marker-end="url(#arrow)" />
+<line x1="630" y1="336" x2="670" y2="336" stroke="#2f3a45" stroke-width="2" marker-end="url(#arrow)" />
+<line x1="755" y1="372" x2="545" y2="420" stroke="#2f3a45" stroke-width="2" marker-end="url(#arrow)" />
+<line x1="630" y1="456" x2="670" y2="456" stroke="#2f3a45" stroke-width="2" marker-end="url(#arrow)" />
+<rect x="40" y="60" width="170" height="72" rx="10" fill="#eef6ff" stroke="#45607a" stroke-width="1.4" />
+<text x="125.0" y="101.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">Query</text>
+<rect x="250" y="60" width="170" height="72" rx="10" fill="#eef6ff" stroke="#45607a" stroke-width="1.4" />
+<text x="335.0" y="101.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">Candidate Retrieval</text>
+<rect x="460" y="60" width="170" height="72" rx="10" fill="#eef6ff" stroke="#45607a" stroke-width="1.4" />
+<text x="545.0" y="94.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">Temporal Contextual</text>
+<text x="545.0" y="108.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">Chunking</text>
+<rect x="670" y="60" width="170" height="72" rx="10" fill="#eef6ff" stroke="#45607a" stroke-width="1.4" />
+<text x="755.0" y="87.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">Valid-Time /</text>
+<text x="755.0" y="101.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">Transaction-Time</text>
+<text x="755.0" y="115.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">Separation</text>
+<rect x="250" y="180" width="170" height="72" rx="10" fill="#eef6ff" stroke="#45607a" stroke-width="1.4" />
+<text x="335.0" y="214.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">Temporal Precision</text>
+<text x="335.0" y="228.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">Scoring</text>
+<rect x="460" y="180" width="170" height="72" rx="10" fill="#eef6ff" stroke="#45607a" stroke-width="1.4" />
+<text x="545.0" y="221.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">Temporal Fusion</text>
+<rect x="670" y="180" width="170" height="72" rx="10" fill="#eef6ff" stroke="#45607a" stroke-width="1.4" />
+<text x="755.0" y="214.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">Forbidden-Time</text>
+<text x="755.0" y="228.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">Handling</text>
+<rect x="250" y="300" width="170" height="72" rx="10" fill="#eef6ff" stroke="#45607a" stroke-width="1.4" />
+<text x="335.0" y="327.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">Source / Metric /</text>
+<text x="335.0" y="341.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">Slot-Aware</text>
+<text x="335.0" y="355.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">Finalization</text>
+<rect x="460" y="300" width="170" height="72" rx="10" fill="#eef6ff" stroke="#45607a" stroke-width="1.4" />
+<text x="545.0" y="341.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">ChronoSanity</text>
+<rect x="670" y="300" width="170" height="72" rx="10" fill="#eef6ff" stroke="#45607a" stroke-width="1.4" />
+<text x="755.0" y="341.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">Attribution Cards</text>
+<rect x="460" y="420" width="170" height="72" rx="10" fill="#eef6ff" stroke="#45607a" stroke-width="1.4" />
+<text x="545.0" y="461.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">Answer Synthesis</text>
+<rect x="670" y="420" width="170" height="72" rx="10" fill="#eef6ff" stroke="#45607a" stroke-width="1.4" />
+<text x="755.0" y="454.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">Answer-Contract</text>
+<text x="755.0" y="468.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="12.5" fill="#1f2933">Validation</text>
+</svg>

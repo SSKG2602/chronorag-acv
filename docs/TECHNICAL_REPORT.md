@@ -224,7 +224,7 @@ Main interpretation:
 - Temporal precision contributes to wrong-time suppression and exact-time
   ranking.
 - Slot assembly contributes strongly to multi-slot and cross-domain coverage.
-- Score-only ranking is weaker than final evidence selection in the v3 tested
+- Score-only ranking trails final evidence selection in the v3 tested
   setting.
 - Several ablations remain strong on explicitly anchored categories; those
   categories should be interpreted as controlled checks of the corresponding
@@ -340,7 +340,17 @@ python3 benchmarks/layer2_crossdomain/run_layer2_ablations.py \
   --result-suffix v3_ablation200
 ```
 
-## 13. Technical Limitations
+## 13. Paper Preparation Assets
+
+Paper-facing source notes, qualitative case extracts, and figure captions are
+available in:
+
+- `docs/PAPER_SOURCE_NOTES.md`
+- `docs/PAPER_QUALITATIVE_CASES.md`
+- `docs/PAPER_FIGURE_INDEX.md`
+- `docs/paper_assets/`
+
+## 14. Technical Limitations
 
 ### Temporal Expression Parsing
 
@@ -388,7 +398,7 @@ Additional visual analysis, such as score heatmaps, temporal-ranking traces,
 and before/after evidence finalization diagrams, would improve interpretability
 of the temporal retrieval process.
 
-## 14. Future Work
+## 15. Future Work
 
 Future work will focus on strengthening the temporal modeling layer rather than
 changing the core motivation of the framework.
