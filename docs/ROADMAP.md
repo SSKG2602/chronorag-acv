@@ -1,12 +1,12 @@
 # ChronoRAG Roadmap
 
-ChronoRAG is a research scaffold for temporal RAG. It implements bitemporal
+ChronoRAG is a research framework for temporal RAG. It implements bitemporal
 retrieval concepts and validates them with controlled retrieval and grounding
 diagnostics. Layer 1A, Layer 1B, Layer 2A, and Layer 2B are completed
 evaluation checkpoints. Layer 2A has a completed public retrieval-quality
 checkpoint. Layer 2B has a completed 50-case natural-language QA checkpoint.
-Further runs may expand coverage, but they are not prerequisites for the
-current public artifact map.
+Further runs can expand coverage while preserving the current public artifact
+map.
 
 ## P0: Credibility Cleanup
 
@@ -54,12 +54,13 @@ current public artifact map.
 - Expand generalization coverage across domains using independent metadata
   temporal RAG, ChronoRAG full, and future external baselines under the same
   corpus and questions.
-- Treat small Vertex pilots as diagnostics, not final benchmark results.
+- Treat small Vertex pilots as diagnostics separate from final benchmark
+  results.
 - Keep deterministic Layer 2A validation retrieval-only. It reads
   `selected_evidence_ids` and scores expected evidence Hit@1/Hit@k, acceptable
   evidence Hit@k, forbidden evidence absent@k, and category-specific temporal
   trap checks.
-- Do not interpret dry-run answer placeholders as answer-quality results.
+- Keep dry-run answer placeholders separate from answer-quality results.
 - Keep generated answer quality in a separate provider-backed grounded answer
   judge.
 - Use the `benchmarks/layer2_crossdomain/` framework to compare metadata
@@ -81,8 +82,8 @@ current public artifact map.
 - Keep core TCC precision metadata backward-compatible while extending
   `normalized_start`, `normalized_end`, `precision`, `temporal_role`, and
   ambiguity fields across ingestion paths.
-- Further retrieval-only and answer-validation runs may expand coverage. They
-  are not prerequisites for the current public artifact map.
+- Further retrieval-only and answer-validation runs may expand coverage while
+  preserving the current public artifact map.
 
 ## P4: ChronoSanity Strengthening
 
@@ -98,5 +99,5 @@ current public artifact map.
 - DHQC remains an active support module and may continue to evolve, but it is
   not the main claim of the current checkpoint. Historical Layer 2A experiments
   are outside the active benchmark surface.
-- Graph retrieval remains future work until `graph_paths.py` is replaced with a
-  real implementation.
+- Graph retrieval becomes part of the active path when `graph_paths.py` has a
+  configured graph backend, path-ranking policy, and evaluation contract.

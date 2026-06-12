@@ -40,8 +40,7 @@ Scope:
 - deterministic hard-contract validation
 - LLM judge semantic validation
 - human manual audit of validator-strictness cases
-- expected evidence available where needed, so this is not a retrieval-quality
-  result
+- answer synthesis and answer-validation scoring over the manual QA cases
 
 Layer 2B final scores:
 
@@ -70,17 +69,6 @@ Scope:
 - same retrieval-only evaluator
 - ChronoRAG component ablations plus the metadata-oriented baseline
 - component behavior measured only in the tested setting
-
-## Blocked Conflict Data Contract
-
-Files:
-
-- `conflict_data_contract_blocked_v3.md`
-- `conflict_data_contract_blocked_v3.json`
-
-Layer 2A v3 does not score `conflict_detection` because real two-sided
-conflict evidence pairs are absent from the current corpus. The blocked note is
-part of the public result boundary, not an omitted score.
 
 ## Archive
 

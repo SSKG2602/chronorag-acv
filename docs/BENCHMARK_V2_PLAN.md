@@ -8,12 +8,13 @@ Layer 1B validates, and what remains for Layer 2.
 
 - Layer 1A: Temporal Eval v2 retrieval benchmark. Implemented.
 - Layer 1B: Evidence-grounded answer-validation benchmark. Implemented.
-- Layer 2: Cross-domain generalization benchmark. Later.
+- Layer 2A: Cross-domain retrieval-only benchmark. Implemented.
+- Layer 2B: Natural-language temporal QA answer validation. Implemented.
 
 ## Why V1 Was Insufficient
 
 The v1 hard 15-case benchmark remains useful as an archived controlled
-diagnostic, but it is too small for broader claims:
+diagnostic. Its compact design made several metrics less informative:
 
 - 15 cases
 - 19 chunks/rows
@@ -23,17 +24,17 @@ diagnostic, but it is too small for broader claims:
 - `Window Hit@5` saturates
 - `Top1 Window` is the main useful signal
 
-V1 demonstrates temporal retrieval behavior on a small corpus. It does not
-establish broader validation. Temporal Eval v2 replaces it as the main
-controlled benchmark.
+V1 demonstrates temporal retrieval behavior on a small corpus. Temporal Eval v2
+replaces it as the main controlled Layer 1A benchmark.
 
 ## E2 Benchmark Goals
 
-- Test temporal retrieval behavior across a larger but still reproducible corpus.
+- Test temporal retrieval behavior across a larger reproducible corpus.
 - Make source attribution metrics meaningful.
 - Include success, partial, conflict, ambiguity, and insufficient-evidence cases.
 - Separate retrieval quality from answer-writing quality.
-- Keep claims limited to controlled benchmark behavior.
+- Keep retrieval, answer-validation, and cross-domain measurements in their
+  separate evaluation layers.
 
 Status: implemented in `benchmarks/build_temporal_eval_v2.py`,
 `benchmarks/run_temporal_eval_v2.py`, and `benchmarks/temporal_eval_v2_15.jsonl`.
@@ -73,19 +74,22 @@ behavior-aware validation without changing Layer 1A retrieval claims.
 5. Conflict / ChronoSanity cases.
 6. Partial/refusal/ambiguous cases.
 
-## Planned Domains
+## Layer 2 Domains
 
 - Historical macroeconomic data.
-- Policy/regulation revisions or company filing revisions as a second domain.
-- Optional third domain later: research literature revisions or legal case
-  history.
+- Policy/regulation revisions, company filing revisions, market/index series,
+  software releases, and Federal Register records in Layer 2A.
+- Additional candidates for later extensions: research literature revisions,
+  medical guideline updates, and legal case history.
 
-## Non-Goals
+## Evaluation Boundaries
 
-- No broad performance claim.
-- No broad open-domain QA claim.
-- No provider or answer-quality claim from retrieval-only metrics.
-- No production-readiness claim.
+- Layer 1A and Layer 2A report retrieval and selected-evidence behavior.
+- Layer 1B and Layer 2B report answer synthesis and answer-contract behavior.
+- Provider-output contract failures are tracked separately from temporal
+  reasoning and grounding failures.
+- New datasets or source families should preserve expected evidence IDs,
+  behavior labels, and reproducible scoring contracts.
 
 ## Claims Allowed After E2
 
@@ -95,5 +99,3 @@ With E2 in place, the repo can claim:
 - Temporal filtering/fusion changes temporal ranking on the tested benchmark.
 - Temporal Contextual Chunking supports more precise temporal evidence retrieval
   under controlled conditions.
-
-It still should not claim general RAG advantage without external benchmarks.

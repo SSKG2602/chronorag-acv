@@ -1,54 +1,73 @@
 # Technical Limitations
 
-ChronoRAG should be presented honestly as a temporal-RAG research scaffold, not a finished production system.
+## Temporal Expression Parsing
 
-## Current Limitations
+ChronoRAG currently relies on explicit or reliably extractable temporal
+expressions. More robust handling of relative, implicit, underspecified, and
+fuzzy temporal references remains an important technical extension.
 
-1. **No public hosted deployment**
-   - The repo documents local and notebook workflows, not a live production URL.
+## Rule-Weighted Temporal Fusion
 
-2. **Benchmark coverage is still limited**
-   - The project has controlled Layer 1A, Layer 1B, Layer 2A, and Layer 2B
-     checkpoints, but broader validation still requires larger corpora,
-     external baselines, and more conflict-pair data.
+The current temporal fusion layer uses explicitly designed scoring signals. A
+learned temporal reranker could adapt the relative importance of semantic
+relevance, valid-time fit, transaction-time role, interval overlap, and
+forbidden-time penalties across different domains.
 
-3. **Domain coverage is uneven**
-   - World-economy/Maddison-style data appears to be the strongest path.
-   - Other domains need dedicated schemas, policy sets, tests, and evaluation.
+## Multi-Hop Temporal Reasoning
 
-4. **Temporal extraction is partly heuristic**
-   - Valid windows, entities, regions, and units depend on structured input quality or pattern detection.
-   - Temporal Contextual Chunking is implemented and wired into ingestion, but
-     it still needs broader external validation before claiming general behavior.
+ChronoRAG focuses on temporally valid evidence selection and slot-aware
+assembly. Extending the framework to multi-hop temporal reasoning, where
+answers require ordered chains of evidence across multiple events or intervals,
+remains future work.
 
-5. **Storage is not production-hardened yet**
-   - A robust production path needs Postgres/pgvector migrations, tenant isolation, indexing strategy, backups, and migration tests.
+## Temporal Contradiction Modeling
 
-6. **No complete observability stack**
-   - Controller stats exist as response metadata, but dashboards/exporters are not documented.
+ChronoSanity detects temporally inconsistent or role-conflicting evidence in
+retrieved candidates. Future work should extend this into explicit temporal
+contradiction modeling, including contradiction type classification and
+contradiction severity scoring.
 
-7. **No security layer**
-   - Authentication, authorization, rate limiting, audit permissions, and tenant boundaries are not complete.
+## Temporal Confidence Calibration
 
-8. **No polished UI**
-   - Current demo path is CLI/API-first.
+The current framework exposes confidence and attribution metadata, but
+calibrated uncertainty estimation for temporal fit, conflict likelihood, and
+answer validity remains an open extension.
 
-9. **Full model mode may be heavy**
-   - Sentence transformers, cross-encoders, LLM generation, and llama.cpp dependencies can be slow or difficult on low-memory systems.
+## Joint Optimization of Evidence Finalization
 
-10. **Claim discipline required**
-   - The project should not claim enterprise readiness until deployment, monitoring, benchmarks, and security are added.
+Source-aware, metric-aware, and slot-aware finalization are implemented as
+modular retrieval-time controls. A future version can investigate whether these
+controls can be jointly optimized through learning-based evidence selection.
 
-## Correct Public Framing
+## Interpretability Visualization
 
-Use:
+The current repository reports numerical retrieval and ablation results.
+Additional visual analysis, such as score heatmaps, temporal-ranking traces,
+and before/after evidence finalization diagrams, would improve interpretability
+of the temporal retrieval process.
 
-```text
-Temporal RAG research scaffold with Temporal Contextual Chunking architecture, auditable evidence windows, hybrid retrieval, temporal fusion, and conflict-aware answer generation.
-```
+## Future Work
 
-Avoid:
+Future work will focus on strengthening the temporal modeling layer rather than
+changing the core motivation of the framework.
 
-```text
-Finished enterprise temporal intelligence platform.
-```
+1. Robust temporal expression normalization for relative, fuzzy, implicit, and
+   underspecified dates.
+2. Learned temporal reranking over semantic relevance, valid-time fit,
+   transaction-time role, interval overlap, and forbidden-time penalties.
+3. Multi-hop temporal reasoning over ordered evidence chains.
+4. Explicit temporal contradiction modeling with contradiction type and
+   severity classification.
+5. Calibrated temporal confidence estimation for evidence fit, conflict
+   likelihood, and answer validity.
+6. Joint optimization of temporal fusion and source-aware, metric-aware, and
+   slot-aware evidence finalization.
+7. Interpretability tools such as temporal score heatmaps, evidence-ranking
+   traces, attribution-flow graphs, and before/after finalization
+   visualizations.
+8. Advanced slot-aware evidence planning for comparison, aggregation, and
+   multi-entity temporal queries.
+9. Automatic extraction of valid-time and transaction-time roles from raw
+   documents.
+10. Harder temporal benchmark cases focused on reasoning patterns,
+    contradiction, temporal ordering, and interval logic.

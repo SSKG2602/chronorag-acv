@@ -10,8 +10,8 @@ The method keeps raw evidence unchanged while adding an indexing surface and
 explicit temporal metadata. The goal is to make each chunk easier to retrieve
 without letting generated or inherited context overwrite the source text.
 
-This is a ChronoRAG architecture definition. It is not a broad benchmark claim
-and should not be described as Anthropic's method.
+This is a ChronoRAG architecture definition and should be described separately
+from Anthropic's contextual retrieval method.
 
 ## Why Normal Chunking Fails For Temporal RAG
 
@@ -334,16 +334,53 @@ Recommended attribution behavior:
 - include `temporal_source`
 - expose ambiguity or broad-window warnings
 
-## Limitations
+## Technical Limitations
 
-- Temporal Contextual Chunking does not make weak source data strong.
-- It depends on extractor quality for titles, sections, units, and rows.
-- Multiple timestamps in dense table text may require smaller claim chunks.
-- Context prefixes can improve retrieval but may also bias retrieval if too long
-  or too speculative.
-- Ablation results should be read as controlled evidence, not broad proof of
-  measurable improvement.
-- It is not an answer-quality evaluation and not a broad benchmark claim.
+### Temporal Expression Parsing
+
+ChronoRAG currently relies on explicit or reliably extractable temporal
+expressions. More robust handling of relative, implicit, underspecified, and
+fuzzy temporal references remains an important technical extension.
+
+### Rule-Weighted Temporal Fusion
+
+The current temporal fusion layer uses explicitly designed scoring signals. A
+learned temporal reranker could adapt the relative importance of semantic
+relevance, valid-time fit, transaction-time role, interval overlap, and
+forbidden-time penalties across different domains.
+
+### Multi-Hop Temporal Reasoning
+
+ChronoRAG focuses on temporally valid evidence selection and slot-aware
+assembly. Extending the framework to multi-hop temporal reasoning, where
+answers require ordered chains of evidence across multiple events or intervals,
+remains future work.
+
+### Temporal Contradiction Modeling
+
+ChronoSanity detects temporally inconsistent or role-conflicting evidence in
+retrieved candidates. Future work should extend this into explicit temporal
+contradiction modeling, including contradiction type classification and
+contradiction severity scoring.
+
+### Temporal Confidence Calibration
+
+The current framework exposes confidence and attribution metadata, but
+calibrated uncertainty estimation for temporal fit, conflict likelihood, and
+answer validity remains an open extension.
+
+### Joint Optimization of Evidence Finalization
+
+Source-aware, metric-aware, and slot-aware finalization are implemented as
+modular retrieval-time controls. A future version can investigate whether these
+controls can be jointly optimized through learning-based evidence selection.
+
+### Interpretability Visualization
+
+The current repository reports numerical retrieval and ablation results.
+Additional visual analysis, such as score heatmaps, temporal-ranking traces,
+and before/after evidence finalization diagrams, would improve interpretability
+of the temporal retrieval process.
 
 ## Implementation Checklist
 
@@ -378,5 +415,4 @@ answer synthesis should be evaluated separately from retrieval quality.
 Temporal Eval v2 includes cases for exact-year evidence, broad ranges, unknown
 timestamps, publication-time-only evidence, and conflicting evidence. It is
 intended to test whether Temporal Contextual Chunking changes temporal retrieval
-behavior before answer synthesis. It is not an external benchmark and not a
-broad performance claim.
+behavior before answer synthesis.

@@ -8,10 +8,10 @@ temporal precision, and grounded citation checks as first-class system
 contracts.
 
 The stored benchmarks provide controlled evidence for temporal retrieval
-behavior under explicitly scoped datasets and validators. The claims are limited
-to the tested settings: temporal retrieval, evidence selection, answer-contract
-validation, and component ablation behavior. The project does not generalize
-these results beyond the benchmark conditions without additional evaluation.
+behavior under the datasets and validators described in this report. The
+evaluation layers separate temporal retrieval, evidence selection,
+answer-contract validation, and component ablation behavior so each result can
+be interpreted through its own measurement contract.
 
 ## 1. Problem Statement
 
@@ -155,10 +155,10 @@ Layer 2A expands retrieval evaluation to a selected cross-domain corpus:
 - retrieval-only scoring over `selected_evidence_ids`;
 - no Vertex and no generated answer scoring in the public result.
 
-The full 5,000-row corpus is generated/working benchmark data and may not be
-fully tracked in Git. The public repository contains builders, validators,
-tracked samples, question definitions, final result artifacts, and commands
-that distinguish sample files from generated full-corpus files.
+The 5,000-row corpus is generated benchmark data. The public repository
+contains builders, validators, tracked samples, question definitions, final
+result artifacts, and commands that distinguish sample files from generated
+execution data.
 
 Active methods:
 
@@ -171,8 +171,6 @@ Final public result files:
 - `benchmarks/layer2_crossdomain/results/layer2_retrieval_only_v3_200_eval.json`
 - `benchmarks/layer2_crossdomain/results/layer2_ablation_v3_ablation200.md`
 - `benchmarks/layer2_crossdomain/results/layer2_ablation_v3_ablation200.json`
-- `benchmarks/layer2_crossdomain/results/conflict_data_contract_blocked_v3.md`
-- `benchmarks/layer2_crossdomain/results/conflict_data_contract_blocked_v3.json`
 
 Layer 2A v3 retrieval-only summary:
 
@@ -192,18 +190,13 @@ current retrieval-only result:
 
 - Earlier broad-window style questions were reframed because vague year-only
   wording cannot fairly require a hidden exact date.
-- Earlier conflict-detection questions were blocked because real conflict-pair
-  evidence rows were absent in the current corpus.
+- Earlier conflict-detection questions were removed from scored v3 categories
+  because real paired contradiction rows were absent in the current corpus.
 - Earlier intermediate Layer 2 Vertex and judge artifacts were archived because
   they were not the final Layer 2A retrieval-only result.
 - The v3 benchmark aligns question wording, expected evidence, and available
   corpus rows more strictly.
 - The correction improved benchmark validity rather than hiding failures.
-
-The conflict status is documented in:
-
-- `benchmarks/layer2_crossdomain/results/conflict_data_contract_blocked_v3.md`
-- `benchmarks/layer2_crossdomain/results/conflict_data_contract_blocked_v3.json`
 
 Synthetic conflict IDs are not used in the public v3 scoring path.
 
@@ -234,7 +227,8 @@ Main interpretation:
 - Score-only ranking is weaker than final evidence selection in the v3 tested
   setting.
 - Several ablations remain strong on explicitly anchored categories; those
-  categories should be interpreted as controlled checks, not broad proof.
+  categories should be interpreted as controlled checks of the corresponding
+  category contracts.
 
 ## 11. Layer 2B: Full-50 Answer Synthesis And Validation
 
@@ -275,10 +269,10 @@ manual-audited acceptable score, `41 / 50 = 82%`, is a secondary interpretation
 after accepting 3 validator-strictness cases reviewed by the judge and a human
 audit. It does not replace the strict combined score.
 
-Layer 2B evaluates answer synthesis and answer validation. It does not prove
-retrieval quality because expected evidence was available or injected where
-needed for answer generation. Retrieval quality is evaluated separately in
-Layer 2A.
+Layer 2B evaluates answer synthesis and answer validation. Retrieval-quality
+behavior is evaluated separately in Layer 2A through selected-evidence metrics,
+forbidden-evidence checks, source/metric constraints, and slot-coverage
+criteria.
 
 ## 12. Reproducibility Commands
 
@@ -346,16 +340,76 @@ python3 benchmarks/layer2_crossdomain/run_layer2_ablations.py \
   --result-suffix v3_ablation200
 ```
 
-## 13. Limitations
+## 13. Technical Limitations
 
-- Layer 2A is retrieval-only.
-- Layer 2A does not evaluate generated natural-language answer quality.
-- Layer 2B evaluates answer synthesis and validation, not retrieval quality,
-  because expected evidence was available where needed.
-- The Layer 2B manual-audited acceptable score is secondary and does not replace
-  the strict combined score.
-- Layer 1B is controlled answer validation, not production reliability proof.
-- Conflict detection is data-contract blocked in Layer 2A until real
-  conflict-pair rows exist.
-- The current service is not production-hardened for multi-tenant storage,
-  authentication, observability, or deployment.
+### Temporal Expression Parsing
+
+ChronoRAG currently relies on explicit or reliably extractable temporal
+expressions. More robust handling of relative, implicit, underspecified, and
+fuzzy temporal references remains an important technical extension.
+
+### Rule-Weighted Temporal Fusion
+
+The current temporal fusion layer uses explicitly designed scoring signals. A
+learned temporal reranker could adapt the relative importance of semantic
+relevance, valid-time fit, transaction-time role, interval overlap, and
+forbidden-time penalties across different domains.
+
+### Multi-Hop Temporal Reasoning
+
+ChronoRAG focuses on temporally valid evidence selection and slot-aware
+assembly. Extending the framework to multi-hop temporal reasoning, where
+answers require ordered chains of evidence across multiple events or intervals,
+remains future work.
+
+### Temporal Contradiction Modeling
+
+ChronoSanity detects temporally inconsistent or role-conflicting evidence in
+retrieved candidates. Future work should extend this into explicit temporal
+contradiction modeling, including contradiction type classification and
+contradiction severity scoring.
+
+### Temporal Confidence Calibration
+
+The current framework exposes confidence and attribution metadata, but
+calibrated uncertainty estimation for temporal fit, conflict likelihood, and
+answer validity remains an open extension.
+
+### Joint Optimization of Evidence Finalization
+
+Source-aware, metric-aware, and slot-aware finalization are implemented as
+modular retrieval-time controls. A future version can investigate whether these
+controls can be jointly optimized through learning-based evidence selection.
+
+### Interpretability Visualization
+
+The current repository reports numerical retrieval and ablation results.
+Additional visual analysis, such as score heatmaps, temporal-ranking traces,
+and before/after evidence finalization diagrams, would improve interpretability
+of the temporal retrieval process.
+
+## 14. Future Work
+
+Future work will focus on strengthening the temporal modeling layer rather than
+changing the core motivation of the framework.
+
+1. Robust temporal expression normalization for relative, fuzzy, implicit, and
+   underspecified dates.
+2. Learned temporal reranking over semantic relevance, valid-time fit,
+   transaction-time role, interval overlap, and forbidden-time penalties.
+3. Multi-hop temporal reasoning over ordered evidence chains.
+4. Explicit temporal contradiction modeling with contradiction type and
+   severity classification.
+5. Calibrated temporal confidence estimation for evidence fit, conflict
+   likelihood, and answer validity.
+6. Joint optimization of temporal fusion and source-aware, metric-aware, and
+   slot-aware evidence finalization.
+7. Interpretability tools such as temporal score heatmaps, evidence-ranking
+   traces, attribution-flow graphs, and before/after finalization
+   visualizations.
+8. Advanced slot-aware evidence planning for comparison, aggregation, and
+   multi-entity temporal queries.
+9. Automatic extraction of valid-time and transaction-time roles from raw
+   documents.
+10. Harder temporal benchmark cases focused on reasoning patterns,
+    contradiction, temporal ordering, and interval logic.

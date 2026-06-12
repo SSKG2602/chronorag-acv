@@ -1,133 +1,75 @@
 # Future Research Direction
 
-ChronoRAG currently has four completed evaluation checkpoints: Layer 1A
-temporal retrieval, Layer 1B answer validation, Layer 2A cross-domain retrieval
-quality, and Layer 2B answer synthesis/validation. Future work should extend
-external baselines, larger corpora, conflict-pair datasets, paper drafting, and
-production hardening.
+## Technical Limitations
 
-Temporal Contextual Chunking is the current architectural center. Older helper
-layers such as DHQC may still be useful for controller and heuristic
-support, but they are not the main research claim of the present checkpoint.
-Graph retrieval is still future work rather than an active subsystem.
+### Temporal Expression Parsing
 
-## 1. Layer 2 Cross-Domain Extensions
+ChronoRAG currently relies on explicit or reliably extractable temporal
+expressions. More robust handling of relative, implicit, underspecified, and
+fuzzy temporal references remains an important technical extension.
 
-Layer 2A and Layer 2B now provide public cross-domain checkpoints. The next
-research step is broader coverage: larger corpora, more source families,
-conflict-pair datasets, external baselines, and additional review of failure
-categories. Those extensions should remain controlled benchmark work, not a
-superiority claim.
+### Rule-Weighted Temporal Fusion
 
-Minimum dataset fields:
+The current temporal fusion layer uses explicitly designed scoring signals. A
+learned temporal reranker could adapt the relative importance of semantic
+relevance, valid-time fit, transaction-time role, interval overlap, and
+forbidden-time penalties across different domains.
 
-```text
-question
-expected_answer
-valid_window_start
-valid_window_end
-source_uri
-conflicting_source_uri
-answer_unit
-domain
-```
+### Multi-Hop Temporal Reasoning
 
-Candidate domains:
+ChronoRAG focuses on temporally valid evidence selection and slot-aware
+assembly. Extending the framework to multi-hop temporal reasoning, where
+answers require ordered chains of evidence across multiple events or intervals,
+remains future work.
 
-- policy and regulation updates
-- versioned software documentation
-- company filings and earnings-call revisions
-- scientific literature revisions
-- medical guideline changes
-- legal case history
+### Temporal Contradiction Modeling
 
-Layer 2A currently compares an independent metadata temporal RAG baseline
-against ChronoRAG full using the existing TCC/retrieval framework. Future
-extensions can add more baselines and larger corpora. Direct Gemini
-full-context remains deprecated for serious Layer 2A retrieval evaluation
-because it is not retrieval-based and can truncate heavily.
+ChronoSanity detects temporally inconsistent or role-conflicting evidence in
+retrieved candidates. Future work should extend this into explicit temporal
+contradiction modeling, including contradiction type classification and
+contradiction severity scoring.
 
-A small diagnostic pilot exposed an exact-date retrieval weakness on dense FRED
-daily series, where year-level scoring could retrieve wrong same-year rows.
-Adapter-side precision fixed the ChronoRAG-only pilot from 2/5 to 5/5, and core
-TCC now preserves multi-granularity temporal metadata for year, month, day,
-hour, minute, second, ranges, quarters, dayparts, and fuzzy phrases. This
-precision should remain separate from embedding-model experiments: stronger
-embeddings can help recall, but exact valid-time matching should not be
-delegated only to semantic similarity.
+### Temporal Confidence Calibration
 
-Each domain needs a metadata schema, source-family disclosure, sample corpus,
-expected evidence IDs, expected behavior labels, and readable expected answers.
+The current framework exposes confidence and attribution metadata, but
+calibrated uncertainty estimation for temporal fit, conflict likelihood, and
+answer validity remains an open extension.
 
-## 2. External Baseline Comparison
+### Joint Optimization of Evidence Finalization
 
-Compare:
+Source-aware, metric-aware, and slot-aware finalization are implemented as
+modular retrieval-time controls. A future version can investigate whether these
+controls can be jointly optimized through learning-based evidence selection.
 
-- vanilla vector RAG
-- BM25 + vector hybrid RAG
-- ChronoRAG without temporal pre-mask
-- ChronoRAG with temporal pre-mask
-- ChronoRAG with ChronoSanity fallback
-- at least one existing temporal retrieval or time-aware RAG baseline, if a
-  comparable implementation is available
+### Interpretability Visualization
 
-Do not claim SOTA until this external comparison exists.
+The current repository reports numerical retrieval and ablation results.
+Additional visual analysis, such as score heatmaps, temporal-ranking traces,
+and before/after evidence finalization diagrams, would improve interpretability
+of the temporal retrieval process.
 
-## 3. Ablation Study
+## Future Work
 
-Measure the effect of each major component:
+Future work will focus on strengthening the temporal modeling layer rather than
+changing the core motivation of the framework.
 
-| Component | Test |
-|---|---|
-| Temporal Contextual Chunking | Does raw-text plus retrieval-context indexing improve exact-window evidence quality? |
-| Temporal pre-mask | Does retrieval avoid wrong-era evidence? |
-| Monotone temporal fusion | Does ranking penalize time mismatch correctly? |
-| Authority score | Does source reliability affect final answer quality? |
-| Unit bias | Does numeric evidence improve answer correctness? |
-| Region diversity | Does retrieval avoid over-concentrated evidence? |
-| ChronoSanity | Does conflict fallback reduce hallucination? |
-
-## 4. ChronoSanity Reliability
-
-Evaluate conflict detection against manually labeled evidence pairs.
-
-Metrics:
-
-- conflict precision
-- conflict recall
-- false degradation rate
-- missed conflict rate
-- answer correctness after fallback
-
-## 5. Storage Research
-
-Move toward production-grade temporal storage:
-
-- Postgres + pgvector
-- valid-time indexes
-- transaction-time indexes
-- composite filters over domain/entity/window
-- migration scripts
-- backfill strategy
-- source revision ledger
-
-## 6. Human-Centered Attribution
-
-Build attribution cards for analysts:
-
-- source timeline
-- valid vs transaction window separation
-- conflict explanation
-- confidence reasoning
-- alternative windows
-- answer provenance graph
-
-## 7. Cost-Aware Temporal Retrieval
-
-Add adaptive routing:
-
-- cheap lexical-first mode
-- vector-only when lexical coverage fails
-- reranker only above ambiguity threshold
-- LLM judge only for close conflicts
-- evidence-only mode when generation adds no value
+1. Robust temporal expression normalization for relative, fuzzy, implicit, and
+   underspecified dates.
+2. Learned temporal reranking over semantic relevance, valid-time fit,
+   transaction-time role, interval overlap, and forbidden-time penalties.
+3. Multi-hop temporal reasoning over ordered evidence chains.
+4. Explicit temporal contradiction modeling with contradiction type and
+   severity classification.
+5. Calibrated temporal confidence estimation for evidence fit, conflict
+   likelihood, and answer validity.
+6. Joint optimization of temporal fusion and source-aware, metric-aware, and
+   slot-aware evidence finalization.
+7. Interpretability tools such as temporal score heatmaps, evidence-ranking
+   traces, attribution-flow graphs, and before/after finalization
+   visualizations.
+8. Advanced slot-aware evidence planning for comparison, aggregation, and
+   multi-entity temporal queries.
+9. Automatic extraction of valid-time and transaction-time roles from raw
+   documents.
+10. Harder temporal benchmark cases focused on reasoning patterns,
+    contradiction, temporal ordering, and interval logic.

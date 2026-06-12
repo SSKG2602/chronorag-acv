@@ -16,7 +16,8 @@ avoidance.
 Conflict warnings and refusal behavior are answer-time system behaviors. They
 depend on retrieved evidence, Temporal Contextual Chunking metadata, evidence
 cards, LLM answer synthesis, answer validation, and ChronoSanity conflict logic.
-They should not be treated as proven by retrieval-only metrics.
+They are measured in the answer-validation layer rather than the
+retrieval-only layer.
 
 ## Required Pipeline
 
@@ -47,19 +48,19 @@ They should not be treated as proven by retrieval-only metrics.
 - Missing-exact-evidence cases requiring partial or refusal behavior.
 - Ambiguous temporal query cases requiring clarification.
 
-## Non-Goals
+## Evaluation Boundaries
 
-- No Layer 2 domain generalization yet.
-- No broad performance claim.
-- No external benchmark claim.
-- No provider comparison claim.
+- Layer 1B measures answer behavior over Temporal Eval v2 evidence cards.
+- Layer 2A and Layer 2B carry the cross-domain retrieval and answer-validation
+  checkpoints.
+- Provider comparison is separate from answer-contract validation.
 
 ## Allowed Claims
 
 Layer 1B is implemented in `benchmarks/run_temporal_answer_validation_v2.py`.
 ChronoRAG may claim that it has a controlled answer-validation benchmark for
-evidence-grounded temporal answers over the Temporal Eval v2 corpus. It still
-should not claim external generalization without Layer 2.
+evidence-grounded temporal answers over the Temporal Eval v2 corpus. Layer 2A
+and Layer 2B provide the separate cross-domain checkpoints.
 
 ## Provider Reliability Guardrails
 
@@ -69,7 +70,7 @@ drift, validates response schema, checks cited evidence IDs against retrieved
 cards, and applies deterministic temporal-rule validation. Provider JSON Parse
 Failure is treated as a provider-output contract failure, not a reasoning
 failure. One retry is allowed only for parse or non-normalizable schema contract
-failures; temporal reasoning and grounding failures are not retried away. A
+failures; temporal reasoning and grounding failures are scored directly. A
 failed retry cannot overwrite a usable initial response.
 
 After a full 15-case Vertex run, the reliability repair simplified the prompt,

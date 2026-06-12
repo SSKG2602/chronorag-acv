@@ -10,8 +10,9 @@ ChronoRAG now has a consistent public quickstart, verified light-mode demo path,
 committed demo assets under `assets/demo/`, Temporal Eval v2 retrieval results,
 Layer 1B answer-validation results, a Layer 2A public retrieval-quality
 checkpoint, and a Layer 2B public answer-synthesis/validation checkpoint. The
-repository should still be presented as a temporal-RAG research-demo scaffold,
-not as a production service or publication-grade proof.
+repository should be presented as a temporal-RAG research framework with
+layered benchmark evidence for retrieval, answer validation, and ablation
+behavior.
 
 ## Completed Polish Items
 
@@ -55,20 +56,22 @@ not as a production service or publication-grade proof.
 - The dynamic top-k result is stored separately as a diagnostic at
   `benchmarks/results/temporal_answer_validation_v2_vertex_dynamic_topk_results.md`.
 
-## Remaining Gaps
+## Remaining Technical Extensions
 
-- The current benchmark is controlled and useful for a research-demo checkpoint,
-  but it is not a publication-grade external benchmark.
-- Full Layer 2 provider-backed comparison is still required.
-- External baseline comparisons against other time-aware RAG or temporal
-  retrieval systems are still future work.
-- No production deployment layer, migration path, or external observability stack
-  is committed yet.
-- No public hosted demo URL is documented.
-- The CLI output is verbose for large ingests and should eventually support a
-  concise demo mode.
-- The light-mode answer screenshot is a smoke-mode evidence digest, not a
-  full-quality model-backed answer.
+- Robust temporal expression normalization for relative, fuzzy, implicit, and
+  underspecified dates.
+- Learned temporal reranking over semantic relevance, valid-time fit,
+  transaction-time role, interval overlap, and forbidden-time penalties.
+- Multi-hop temporal reasoning over ordered evidence chains.
+- Explicit temporal contradiction modeling with contradiction type and severity
+  classification.
+- Calibrated temporal confidence estimation for evidence fit, conflict
+  likelihood, and answer validity.
+- Joint optimization of temporal fusion and source-aware, metric-aware, and
+  slot-aware evidence finalization.
+- Interpretability tools such as temporal score heatmaps, evidence-ranking
+  traces, attribution-flow graphs, and before/after finalization
+  visualizations.
 
 ## Next Priority
 
@@ -81,8 +84,8 @@ company filings, or scientific guideline updates.
 The comparison framework now exists under `benchmarks/layer2_crossdomain/`.
 It supports independent metadata temporal RAG and ChronoRAG full comparisons with
 a generated local 5,000-row / 200-question data path. Direct full-context is
-kept only as a historical/small-context diagnostic. It does not establish a
-result claim yet.
+kept only as a historical/small-context diagnostic separate from the current
+Layer 2A result claim.
 
 Layer 2A diagnostic work has clarified the need for exact temporal intent in
 dense daily series. The reusable parser now lives in
@@ -100,8 +103,8 @@ that forward-looking item.
 ### P2: External Baselines
 
 Compare ChronoRAG against vanilla vector RAG, hybrid BM25/vector RAG, and at
-least one temporal/time-aware retrieval baseline. Do not claim SOTA until this
-external comparison exists.
+least one temporal/time-aware retrieval baseline under the same evidence
+contracts.
 
 ### P3: ChronoSanity Evaluation
 
@@ -112,7 +115,7 @@ degradation behavior against manually labeled cases.
 
 - TCC is core. Temporal Contextual Chunking is implemented in ingestion and is
   the main architectural contribution of the current checkpoint.
-- Layer 1B answer validation is core. The current benchmark proof depends on
+- Layer 1B answer validation is core. The current benchmark evidence depends on
   TCC-enriched evidence cards, temporal retrieval, grounded synthesis, and
   deterministic validation.
 - Vertex provider mode is core for full benchmark execution. Light mode remains
@@ -122,8 +125,7 @@ degradation behavior against manually labeled cases.
   `tests/unit/test_dhqc_caps.py`. It affects controller planning telemetry, but
   it is not the main Layer 1B contribution.
 - Graph path status: stub-only. `core/retrieval/graph_paths.py` only raises
-  `GraphNotConfigured`, so graph retrieval is not implemented in the current
-  proof path.
-- Not part of current proof: graph retrieval, external baseline comparison,
-  Layer 2 cross-domain generalization, and any claim that DHQC is the
-  main architectural novelty.
+  `GraphNotConfigured`, so graph retrieval is outside the current evaluation
+  path.
+- Outside the active evaluation path: graph retrieval, external baseline
+  comparison, and any claim that DHQC is the main architectural novelty.

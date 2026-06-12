@@ -93,8 +93,8 @@ Provider mode fails closed. If the Vertex SDK is missing, credentials are not av
 
 Provider mode calls Vertex AI and may incur cost or quota usage. Keep the smoke test small, avoid putting provider mode in CI, and prefer light mode for repeatable tests.
 
-Retrieval ablation numbers remain controlled sanity results, not an external
-benchmark or broad performance claim.
+Retrieval ablation numbers are controlled sanity results for the documented
+benchmark setup.
 
 The Layer 1B answer-validation benchmark has a full Vertex mode:
 

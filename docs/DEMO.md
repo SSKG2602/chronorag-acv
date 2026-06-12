@@ -30,7 +30,7 @@ The intended chunking architecture is Temporal Contextual Chunking: ChronoRAG's
 chunking strategy, inspired by contextual retrieval but extended for valid-time
 retrieval, transaction-time tracking, temporal fusion, ChronoSanity, and
 attribution. Demo claims should distinguish this implemented architecture from
-the current smoke path and should not present broad benchmark claims.
+the current smoke path and the benchmark result reports.
 
 ## Commands
 

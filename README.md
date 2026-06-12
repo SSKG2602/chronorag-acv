@@ -7,11 +7,10 @@ dates mistaken for fact time, broad background rows outranking exact evidence,
 and generated answers that cite evidence while misusing its temporal role.
 
 The system separates fact time from publication, filing, release, ingestion, or
-other transaction time. The stored results are controlled benchmark evidence
-under explicitly scoped datasets and validators. They cover temporal retrieval,
-evidence selection, answer-contract validation, and component ablations in the
-tested settings only; they should not be generalized beyond those conditions
-without additional evaluation.
+other transaction time. The stored results are controlled benchmark evidence for
+the evaluation layers described below. They cover temporal retrieval, evidence
+selection, answer-contract validation, and component ablations, with
+interpretation tied to each layer's dataset, validator, and execution mode.
 
 ## Why Temporal RAG Is Hard
 
@@ -195,7 +194,7 @@ Vertex.
 
 ## Claims And Boundaries
 
-What the current benchmark evidence supports:
+Current benchmark evidence supports:
 
 - The Layer 2A retrieval-only result provides controlled evidence that
   ChronoRAG selects cleaner final evidence than the metadata temporal RAG
@@ -206,12 +205,14 @@ What the current benchmark evidence supports:
 - Layer 2B exposes remaining weaknesses in valid-time precision, behavior
   labels, and unsupported detail control.
 
-What the current benchmark evidence does not establish:
+Interpretation boundaries:
 
-- Layer 2B does not prove retrieval quality, because expected evidence was
-  injected where needed for answer synthesis and validation.
-- These results do not establish open-domain production reliability.
-- These results do not establish superiority across all datasets or workloads.
+- Layer 2A is the retrieval-quality layer. It scores selected evidence IDs,
+  forbidden-evidence handling, source/metric constraints, and slot coverage.
+- Layer 2B is the answer-synthesis and validation layer. It measures whether
+  grounded answers satisfy the expected evidence contract.
+- Claims about new datasets, source families, or deployment settings should be
+  evaluated through the same layer-specific result structure.
 
 ## Layer 1A: Temporal Eval v2
 
@@ -377,8 +378,6 @@ Final public result files:
 - `benchmarks/layer2_crossdomain/results/layer2_retrieval_only_v3_200_eval.json`
 - `benchmarks/layer2_crossdomain/results/layer2_ablation_v3_ablation200.md`
 - `benchmarks/layer2_crossdomain/results/layer2_ablation_v3_ablation200.json`
-- `benchmarks/layer2_crossdomain/results/conflict_data_contract_blocked_v3.md`
-- `benchmarks/layer2_crossdomain/results/conflict_data_contract_blocked_v3.json`
 
 Layer 2A v3 retrieval-only summary:
 
@@ -575,11 +574,10 @@ precision is visible in the wording or category contract. The v3 rebuild
 reframed those cases so question wording, expected evidence, and forbidden
 evidence were aligned.
 
-Conflict detection was blocked because the corpus did not contain reliable real
-conflict-pair rows for the intended category. Rather than report a conflict
-metric over synthetic or unavailable evidence, the benchmark preserves the
-blocked data-contract note at
-`benchmarks/layer2_crossdomain/results/conflict_data_contract_blocked_v3.md`.
+The conflict-detection category was removed from scored v3 categories because
+the available corpus lacked real paired contradiction rows. The current scoring
+path keeps contradiction modeling as a technical extension rather than
+reporting a metric over synthetic placeholders.
 
 Some early Vertex and judge artifacts were archived because they mixed
 answer-generation or provider behavior with the retrieval-only Layer 2A
@@ -607,85 +605,79 @@ Layer 2B:
 - Layer 2B: full-50 natural-language temporal QA answer synthesis, hard
   validation, LLM judge, and manual audit note.
 
-## Current Limitations And Next Work
+## Technical Limitations
 
-### Current limitations
+### Temporal Expression Parsing
 
-Layer 2A is retrieval-only. It evaluates whether the benchmark methods select
-the expected evidence IDs and avoid forbidden evidence under controlled
-category contracts, but it does not score final natural-language answer quality,
-fluency, or reasoning.
+ChronoRAG currently relies on explicit or reliably extractable temporal
+expressions. More robust handling of relative, implicit, underspecified, and
+fuzzy temporal references remains an important technical extension.
 
-The generated 5,000-row Layer 2A corpus may not be fully tracked in Git because
-generated corpus artifacts are excluded from normal public commits. The
-repository keeps the question definitions, sample corpus files, validators,
-result artifacts, and reproducibility commands visible, while distinguishing
-tracked samples from generated working data.
+### Rule-Weighted Temporal Fusion
 
-Conflict detection requires real conflict-pair data. The current corpus did not
-provide reliable real conflict-pair rows for the blocked Layer 2A conflict
-category, so that category is documented as data-contract blocked rather than
-reported as a normal retrieval metric.
+The current temporal fusion layer uses explicitly designed scoring signals. A
+learned temporal reranker could adapt the relative importance of semantic
+relevance, valid-time fit, transaction-time role, interval overlap, and
+forbidden-time penalties across different domains.
 
-Some raw-data-dependent Layer 1 builder tests require external raw files. The
-tracked sample and light-mode commands are intended for deterministic local
-checks, while raw builder paths depend on data that may not be present in a
-fresh checkout.
+### Multi-Hop Temporal Reasoning
 
-Results are scoped to the benchmark conditions described here and in the result
-files. ChronoRAG is not a deployed production service; storage,
-authentication, observability, and multi-tenant deployment paths are not
-production-hardened.
+ChronoRAG focuses on temporally valid evidence selection and slot-aware
+assembly. Extending the framework to multi-hop temporal reasoning, where
+answers require ordered chains of evidence across multiple events or intervals,
+remains future work.
 
-### Layer 2B completed boundary and remaining work
+### Temporal Contradiction Modeling
 
-Layer 2B is now a natural-language temporal QA layer with 50 manually designed
-questions. The questions were built evidence-card-first from the selected
-5,000-row corpus so each prompt has a clear expected evidence contract before
-provider-backed answer synthesis is run.
+ChronoSanity detects temporally inconsistent or role-conflicting evidence in
+retrieved candidates. Future work should extend this into explicit temporal
+contradiction modeling, including contradiction type classification and
+contradiction severity scoring.
 
-The completed execution path is ChronoRAG + Vertex + dynamic top-k, followed
-by deterministic answer-contract validation, LLM judge scoring, and a manual
-audit note for validator-strictness cases. Metadata+LLM comparison is not the
-current goal for Layer 2B; the goal is to test ChronoRAG answer synthesis and
-validation with expected evidence available where needed.
+### Temporal Confidence Calibration
 
-Layer 2B question design tests relative temporal reasoning, including
-month-before and month-after questions, closest release to filing date, macro
-event before market movement, valid-time versus filing-time traps, and
-insufficient or ambiguous temporal evidence.
-Future Layer 2B question design should continue to use the selected 5,000-row
-evaluation corpus as the evidence universe unless the corpus is intentionally
-rebuilt from the raw/source families above.
+The current framework exposes confidence and attribution metadata, but
+calibrated uncertainty estimation for temporal fit, conflict likelihood, and
+answer validity remains an open extension.
 
-### Research/report work
+### Joint Optimization of Evidence Finalization
 
-Public technical report material exists in `docs/TECHNICAL_REPORT.md`; an
-arXiv-style paper and outreach summaries remain future work. These are
-reporting artifacts, not completed benchmark layers.
+Source-aware, metric-aware, and slot-aware finalization are implemented as
+modular retrieval-time controls. A future version can investigate whether these
+controls can be jointly optimized through learning-based evidence selection.
 
-### Layer 2B natural-language QA result
+### Interpretability Visualization
 
-Layer 2B uses 50 manually designed natural-language temporal QA questions built
-from evidence cards in the selected 5,000-row Layer 2A corpus. The completed
-path is ChronoRAG retrieval context, Vertex-backed answer synthesis, dynamic
-top-k selection, deterministic answer-contract validation, LLM judge scoring,
-and manual audit of selected validator-strictness cases.
+The current repository reports numerical retrieval and ablation results.
+Additional visual analysis, such as score heatmaps, temporal-ranking traces,
+and before/after evidence finalization diagrams, would improve interpretability
+of the temporal retrieval process.
 
-### Technical report / arXiv-style draft
+## Future Work
 
-Public technical report material exists in `docs/TECHNICAL_REPORT.md`; an
-arXiv-style paper remains future work. Reporting should use the current Layer
-1A, Layer 1B, Layer 2A, and Layer 2B results while keeping retrieval-quality
-claims separate from answer-validation claims.
+Future work will focus on strengthening the temporal modeling layer rather than
+changing the core motivation of the framework.
 
-### Outreach and portfolio work
-
-README and technical-report material are intended to support professor or lab
-outreach, LinkedIn build-log posts, and research portfolio presentation. This
-work should summarize the controlled benchmark setup, correction history, and
-result boundaries without treating Layer 2B answer-validation scores as
-retrieval-quality evidence.
+1. Robust temporal expression normalization for relative, fuzzy, implicit, and
+   underspecified dates.
+2. Learned temporal reranking over semantic relevance, valid-time fit,
+   transaction-time role, interval overlap, and forbidden-time penalties.
+3. Multi-hop temporal reasoning over ordered evidence chains.
+4. Explicit temporal contradiction modeling with contradiction type and
+   severity classification.
+5. Calibrated temporal confidence estimation for evidence fit, conflict
+   likelihood, and answer validity.
+6. Joint optimization of temporal fusion and source-aware, metric-aware, and
+   slot-aware evidence finalization.
+7. Interpretability tools such as temporal score heatmaps, evidence-ranking
+   traces, attribution-flow graphs, and before/after finalization
+   visualizations.
+8. Advanced slot-aware evidence planning for comparison, aggregation, and
+   multi-entity temporal queries.
+9. Automatic extraction of valid-time and transaction-time roles from raw
+   documents.
+10. Harder temporal benchmark cases focused on reasoning patterns,
+    contradiction, temporal ordering, and interval logic.
 
 ## Reproduce
 
@@ -781,9 +773,9 @@ python3 benchmarks/layer2_crossdomain/run_layer2_ablations.py \
 
 ### Raw external file boundary
 
-Some raw-data-dependent Layer 1 builder tests require external raw files that
-may not be present in a fresh checkout. Those paths are separate from the
-tracked sample and light-mode commands above.
+Some raw-data-dependent Layer 1 builder tests require external raw files placed
+under the expected paths. Those paths are separate from the tracked sample and
+light-mode commands above.
 
 ### Layer 2A provider boundary
 
@@ -882,15 +874,13 @@ reviewed validator-strictness cases, and it does not replace the strict score.
   final v3 retrieval-only comparison report.
 - `benchmarks/layer2_crossdomain/results/layer2_ablation_v3_ablation200.md`:
   final v3 ablation report.
-- `benchmarks/layer2_crossdomain/results/conflict_data_contract_blocked_v3.md`:
-  blocked conflict-category data-contract note.
 - `benchmarks/layer2_crossdomain/results/README.md`: result-directory guide
   for final and archived Layer 2 artifacts.
 
 The final public Layer 2A result boundary is the v3 retrieval comparison, the
-v3 ablation report, and the blocked conflict data-contract note. These files
-are the public retrieval-only Layer 2A reports; they should be read separately
-from intermediate development outputs.
+v3 ablation report, and the result-directory guide. These files are the public
+retrieval-only Layer 2A reports; they should be read separately from
+intermediate development outputs.
 
 ### Layer 2B benchmark artifacts
 
@@ -920,9 +910,8 @@ from intermediate development outputs.
 
 Archived files are development history, not the final result boundary. They are
 useful for understanding the correction process, but the final public result
-files are the v3 retrieval comparison, v3 ablation, blocked conflict
-data-contract note, and Layer 2B full-50 answer-validation artifacts listed
-above.
+files are the v3 retrieval comparison, v3 ablation, and Layer 2B full-50
+answer-validation artifacts listed above.
 
 ## Repository Map
 

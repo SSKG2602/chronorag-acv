@@ -1,14 +1,13 @@
 # Controlled Hard 15-Case Benchmark
 
-This benchmark is designed to test temporal retrieval behavior, not broad
-open-domain QA. It is controlled, small, and intentionally includes cases where
-ChronoRAG should return partial evidence, surface conflict risk, or show
-insufficient evidence. It is not a broad performance claim.
+This benchmark is designed to test temporal retrieval behavior on a compact
+controlled corpus. It intentionally includes cases where ChronoRAG should
+return partial evidence, surface conflict risk, or show insufficient evidence.
 
 ## Corpus Disclosure
 
-This v1 hard benchmark is a controlled diagnostic, not a publication-grade
-external benchmark.
+This v1 hard benchmark is a controlled diagnostic for inspecting temporal
+retrieval behavior.
 
 - Corpus size: 19 ingested rows/chunks in the current controlled dataset.
 - Case count: 15 benchmark cases.
@@ -21,8 +20,7 @@ external benchmark.
 - `Top1 Window` is the primary useful signal in the current result table.
 
 Use this benchmark to inspect whether temporal filtering/fusion changes ranking
-behavior on the controlled corpus. Do not present these numbers as broad
-validation.
+behavior on the controlled corpus.
 
 Dataset:
 
@@ -77,4 +75,5 @@ failure cases are included to test refusal, partial answer behavior, and
 conflict visibility.
 
 The older `benchmarks/temporal_qa_15.jsonl` file is an internal smoke benchmark.
-It validates that the pipeline runs; it is not the public benchmark claim.
+It validates that the pipeline runs and is separate from the public benchmark
+claim.

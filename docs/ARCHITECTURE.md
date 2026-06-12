@@ -52,8 +52,8 @@ Storage currently supports local/research persistence and cache-oriented helpers
 | `storage/graph/` | Graph-oriented storage experiments. |
 
 `core/retrieval/graph_paths.py` is currently a stub that raises
-`GraphNotConfigured`. Graph retrieval should be treated as future work rather
-than an implemented part of the Layer 1B path.
+`GraphNotConfigured`. Graph retrieval is outside the active Layer 1B execution
+path until a graph backend and path-ranking policy are configured.
 
 ## Temporal Concepts
 
@@ -150,16 +150,21 @@ sequenceDiagram
   from grounding and temporal-rule failures.
 - The response envelope exposes telemetry that can become an evaluation/observability layer.
 
-## Architecture Gaps
+## Architecture Extension Points
 
-- No production deployment layer yet.
-- No hardened database migration path yet.
-- A small controlled benchmark exists, but a larger multi-source, multi-domain
-  benchmark is still required.
-- Temporal Contextual Chunking is implemented and wired into ingestion. Broader
-  external validation and multi-domain benchmarking remain future work.
-- DHQC is an active support module, but the current proof does not depend
-  on it as a novel research claim.
-- Graph path retrieval is not implemented beyond a disabled stub.
-- No UI/demo surface yet.
-- No external observability stack yet.
+- Robust temporal expression normalization for relative, fuzzy, implicit, and
+  underspecified dates.
+- Learned temporal reranking over semantic relevance, valid-time fit,
+  transaction-time role, interval overlap, and forbidden-time penalties.
+- Multi-hop temporal reasoning over ordered evidence chains.
+- Explicit temporal contradiction modeling with contradiction type and severity
+  classification.
+- Calibrated temporal confidence estimation for evidence fit, conflict
+  likelihood, and answer validity.
+- Joint optimization of temporal fusion and source-aware, metric-aware, and
+  slot-aware evidence finalization.
+- Interpretability tooling for temporal score heatmaps, evidence-ranking
+  traces, attribution-flow graphs, and before/after finalization
+  visualizations.
+- Graph retrieval integration once graph storage, path ranking, and evaluation
+  contracts are defined.

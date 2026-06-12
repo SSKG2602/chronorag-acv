@@ -6,8 +6,8 @@ whether retrieval can prefer exact valid-time evidence over wrong-year,
 broad-window, transaction-time-only, metric-confused, and conflict-prone
 distractors.
 
-This is not a broad performance claim, not a publication-grade external
-benchmark, and not proof of universal temporal reasoning.
+The benchmark result should be read as Layer 1A retrieval evidence: a controlled
+measurement of temporal evidence selection before answer synthesis.
 
 ## Why V1 Was Insufficient
 
@@ -43,10 +43,10 @@ Layer 1B has its own result files under `benchmarks/results/`. Temporal Eval v2
 retrieval metrics should not be mixed with answer-completeness or provider JSON
 contract failures.
 
-Layer 2: Generalization Benchmark.
+Layer 2: Cross-Domain Benchmark.
 
-This is later future work. It will test a different domain, likely versioned
-software documentation.
+Layer 2A and Layer 2B are separate cross-domain checkpoints with their own
+retrieval-only and answer-validation result files.
 
 ## Raw Data Paths
 
@@ -137,18 +137,57 @@ Temporal Eval v2 is a controlled multi-source benchmark testing whether
 ChronoRAG can prefer exact valid-time evidence over wrong-year, broad-window,
 transaction-time-only, metric-confused, and conflict-prone distractors.
 
-## Forbidden Claims
+## Interpretation Boundaries
 
-- Do not claim broad benchmark leadership.
-- Do not claim external generalization proof.
-- Do not call it a publication-grade benchmark.
-- Do not claim universal temporal reasoning.
+- Layer 1A reports retrieval-layer behavior over Temporal Eval v2.
+- Layer 1B reports answer-level behavior over TCC-enriched evidence cards.
+- Layer 2A and Layer 2B report separate cross-domain retrieval and
+  answer-validation checkpoints.
 
-## Limitations
+## Technical Limitations
 
-- The benchmark is controlled and still focused on historical economic data.
-- Synthetic traps are useful for diagnostics but are not a substitute for a
-  natural external benchmark.
-- Layer 2 generalization across a second domain remains future work.
-- Answer-quality evaluation is separate from retrieval/grounding evaluation and
-  belongs in Layer 1B.
+### Temporal Expression Parsing
+
+ChronoRAG currently relies on explicit or reliably extractable temporal
+expressions. More robust handling of relative, implicit, underspecified, and
+fuzzy temporal references remains an important technical extension.
+
+### Rule-Weighted Temporal Fusion
+
+The current temporal fusion layer uses explicitly designed scoring signals. A
+learned temporal reranker could adapt the relative importance of semantic
+relevance, valid-time fit, transaction-time role, interval overlap, and
+forbidden-time penalties across different domains.
+
+### Multi-Hop Temporal Reasoning
+
+ChronoRAG focuses on temporally valid evidence selection and slot-aware
+assembly. Extending the framework to multi-hop temporal reasoning, where
+answers require ordered chains of evidence across multiple events or intervals,
+remains future work.
+
+### Temporal Contradiction Modeling
+
+ChronoSanity detects temporally inconsistent or role-conflicting evidence in
+retrieved candidates. Future work should extend this into explicit temporal
+contradiction modeling, including contradiction type classification and
+contradiction severity scoring.
+
+### Temporal Confidence Calibration
+
+The current framework exposes confidence and attribution metadata, but
+calibrated uncertainty estimation for temporal fit, conflict likelihood, and
+answer validity remains an open extension.
+
+### Joint Optimization of Evidence Finalization
+
+Source-aware, metric-aware, and slot-aware finalization are implemented as
+modular retrieval-time controls. A future version can investigate whether these
+controls can be jointly optimized through learning-based evidence selection.
+
+### Interpretability Visualization
+
+The current repository reports numerical retrieval and ablation results.
+Additional visual analysis, such as score heatmaps, temporal-ranking traces,
+and before/after evidence finalization diagrams, would improve interpretability
+of the temporal retrieval process.

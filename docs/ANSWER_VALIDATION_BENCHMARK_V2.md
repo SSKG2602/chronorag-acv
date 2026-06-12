@@ -5,8 +5,9 @@ benchmark. Layer 2A and Layer 2B now exist as separate cross-domain checkpoints
 and should be cited separately.
 
 Layer 1B evaluates ChronoRAG's evidence-grounded temporal answer behavior over
-the Temporal Eval v2 corpus. It is not Layer 2, not an external benchmark, and
-not a broad performance claim.
+the Temporal Eval v2 corpus. It should be cited as the Layer 1B
+answer-validation checkpoint, separate from Layer 2A retrieval and Layer 2B
+cross-domain answer validation.
 
 ## Scope
 
@@ -43,9 +44,8 @@ hybrid lexical + BGE vector retrieval + temporal metadata scoring. If vector
 dependencies are unavailable, the run fails clearly unless `--skip-vector` is
 explicitly passed.
 
-Vertex mode is provider-backed answer synthesis. Light mode is only
-CI/plumbing/scoring validation and should not be presented as the production
-technology.
+Vertex mode is provider-backed answer synthesis. Light mode is the deterministic
+CI, plumbing, and scoring-validation harness.
 
 ## Provider Contract Hardening
 
@@ -205,13 +205,54 @@ is not the primary claim.
 
 ## Allowed Interpretation
 
-This benchmark can support claims about controlled ChronoRAG answer behavior over
-Temporal Eval v2 evidence cards. It cannot support claims about external
-generalization, broad QA quality, or state-of-the-art performance.
+This benchmark supports claims about controlled ChronoRAG answer behavior over
+Temporal Eval v2 evidence cards. Layer 2A and Layer 2B provide the separate
+cross-domain retrieval and answer-validation checkpoints.
 
-## Limitations
+## Technical Limitations
 
-- Light mode is only a deterministic harness.
-- Vertex mode costs money and requires ADC/project configuration.
-- The corpus is still controlled and historical-economy focused.
-- Cross-domain generalization is Layer 2 future work.
+### Temporal Expression Parsing
+
+ChronoRAG currently relies on explicit or reliably extractable temporal
+expressions. More robust handling of relative, implicit, underspecified, and
+fuzzy temporal references remains an important technical extension.
+
+### Rule-Weighted Temporal Fusion
+
+The current temporal fusion layer uses explicitly designed scoring signals. A
+learned temporal reranker could adapt the relative importance of semantic
+relevance, valid-time fit, transaction-time role, interval overlap, and
+forbidden-time penalties across different domains.
+
+### Multi-Hop Temporal Reasoning
+
+ChronoRAG focuses on temporally valid evidence selection and slot-aware
+assembly. Extending the framework to multi-hop temporal reasoning, where
+answers require ordered chains of evidence across multiple events or intervals,
+remains future work.
+
+### Temporal Contradiction Modeling
+
+ChronoSanity detects temporally inconsistent or role-conflicting evidence in
+retrieved candidates. Future work should extend this into explicit temporal
+contradiction modeling, including contradiction type classification and
+contradiction severity scoring.
+
+### Temporal Confidence Calibration
+
+The current framework exposes confidence and attribution metadata, but
+calibrated uncertainty estimation for temporal fit, conflict likelihood, and
+answer validity remains an open extension.
+
+### Joint Optimization of Evidence Finalization
+
+Source-aware, metric-aware, and slot-aware finalization are implemented as
+modular retrieval-time controls. A future version can investigate whether these
+controls can be jointly optimized through learning-based evidence selection.
+
+### Interpretability Visualization
+
+The current repository reports numerical retrieval and ablation results.
+Additional visual analysis, such as score heatmaps, temporal-ranking traces,
+and before/after evidence finalization diagrams, would improve interpretability
+of the temporal retrieval process.

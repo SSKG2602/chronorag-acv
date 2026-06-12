@@ -2,18 +2,19 @@
 
 Layer 2A is ChronoRAG's controlled cross-domain retrieval-only benchmark. It
 checks selected evidence behavior across a selected 5,000-row corpus and 200 v3
-aligned questions. It does not call Vertex in the public retrieval-only path and
-does not score generated natural-language answer quality.
+aligned questions. The public retrieval-only path reports selected-evidence
+metrics without provider-backed answer synthesis.
 
 The Layer 2A artifacts provide controlled benchmark evidence for temporal
 retrieval behavior under explicitly scoped datasets and validators. Their
-claims are limited to retrieval-only evidence selection in this tested setting.
+measurement contract is retrieval-only evidence selection in this tested
+setting.
 
 Layer 2B is the companion full-50 natural-language temporal QA evaluation. It
 uses manually designed temporal QA cases, ChronoRAG answer synthesis, hard
 answer-contract validation, LLM judge scoring, and a manual audit note.
-Expected evidence was available where needed in Layer 2B, so Layer 2B measures
-answer synthesis and answer validation rather than retrieval quality.
+Layer 2B measures answer synthesis and answer validation; Layer 2A carries the
+selected-evidence retrieval metrics.
 
 ## Layer 2A Flow
 
@@ -69,9 +70,10 @@ metric is the meaningful Layer 2A check because some categories require
 forbidden-evidence avoidance, slot coverage, source constraints, or metric
 constraints rather than a single expected ID.
 
-`conflict_detection` is not a scored v3 category. It is documented as
-data-contract blocked because the current corpus does not contain real
-two-sided conflict evidence pairs.
+`conflict_detection` is outside the scored v3 categories because the current
+corpus lacks real two-sided contradiction pairs. Explicit temporal
+contradiction modeling is tracked as a technical extension rather than scored
+over synthetic placeholders.
 
 ## Methods
 
@@ -92,8 +94,6 @@ The public Layer 2 result directory contains:
 - `results/layer2_retrieval_only_v3_200_eval.json`
 - `results/layer2_ablation_v3_ablation200.md`
 - `results/layer2_ablation_v3_ablation200.json`
-- `results/conflict_data_contract_blocked_v3.md`
-- `results/conflict_data_contract_blocked_v3.json`
 - `results/layer2b_manual_50_qa_summary.md`
 - `results/layer2b_chronorag_full_layer2b_full50_vertex_final_results.md`
 - `results/layer2b_judge_layer2b_full50_judge_final_results.md`
@@ -154,9 +154,8 @@ semantically correct. The final full-50 answer and judge runs had 0 answer
 provider errors, 0 judge errors, 0 judge provider failures, and 0 judge parse
 failures.
 
-Layer 2B used expected-evidence injection where needed. Treat Layer 2B as an
-answer-synthesis and answer-validation evaluation. Retrieval-quality claims
-belong to Layer 2A retrieval-only reports.
+Layer 2B is an answer-synthesis and answer-validation evaluation. Retrieval
+quality is reported through the Layer 2A selected-evidence metrics.
 
 ## Ablation Result
 
@@ -192,15 +191,15 @@ Overall ablation summary:
 
 Interpretation should stay conservative. Some categories are explicitly
 anchored enough that an ablation may not drop, and that is a property of this
-controlled benchmark design rather than proof that the removed component is
-irrelevant in other settings.
+controlled benchmark design rather than a conclusion about the removed
+component across other settings.
 
 ## Benchmark Corrections And Failure Notes
 
 - Broad-window style questions were corrected because vague year-only wording
   cannot fairly require a hidden exact date.
-- Conflict detection is data-contract blocked because real conflict-pair rows
-  are absent in the current corpus.
+- Conflict detection was removed from scored v3 categories because real
+  paired contradiction rows are absent in the current corpus.
 - Layer 2A is retrieval-only; Vertex and LLM judge artifacts are not the final
   public result for this layer.
 - The current v3 benchmark aligns question wording, expected evidence, and
