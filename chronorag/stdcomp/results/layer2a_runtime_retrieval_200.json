@@ -1,0 +1,132 @@
+{
+  "timestamp": "2026-06-14T16:16:38+00:00",
+  "git_commit": "f6005d9",
+  "git_status_short": "?? main",
+  "environment": {
+    "os": "macOS-26.3.1-arm64-arm-64bit",
+    "python_version": "3.11.1 (v3.11.1:a7a450f84a, Dec  6 2022, 15:24:06) [Clang 13.0.0 (clang-1300.0.29.30)]",
+    "cpu_model": "Apple M2",
+    "ram_gb": 8.0,
+    "gpu_availability": {
+      "torch_available": true,
+      "cuda_available": false,
+      "mps_available": true
+    },
+    "gpu_used": true,
+    "dense_model_device": "mps:0"
+  },
+  "benchmark": {
+    "corpus": "benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl",
+    "questions": "benchmarks/layer2_crossdomain/data/layer2_questions.jsonl",
+    "num_corpus_rows": 5000,
+    "num_questions": 200,
+    "top_k": 5,
+    "corpus_sha256": "fe0782eea177ccd1ac90ce21c730c8c69f65c8be388534bc141d3a01a6269287",
+    "questions_sha256": "d8dcaf4e306fa7f3c8d3ccd02aeee7af5c03ce23250d2a47d470c2c7e5c98b7a",
+    "data_load_seconds": 0.054972374986391515
+  },
+  "measurement_policy": {
+    "timing": "wall_clock_perf_counter",
+    "llm_calls": false,
+    "judge_calls": false,
+    "vertex_calls": false,
+    "gemini_calls": false,
+    "answer_generation": false,
+    "reported_runtime": "warm_retrieval_after_setup_and_one_warmup",
+    "setup_time_recorded_separately": true,
+    "warmup": "one query per method, excluded from warm retrieval timing; all 200 questions still timed after warmup",
+    "fallback_used": false,
+    "fallback_estimate": false
+  },
+  "command_used": "python3 - <<'PY'  # Layer 2A retrieval runtime timing script",
+  "method_list": [
+    "BM25",
+    "Dense-only",
+    "Date-filter RAG",
+    "Metadata Temporal RAG",
+    "ChronoRAG Full"
+  ],
+  "results": [
+    {
+      "method": "BM25",
+      "questions_timed": 200,
+      "top_k": 5,
+      "setup_seconds": 0.04342366600758396,
+      "warmup_seconds": 0.005466417002025992,
+      "cold_total_seconds": 1.5691257919970667,
+      "warm_retrieval_seconds": 1.5202333750057733,
+      "mean_warm_seconds_per_query": 0.0076011668750288666,
+      "queries_per_second": 131.55874833970176,
+      "failed": false,
+      "notes": "Raw BM25 over standard raw_text rows; setup builds BM25 index once.",
+      "uses_llm": false,
+      "device_used": "CPU"
+    },
+    {
+      "method": "Dense-only",
+      "questions_timed": 200,
+      "top_k": 5,
+      "setup_seconds": 139.18258029199205,
+      "warmup_seconds": 1.0441938330041012,
+      "cold_total_seconds": 153.11112262499228,
+      "warm_retrieval_seconds": 12.88434404200234,
+      "mean_warm_seconds_per_query": 0.0644217202100117,
+      "queries_per_second": 15.522714959179114,
+      "failed": false,
+      "notes": "Dense-only BAAI/bge-small-en-v1.5 cosine retrieval; doc embedding cache hit=True; device=mps:0.",
+      "uses_llm": false,
+      "embedding_model": "BAAI/bge-small-en-v1.5",
+      "doc_embedding_cache_path": "chronorag/stdcomp/results/cache/dense_docs_e92ff419d49cc8f4.npz",
+      "doc_embedding_cache_hit": true,
+      "device_used": "mps:0",
+      "gpu_used_by_method": true
+    },
+    {
+      "method": "Date-filter RAG",
+      "questions_timed": 200,
+      "top_k": 5,
+      "setup_seconds": 0.07892104200436734,
+      "warmup_seconds": 0.014110625008470379,
+      "cold_total_seconds": 3.1956325840001227,
+      "warm_retrieval_seconds": 3.1026002909929957,
+      "mean_warm_seconds_per_query": 0.015513001454964979,
+      "queries_per_second": 64.46205802939232,
+      "failed": false,
+      "notes": "Naive date-string filter followed by BM25; setup builds BM25 index once.",
+      "uses_llm": false,
+      "device_used": "CPU"
+    },
+    {
+      "method": "Metadata Temporal RAG",
+      "questions_timed": 200,
+      "top_k": 5,
+      "setup_seconds": 0.0003611659922171384,
+      "warmup_seconds": 0.06462520800414495,
+      "cold_total_seconds": 17.790195082998252,
+      "warm_retrieval_seconds": 17.725207957992097,
+      "mean_warm_seconds_per_query": 0.08862603978996049,
+      "queries_per_second": 11.283365502621493,
+      "failed": false,
+      "notes": "Existing metadata-temporal scorer over ordinary precomputed raw-text chunks; no LLM.",
+      "uses_llm": false,
+      "device_used": "CPU",
+      "metadata_chunk_count": 5000
+    },
+    {
+      "method": "ChronoRAG Full",
+      "questions_timed": 200,
+      "top_k": 5,
+      "setup_seconds": 1.8459367500036024,
+      "warmup_seconds": 1.31885450000118,
+      "cold_total_seconds": 287.19498279200343,
+      "warm_retrieval_seconds": 284.03019120798854,
+      "mean_warm_seconds_per_query": 1.4201509560399428,
+      "queries_per_second": 0.7041504959363449,
+      "failed": false,
+      "notes": "ChronoRAG Full retrieval with prepared TCC context, temporal fusion, and finalization; no LLM.",
+      "uses_llm": false,
+      "device_used": "CPU",
+      "prepared_chunk_count": 5000
+    }
+  ]
+}

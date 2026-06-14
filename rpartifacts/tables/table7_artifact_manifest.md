@@ -46,6 +46,7 @@ Source artifact path: generated from `rpartifacts/generate_research_artifacts.py
 | rpartifacts/tables/table1_layer2a_retrieval_comparison.md | table | Table 1. Layer 2A Retrieval Comparison | docs/paper_assets/table1_layer2a_retrieval_standard_comparison.csv |
 | rpartifacts/tables/table2_ablation_comparison.md | table | Table 2. Ablation Comparison | docs/paper_assets/table2_layer2a_ablation_comparison.csv |
 | rpartifacts/tables/table2_full_layer2a_ablation_comparison.md | table | Table 2 full. Layer 2A Full Ablation Comparison | docs/paper_assets/table2_layer2a_full_ablation_comparison.csv |
+| rpartifacts/tables/table_runtime_layer2a_retrieval.md | table | Runtime. Layer 2A Retrieval Runtime | docs/paper_assets/table_runtime_layer2a_retrieval.csv |
 | rpartifacts/tables/table3_qa50_llm_post_filtering.md | table | Table 3. QA50 LLM Post-Filtering Baselines | docs/paper_assets/table3_qa50_llm_post_filter_baselines.csv |
 | rpartifacts/tables/table4_answer_level_comparison.md | table | Table 4. QA50 Answer-Level Comparison | docs/paper_assets/table4_qa50_answer_level_comparison.csv |
 | rpartifacts/tables/table5_score_only_ablation.md | table | Table 5. Score-Only Ablation | docs/paper_assets/table2_layer2a_ablation_comparison.csv |

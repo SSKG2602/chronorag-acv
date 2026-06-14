@@ -1,7 +1,8 @@
 # ChronoRAG Paper Tables Index
 
-Generated from existing result artifacts only. No retrieval, model, validator,
-or judge runs were executed by this table builder.
+Generated from existing result artifacts only, except the runtime snapshot table
+which records a retrieval-only local timing run. No validator, judge, Vertex,
+Gemini, OpenAI, or answer-generation runs were executed by this table builder.
 
 Use these tables as the paper-ready result boundary for Layer 2A retrieval,
 Layer 2A ablations, QA50 standard retrieval + LLM post-filtering, and QA50
@@ -31,10 +32,13 @@ Key polished artifact links:
 3. [Layer 2A full ablation comparison](table2_layer2a_full_ablation_comparison.md)
    - CSV: `table2_layer2a_full_ablation_comparison.csv`
    - Source: `benchmarks/layer2_crossdomain/results/layer2_ablation_v3_ablation200.md`
-4. [QA50 standard retrieval + LLM temporal post-filtering baselines](table3_qa50_llm_post_filter_baselines.md)
+4. [Layer 2A retrieval runtime](table_runtime_layer2a_retrieval.md)
+   - CSV: `table_runtime_layer2a_retrieval.csv`
+   - JSON: `chronorag/stdcomp/results/layer2a_runtime_retrieval_200.json`
+5. [QA50 standard retrieval + LLM temporal post-filtering baselines](table3_qa50_llm_post_filter_baselines.md)
    - CSV: `table3_qa50_llm_post_filter_baselines.csv`
    - JSON: `chronorag/stdcomp/results/paper_tables/table3_qa50_llm_post_filter_baselines.json`
-5. [QA50 answer-level comparison](table4_qa50_answer_level_comparison.md)
+6. [QA50 answer-level comparison](table4_qa50_answer_level_comparison.md)
    - CSV: `table4_qa50_answer_level_comparison.csv`
    - JSON: `chronorag/stdcomp/results/paper_tables/table4_qa50_answer_level_comparison.json`
 
@@ -54,6 +58,7 @@ Key polished artifact links:
 
 - [ChronoRAG QA50 extracted values](chronorag_qa50_extracted_values.md)
 - [Fixed QA50 answer-level comparison](table4_qa50_answer_level_comparison.md)
+- [Layer 2A retrieval runtime](table_runtime_layer2a_retrieval.md)
 - [Top-k retrieval-only sensitivity](topk_sensitivity.md)
 - [Fusion-weight sensitivity boundary note](fusion_weight_sensitivity_not_run.md)
 - [Reranker ablation boundary note](reranker_ablation_not_run.md)

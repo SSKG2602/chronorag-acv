@@ -253,6 +253,12 @@
       "type": "table"
     },
     {
+      "description": "Runtime. Layer 2A Retrieval Runtime",
+      "path": "rpartifacts/tables/table_runtime_layer2a_retrieval.md",
+      "source": "docs/paper_assets/table_runtime_layer2a_retrieval.csv",
+      "type": "table"
+    },
+    {
       "description": "Table 3. QA50 LLM Post-Filtering Baselines",
       "path": "rpartifacts/tables/table3_qa50_llm_post_filtering.md",
       "source": "docs/paper_assets/table3_qa50_llm_post_filter_baselines.csv",

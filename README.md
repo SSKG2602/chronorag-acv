@@ -572,6 +572,16 @@ Layer 2A v3 retrieval-only standard comparison:
 | Metadata Temporal RAG | 200 | 0.6900 | 0.8600 | 0.7678 | 0.6950 | 0.4813 |
 | ChronoRAG Full | 200 | 0.8250 | 0.8950 | 0.8554 | 0.9950 | 0.9625 |
 
+### Runtime Snapshot
+
+Runtime was measured on the fixed Layer 2A 200-question retrieval-only
+benchmark at top-k=5. Warm retrieval time excludes one-time model/index loading
+where applicable. No LLM, judge, Vertex, Gemini, or answer-generation call was
+used.
+
+Paper-ready runtime table:
+[`docs/paper_assets/table_runtime_layer2a_retrieval.md`](docs/paper_assets/table_runtime_layer2a_retrieval.md)
+
 ![Layer 2A retrieval comparison](rpartifacts/figures/fig3_layer2a_retrieval_comparison.png)
 
 BM25 and Date-filter RAG achieve higher broad Hit@5, while ChronoRAG Full is
