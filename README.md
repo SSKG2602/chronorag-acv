@@ -38,6 +38,12 @@ questions need more than topical match:
 ChronoRAG makes these cases explicit in retrieval, evidence finalization, and
 answer validation.
 
+![Temporal misgrounding concept](rpartifacts/figures/fig1_temporal_misgrounding_concept.png)
+
+Figure 1 illustrates the central failure mode: topically relevant retrieved
+evidence can be invalid for the requested time. ChronoRAG addresses this before
+generation through temporal-validity evidence selection.
+
 ## Core Technical Pieces
 
 ### Temporal Contextual Chunking
@@ -153,6 +159,12 @@ evidence can be injected where needed, which isolates answer behavior and
 validation quality; it must not be used as a retrieval-quality claim.
 
 ## Architecture
+
+![ChronoRAG architecture](rpartifacts/figures/fig2_chronorag_architecture.png)
+
+Figure 2 shows the retrieval path from Temporal Contextual Chunking through
+role grounding, temporal scoring, finalization, attribution, and
+answer-contract validation.
 
 ```mermaid
 flowchart TD
@@ -294,6 +306,12 @@ Forbidden Absent@5 at 0.9950 and Category Primary Pass at 0.9625. This
 demonstrates that unconstrained retrieval score optimization and
 temporal-validity retrieval are different objectives.
 
+![Score-only ablation](rpartifacts/figures/fig5_score_only_ablation.png)
+
+The Score-only ablation achieves higher broad Hit@5 but much worse Forbidden
+Absent@5 and Category Primary Pass, showing that score optimization and
+temporal validity diverge.
+
 ### LLM Post-Filtering Does Not Replace Retrieval-Layer Temporal Grounding
 
 BM25 + LLM, Dense-only + LLM, and Date-filter RAG + LLM were evaluated with
@@ -320,6 +338,12 @@ post-injection evidence available is 1.0000 (50/50).
 | BM25 + LLM | 50 | 32/50 = 0.6400 | 20/50 = 0.4000 | 20 | 12 | 18 | 0 |
 | Dense-only + LLM | 50 | 26/50 = 0.5200 | 16/50 = 0.3200 | 16 | 10 | 24 | 0 |
 | Date-filter RAG + LLM | 50 | 33/50 = 0.6600 | 20/50 = 0.4000 | 20 | 13 | 17 | 0 |
+
+![QA50 LLM post-filtering](rpartifacts/figures/fig6_qa50_llm_post_filtering.png)
+
+Baselines are no-injection LLM post-filtering runs. ChronoRAG Full is the
+post-injection answer setting; pre-injection retrieval availability is reported
+separately.
 
 These baselines test whether standard retrieval followed by an LLM explicitly
 prompted to distinguish valid time from transaction time can replace
@@ -360,6 +384,11 @@ generator. Layer 2A remains the primary retrieval-quality benchmark; Layer
 | Date-filter RAG + LLM | 0.6600 | 0.4000 | 0.4400 | 0.9000 | 0.5800 | 0.4600 |
 | ChronoRAG Full — pre-injection retrieval | 0.7400 any / 0.6400 all | n/a | n/a | n/a | n/a | n/a |
 | ChronoRAG Full — post-injection answer setting | 1.0000 | 0.7000 | 0.7600 | 0.9600 | 0.9800 | 0.8400 |
+
+[Figure 7: Injection fairness split](rpartifacts/figures/fig7_injection_fairness_split.png)
+separates pre-injection retrieval availability from the post-injection answer
+setting so QA50 answer-level results are not mistaken for retrieval-only
+evidence selection.
 
 The answer-level comparison shows that standard retrieval plus LLM temporal
 post-filtering does not recover ChronoRAG-level strict temporal QA performance.
@@ -545,6 +574,15 @@ Layer 2A v3 retrieval-only standard comparison:
 | Date-filter RAG | 200 | 0.7750 | 0.9350 | 0.8475 | 0.7650 | 0.6000 |
 | Metadata Temporal RAG | 200 | 0.6900 | 0.8600 | 0.7678 | 0.6950 | 0.4813 |
 | ChronoRAG Full | 200 | 0.8250 | 0.8950 | 0.8554 | 0.9950 | 0.9625 |
+
+![Layer 2A retrieval comparison](rpartifacts/figures/fig3_layer2a_retrieval_comparison.png)
+
+BM25 and Date-filter RAG have higher broad Hit@5, while ChronoRAG is strongest
+on temporal-validity diagnostics.
+
+[Figure 4: Temporal-validity diagnostics](rpartifacts/figures/fig4_temporal_validity_diagnostics.png)
+separates broad retrieval recall from diagnostics that capture forbidden
+evidence absence, category-primary behavior, and temporal-validity constraints.
 
 ### What the Layer 2A result means
 
@@ -807,10 +845,10 @@ controls can be jointly optimized through learning-based evidence selection.
 
 ### Interpretability Visualization
 
-The current repository reports numerical retrieval and ablation results.
-Additional visual analysis, such as score heatmaps, temporal-ranking traces,
-and before/after evidence finalization diagrams, would improve interpretability
-of the temporal retrieval process.
+The repository now includes one retrieval-only temporal feature heatmap and a
+one-query retrieval trace for inspection. Broader interpretability coverage,
+including more per-category traces and before/after finalization diagrams,
+remains future work.
 
 ### Evaluation Threats To Validity
 
@@ -839,9 +877,9 @@ changing the core motivation of the framework.
    likelihood, and answer validity.
 6. Joint optimization of temporal fusion and source-aware, metric-aware, and
    slot-aware evidence finalization.
-7. Interpretability tools such as temporal score heatmaps, evidence-ranking
-   traces, attribution-flow graphs, and before/after finalization
-   visualizations.
+7. Broader interpretability tools such as additional temporal score heatmaps,
+   evidence-ranking traces, attribution-flow graphs, and before/after
+   finalization visualizations.
 8. Advanced slot-aware evidence planning for comparison, aggregation, and
    multi-entity temporal queries.
 9. Automatic extraction of valid-time and transaction-time roles from raw
@@ -983,6 +1021,14 @@ semantic score is the judge-only answer-quality score. The manual-audited
 acceptable score is a secondary interpretation after accepting 3 manually
 reviewed validator-strictness cases, and it does not replace the strict score.
 
+[Figure 9: Temporal feature heatmap](rpartifacts/figures/fig9_temporal_feature_heatmap.png)
+is a retrieval-only trace; values are per-column min-max normalized. It is a
+mechanism visualization, not a standalone performance metric.
+
+[Figure 10: One-query retrieval trace](rpartifacts/figures/fig10_one_query_trace.png)
+shows one Layer 2A case where a baseline retrieves wrong-time rows that
+ChronoRAG excludes while keeping the expected valid-time evidence.
+
 ## Paper Preparation Assets
 
 Paper-support notes, qualitative case extracts, and figure assets are available
@@ -1001,27 +1047,12 @@ under:
 - `docs/paper_assets/fusion_weight_sensitivity_not_run.md`
 - `docs/paper_assets/reranker_ablation_not_run.md`
 
-## Research Artifacts and Paper Figures
+## Research Artifacts
 
-The generated research-artifact package is indexed at
-[rpartifacts/README.md](rpartifacts/README.md). It contains paper-ready
-figures, Markdown tables, GitHub README snippets, LinkedIn launch drafts, and
-paper integration notes.
-
-Selected figures:
-
-- [Figure 1: Temporal misgrounding concept](rpartifacts/figures/fig1_temporal_misgrounding_concept.png)
-- [Figure 2: ChronoRAG architecture](rpartifacts/figures/fig2_chronorag_architecture.png)
-- [Figure 3: Layer 2A retrieval comparison](rpartifacts/figures/fig3_layer2a_retrieval_comparison.png)
-- [Figure 5: Score-only ablation](rpartifacts/figures/fig5_score_only_ablation.png)
-- [Figure 6: QA50 LLM post-filtering](rpartifacts/figures/fig6_qa50_llm_post_filtering.png)
-- [Figure 10: One-query retrieval trace](rpartifacts/figures/fig10_one_query_trace.png)
-
-Reusable snippets and paper planning:
-
-- [GitHub results snippet](rpartifacts/github/readme_results_section.md)
-- [GitHub figures snippet](rpartifacts/github/readme_figures_section.md)
-- [Paper figure plan](rpartifacts/paper/paper_figure_plan.md)
+The full figure/table/snippet package is indexed in
+[rpartifacts/README.md](rpartifacts/README.md). It includes paper figures,
+generated tables, GitHub snippets, LinkedIn drafts, and paper insertion notes.
+Figures are referenced above near the sections they support.
 
 ## Data and Artifact Structure
 

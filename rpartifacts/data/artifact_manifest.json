@@ -163,7 +163,7 @@
       "type": "paper-note"
     },
     {
-      "description": "Superseded Figure 9 not-available note retained for provenance.",
+      "description": "Superseded Figure 9 availability note retained for provenance.",
       "path": "rpartifacts/figures/fig9_temporal_feature_heatmap_not_available.md",
       "source": "retrieval-only trace export",
       "type": "figure-note"

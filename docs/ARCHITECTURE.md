@@ -163,8 +163,8 @@ sequenceDiagram
   likelihood, and answer validity.
 - Joint optimization of temporal fusion and source-aware, metric-aware, and
   slot-aware evidence finalization.
-- Interpretability tooling for temporal score heatmaps, evidence-ranking
-  traces, attribution-flow graphs, and before/after finalization
-  visualizations.
+- Broader interpretability tooling for additional temporal score heatmaps,
+  evidence-ranking traces, attribution-flow graphs, and before/after
+  finalization visualizations.
 - Graph retrieval integration once graph storage, path ranking, and evaluation
   contracts are defined.

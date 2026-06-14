@@ -2,7 +2,7 @@
 
 A real Figure 9 heatmap is now generated from
 `rpartifacts/data/temporal_feature_trace.jsonl`. This file is retained only as
-provenance for the earlier not-available state.
+provenance for the earlier placeholder state.
 
 Use:
 

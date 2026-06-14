@@ -252,7 +252,7 @@ controls can be jointly optimized through learning-based evidence selection.
 
 ### Interpretability Visualization
 
-The current repository reports numerical retrieval and ablation results.
-Additional visual analysis, such as score heatmaps, temporal-ranking traces,
-and before/after evidence finalization diagrams, would improve interpretability
-of the temporal retrieval process.
+The repository includes numerical retrieval tables, ablation results, a
+retrieval-only temporal feature heatmap, and a one-query trace. Broader
+interpretability coverage, such as more per-category traces and before/after
+evidence finalization diagrams, remains future work.

@@ -45,10 +45,12 @@ Caption: Schematic view of how temporal-role constraints, forbidden-time
 handling, source and metric anchors, and slot-aware assembly refine a generic
 candidate evidence list into a temporally valid final evidence set.
 
-## Figure 6: Temporal Scoring Heatmap
+## Figure 6: Temporal Feature Heatmap
 
-Path: `docs/paper_assets/temporal_scoring_heatmap.png`
+Path: `rpartifacts/figures/fig9_temporal_feature_heatmap.png`
 
-Caption: Illustrative temporal scoring heatmap showing how semantic relevance
-and temporal fit jointly affect candidate evidence ranking. This figure is a
-schematic visualization of the scoring concept, not a new experimental result.
+Caption: Retrieval-only candidate trace heatmap showing available scoring
+signals for representative Layer 2A cases. Raw values are stored in
+`rpartifacts/data/temporal_feature_trace.jsonl` and `.csv`; heatmap colors are
+per-column min-max normalized. This is a mechanism visualization, not a
+standalone performance metric.

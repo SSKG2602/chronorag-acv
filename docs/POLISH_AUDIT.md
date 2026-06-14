@@ -69,9 +69,9 @@ behavior.
   likelihood, and answer validity.
 - Joint optimization of temporal fusion and source-aware, metric-aware, and
   slot-aware evidence finalization.
-- Interpretability tools such as temporal score heatmaps, evidence-ranking
-  traces, attribution-flow graphs, and before/after finalization
-  visualizations.
+- Broader interpretability tools such as additional temporal score heatmaps,
+  evidence-ranking traces, attribution-flow graphs, and before/after
+  finalization visualizations.
 
 ## Next Priority
 

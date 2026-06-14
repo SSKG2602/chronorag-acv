@@ -149,6 +149,8 @@ def trace_case(
 
     for item in adapted:
         row = item.row
+        # Mirror the retrieval-time scoring inputs without changing the core
+        # ChronoRAG ranking code; missing internal fields stay null.
         bm25_score = float(lexical.get(row.id, 0.0))
         relevance = _normalize(bm25_score, lexical_values)
         temporal = _temporal_weight(case, row)
@@ -276,7 +278,7 @@ def ordered_export_ids(
                 break
             if item.row.id not in ids:
                 ids.append(item.row.id)
-    for evidence_id in [*selected_ids, *expected_ids, *forbidden_ids]:
+    for evidence_id in sorted(selected_ids | expected_ids | forbidden_ids):
         if evidence_id not in ids:
             ids.append(evidence_id)
     return ids
@@ -345,6 +347,7 @@ def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
+        # Keep generated CSVs on LF line endings so git whitespace checks pass.
         writer = csv.DictWriter(handle, fieldnames=TRACE_COLUMNS, lineterminator="\n")
         writer.writeheader()
         for row in rows:

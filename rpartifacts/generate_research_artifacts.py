@@ -504,6 +504,8 @@ def figure9_temporal_feature_heatmap(trace_rows: list[dict[str, Any]]) -> None:
         return
 
     raw_matrix = [[as_number(row.get(column)) for column in numeric_columns] for row in rows]
+    # Figure 9 is a mechanism view, so normalize each real score column only
+    # for color comparability; raw values remain in the JSONL/CSV trace files.
     normalized_matrix = normalize_columns(raw_matrix)
     fig_height = max(7.5, min(12.0, 0.42 * len(rows) + 2.8))
     fig, ax = plt.subplots(figsize=(14, fig_height))
@@ -527,7 +529,7 @@ def figure9_temporal_feature_heatmap(trace_rows: list[dict[str, Any]]) -> None:
 
 
 def figure9_feature_heatmap_note(reason: str) -> None:
-    text = f"""# Figure 9 Temporal Feature Heatmap Not Available
+    text = f"""# Figure 9 Temporal Feature Heatmap Availability
 
 {reason}
 
@@ -635,7 +637,7 @@ def write_superseded_heatmap_note() -> None:
 
 A real Figure 9 heatmap is now generated from
 `rpartifacts/data/temporal_feature_trace.jsonl`. This file is retained only as
-provenance for the earlier not-available state.
+provenance for the earlier placeholder state.
 
 Use:
 
@@ -645,7 +647,7 @@ Use:
 """
     path = FIG_DIR / "fig9_temporal_feature_heatmap_not_available.md"
     path.write_text(text, encoding="utf-8")
-    record(path, "figure-note", "Superseded Figure 9 not-available note retained for provenance.", "retrieval-only trace export")
+    record(path, "figure-note", "Superseded Figure 9 availability note retained for provenance.", "retrieval-only trace export")
 
 
 def figure10_one_query_trace(stdcomp: dict[str, Any]) -> None:
@@ -697,9 +699,9 @@ def figure10_one_query_trace(stdcomp: dict[str, Any]) -> None:
         "- Case type: real artifact-extracted benchmark trace.",
         "- Exact BM25 candidate scores: available in `bm25_ranked_outputs.json`.",
         "- ChronoRAG selected evidence IDs and pass/fail behavior: available in `stdcomp_layer2a_comparison.json`.",
-        "- Candidate-level temporal feature scores: not available in existing artifacts.",
+        "- Candidate-level temporal feature scores for Figure 9: available in `rpartifacts/data/temporal_feature_trace.jsonl` and `.csv`.",
         "",
-        "Candidate-level temporal feature scores were not stored in existing artifacts; this trace summarizes selected evidence IDs and pass/fail behavior from stored result artifacts.",
+        "This trace summarizes selected evidence IDs and pass/fail behavior from stored result artifacts. The separate Figure 9 trace export records the available retrieval-time numeric fields for representative cases.",
         "",
         "Interpretation: the baseline retrieves expected evidence but also includes forbidden wrong-time evidence; ChronoRAG keeps the expected evidence while excluding the forbidden rows.",
         "",
@@ -991,13 +993,19 @@ Primary Pass.
 ![Temporal misgrounding schematic](../figures/fig1_temporal_misgrounding_concept.png)
 ![ChronoRAG architecture](../figures/fig2_chronorag_architecture.png)
 ![Layer 2A retrieval comparison](../figures/fig3_layer2a_retrieval_comparison.png)
+![Temporal-validity diagnostics](../figures/fig4_temporal_validity_diagnostics.png)
 ![Score-only ablation](../figures/fig5_score_only_ablation.png)
 ![QA50 LLM post-filtering](../figures/fig6_qa50_llm_post_filtering.png)
+![Temporal feature heatmap](../figures/fig9_temporal_feature_heatmap.png)
 ![One-query trace](../figures/fig10_one_query_trace.png)
 ![Metric family summary](../figures/fig11_metric_family_summary.png)
 
-All quantitative charts are generated from existing result artifacts. Conceptual
-figures are labeled as schematics.
+Place figures next to the claims they support: Figure 1 near the temporal
+misgrounding motivation, Figure 2 near the architecture, Figures 3-5 near
+Layer 2A retrieval and ablation results, Figure 6 near QA50 post-filtering,
+Figure 9 near trace/mechanism discussion, and Figure 10 near qualitative
+retrieval examples. Quantitative charts are generated from existing result
+artifacts; conceptual figures are labeled as schematics.
 """
     write_text(GITHUB_DIR / "readme_figures_section.md", figures, "github-snippet", "Copy-paste README figure section.", "generated figures")
     links = """# Badges Or Links
@@ -1146,10 +1154,10 @@ ChronoRAG result artifacts.
 
 ## Scope
 
-`rpartifacts/` is a research-artifact package for paper writing, GitHub README
-polish, LinkedIn launch preparation, and professor review. Quantitative charts
-are generated from stored result artifacts. Conceptual diagrams are explicitly
-marked as schematics.
+`rpartifacts/` is the research-artifact package for paper writing, GitHub
+README polish, and public communication. Quantitative charts are generated from
+stored result artifacts or retrieval-only traces. Conceptual diagrams are
+explicitly marked as schematics.
 
 ## Figure Index
 
@@ -1188,6 +1196,9 @@ normalization and provenance details. The schema recommendation remains at
 - LinkedIn launch drafts: [linkedin/](linkedin/)
 - Paper inserts: [paper/](paper/)
 
+The root README places the main figures near the explanations they support
+rather than collecting them as a detached gallery.
+
 ## Tables
 
 - [Table 1: Layer 2A retrieval comparison](tables/table1_layer2a_retrieval_comparison.md)
@@ -1204,14 +1215,15 @@ normalization and provenance details. The schema recommendation remains at
 python3 rpartifacts/generate_research_artifacts.py
 ```
 
-## How To Use
+## Use In Paper And README
 
 - Paper: use [paper/paper_figure_plan.md](paper/paper_figure_plan.md) and the
   tables under [tables/](tables/).
-- README: use snippets under [github/](github/).
+- README: use snippets under [github/](github/), but keep figures near the
+  relevant method or result discussion.
 - LinkedIn: use launch drafts under [linkedin/](linkedin/).
 
-## What Not To Claim
+## Claim Boundary
 
 Do not claim generic open-domain RAG superiority or SOTA. Do not treat
 post-injection answer-level evidence availability as baseline retrieval

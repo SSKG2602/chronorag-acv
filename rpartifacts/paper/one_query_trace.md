@@ -22,8 +22,8 @@ This is a real Layer 2A retrieval-only benchmark case extracted from existing ar
 - Case type: real artifact-extracted benchmark trace.
 - Exact BM25 candidate scores: available in `bm25_ranked_outputs.json`.
 - ChronoRAG selected evidence IDs and pass/fail behavior: available in `stdcomp_layer2a_comparison.json`.
-- Candidate-level temporal feature scores: not available in existing artifacts.
+- Candidate-level temporal feature scores for Figure 9: available in `rpartifacts/data/temporal_feature_trace.jsonl` and `.csv`.
 
-Candidate-level temporal feature scores were not stored in existing artifacts; this trace summarizes selected evidence IDs and pass/fail behavior from stored result artifacts.
+This trace summarizes selected evidence IDs and pass/fail behavior from stored result artifacts. The separate Figure 9 trace export records the available retrieval-time numeric fields for representative cases.
 
 Interpretation: the baseline retrieves expected evidence but also includes forbidden wrong-time evidence; ChronoRAG keeps the expected evidence while excluding the forbidden rows.

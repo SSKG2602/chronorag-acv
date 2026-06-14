@@ -6,10 +6,10 @@ ChronoRAG result artifacts.
 
 ## Scope
 
-`rpartifacts/` is a research-artifact package for paper writing, GitHub README
-polish, LinkedIn launch preparation, and professor review. Quantitative charts
-are generated from stored result artifacts. Conceptual diagrams are explicitly
-marked as schematics.
+`rpartifacts/` is the research-artifact package for paper writing, GitHub
+README polish, and public communication. Quantitative charts are generated from
+stored result artifacts or retrieval-only traces. Conceptual diagrams are
+explicitly marked as schematics.
 
 ## Figure Index
 
@@ -48,6 +48,9 @@ normalization and provenance details. The schema recommendation remains at
 - LinkedIn launch drafts: [linkedin/](linkedin/)
 - Paper inserts: [paper/](paper/)
 
+The root README places the main figures near the explanations they support
+rather than collecting them as a detached gallery.
+
 ## Tables
 
 - [Table 1: Layer 2A retrieval comparison](tables/table1_layer2a_retrieval_comparison.md)
@@ -64,14 +67,15 @@ normalization and provenance details. The schema recommendation remains at
 python3 rpartifacts/generate_research_artifacts.py
 ```
 
-## How To Use
+## Use In Paper And README
 
 - Paper: use [paper/paper_figure_plan.md](paper/paper_figure_plan.md) and the
   tables under [tables/](tables/).
-- README: use snippets under [github/](github/).
+- README: use snippets under [github/](github/), but keep figures near the
+  relevant method or result discussion.
 - LinkedIn: use launch drafts under [linkedin/](linkedin/).
 
-## What Not To Claim
+## Claim Boundary
 
 Do not claim generic open-domain RAG superiority or SOTA. Do not treat
 post-injection answer-level evidence availability as baseline retrieval

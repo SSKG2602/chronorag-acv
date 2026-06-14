@@ -31,7 +31,7 @@ Source artifact path: generated from `rpartifacts/generate_research_artifacts.py
 | rpartifacts/figures/fig9_temporal_feature_heatmap.png | figure | Generated from retrieval-only temporal feature trace; values are min-max normalized per column. | generated from existing artifacts or schematic |
 | rpartifacts/figures/fig9_temporal_feature_heatmap.svg | figure | Generated from retrieval-only temporal feature trace; values are min-max normalized per column. | generated from existing artifacts or schematic |
 | rpartifacts/paper/temporal_feature_heatmap.md | paper-note | Figure 9 temporal feature heatmap provenance and normalization note. | retrieval-only trace export |
-| rpartifacts/figures/fig9_temporal_feature_heatmap_not_available.md | figure-note | Superseded Figure 9 not-available note retained for provenance. | retrieval-only trace export |
+| rpartifacts/figures/fig9_temporal_feature_heatmap_not_available.md | figure-note | Superseded Figure 9 availability note retained for provenance. | retrieval-only trace export |
 | rpartifacts/paper/one_query_trace.md | paper-note | Real one-query trace from Layer 2A artifacts. | stdcomp case reports |
 | rpartifacts/figures/fig10_one_query_trace.png | figure | Generated from real Layer 2A case reports. | generated from existing artifacts or schematic |
 | rpartifacts/figures/fig10_one_query_trace.svg | figure | Generated from real Layer 2A case reports. | generated from existing artifacts or schematic |
