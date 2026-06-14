@@ -148,6 +148,4 @@ Top-k retrieval-only sensitivity ran for k=1, 3, 5, and 10 on Layer 2A. At
 k=5, ChronoRAG Full has Hit@5 0.8950, MRR@5 0.8554, Forbidden Absent@5
 0.9950, and Category Primary Pass 0.9625.
 
-Fusion-weight sensitivity was not run because no safe CLI/config switch exists
-and weights are hardcoded. Reranker ablation was not run because no safe
-existing disable flag exists. Both are future work rather than hidden results.
+
