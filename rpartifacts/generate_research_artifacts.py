@@ -10,6 +10,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 
 
@@ -30,6 +31,7 @@ SOURCES = {
     "table3_ci": ROOT / "docs/paper_assets/table3_qa50_llm_post_filter_baselines_with_ci.csv",
     "table4": ROOT / "docs/paper_assets/table4_qa50_answer_level_comparison.csv",
     "table4_ci": ROOT / "docs/paper_assets/table4_qa50_answer_level_comparison_with_ci.csv",
+    "runtime": ROOT / "docs/paper_assets/table_runtime_layer2a_retrieval.csv",
     "qa50_extracted_md": ROOT / "docs/paper_assets/chronorag_qa50_extracted_values.md",
     "topk": ROOT / "docs/paper_assets/topk_sensitivity.csv",
     "qa50_extracted_json": ROOT / "chronorag/stdcomp/results/paper_tables/chronorag_qa50_extracted_values.json",
@@ -71,13 +73,14 @@ def main() -> None:
     table3 = read_csv_source("table3")
     table4 = read_csv_source("table4")
     topk = read_csv_source("topk")
+    runtime = read_csv_source("runtime")
     ablation = read_json_source("ablation_json")
     stdcomp = read_json_source("stdcomp_json")
     qa50_extracted = read_json_source("qa50_extracted_json")
     temporal_trace = read_jsonl_source("temporal_trace_jsonl")
 
     write_data_manifest()
-    write_derived_data(table1, table2, table3, table4, topk, qa50_extracted)
+    write_derived_data(table1, table2, table3, table4, topk, runtime, qa50_extracted)
 
     figure1()
     figure2()
@@ -93,6 +96,7 @@ def main() -> None:
     figure12_qa50_failure_decomposition()
     figure13_claim_boundary()
     figure14_applications_map()
+    figure15_runtime_quality_tradeoff(table1, runtime)
 
     write_tables(table1, table2, table3, table4, topk)
     write_github_snippets()
@@ -156,6 +160,7 @@ def write_derived_data(
     table3: list[dict[str, str]],
     table4: list[dict[str, str]],
     topk: list[dict[str, str]],
+    runtime: list[dict[str, str]],
     qa50_extracted: dict[str, Any],
 ) -> None:
     payload = {
@@ -164,6 +169,7 @@ def write_derived_data(
         "qa50_llm_table3": table3,
         "qa50_answer_table4": table4,
         "topk_sensitivity": topk,
+        "layer2a_runtime": runtime,
         "qa50_extracted_values": qa50_extracted,
     }
     write_json(DATA_DIR / "derived_plot_data.json", payload)
@@ -903,6 +909,84 @@ def figure14_applications_map() -> None:
     save_figure(fig, "fig14_applications_map", "Conceptual application map.")
 
 
+def figure15_runtime_quality_tradeoff(table1: list[dict[str, str]], runtime: list[dict[str, str]]) -> None:
+    if not table1 or not runtime:
+        write_not_available("fig15_runtime_quality_tradeoff", "Layer 2A metric table or runtime table missing.")
+        return
+    metric_rows = {row.get("method"): row for row in table1}
+    runtime_rows = {row.get("Method"): row for row in runtime}
+    methods = ["BM25", "Dense-only", "Date-filter RAG", "Metadata Temporal RAG", "ChronoRAG Full"]
+    if any(method not in metric_rows or method not in runtime_rows for method in methods):
+        write_not_available("fig15_runtime_quality_tradeoff", "Required runtime or metric method row missing.")
+        return
+    quality = [to_float(metric_rows[method].get("category_primary_pass")) for method in methods]
+    warm_seconds = [to_float(runtime_rows[method].get("Warm Retrieval Seconds")) for method in methods]
+    mean_seconds = [to_float(runtime_rows[method].get("Mean Warm Seconds/Query")) for method in methods]
+    colors = ["#8a95a3", "#8a95a3", "#8a95a3", "#8a95a3", "#1f7a3f"]
+    edge_colors = ["#5f6873", "#5f6873", "#5f6873", "#5f6873", "#0d4f29"]
+    y_pos = list(range(len(methods)))
+
+    fig, axes = plt.subplots(1, 2, figsize=(16, 7.4), gridspec_kw={"width_ratios": [1.03, 1.2]})
+    axes[0].barh(y_pos, quality, color=colors, edgecolor=edge_colors, linewidth=1.2)
+    axes[0].set_yticks(y_pos)
+    axes[0].set_yticklabels(methods, fontsize=11)
+    axes[0].invert_yaxis()
+    axes[0].set_xlim(0, 1.08)
+    axes[0].set_xlabel("Category Primary Pass", fontsize=11)
+    axes[0].set_title("Temporal-validity diagnostic\n(higher is better)", fontsize=14, weight="bold", pad=12)
+    axes[0].grid(axis="x", alpha=0.22)
+    for idx, value in enumerate(quality):
+        axes[0].text(
+            min(value + 0.025, 1.01),
+            idx,
+            f"{value:.3f}",
+            va="center",
+            fontsize=10,
+            weight="bold" if methods[idx] == "ChronoRAG Full" else "normal",
+        )
+
+    axes[1].barh(y_pos, warm_seconds, color=colors, edgecolor=edge_colors, linewidth=1.2)
+    axes[1].set_yticks(y_pos)
+    axes[1].set_yticklabels(methods, fontsize=11)
+    axes[1].invert_yaxis()
+    axes[1].set_xscale("log")
+    axes[1].set_xlim(1, 650)
+    axes[1].set_xlabel("Warm retrieval seconds over 200 queries (log scale)", fontsize=11)
+    axes[1].set_title("Measured retrieval latency\n(lower is faster)", fontsize=14, weight="bold", pad=12)
+    axes[1].grid(axis="x", which="both", alpha=0.22)
+    axes[1].xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _pos: f"{x:g}"))
+    for idx, value in enumerate(warm_seconds):
+        axes[1].text(value * 1.08, idx, f"{value:.3f}s total\n{mean_seconds[idx]:.3f}s/query", va="center", fontsize=9)
+
+    fig.suptitle("Figure 15. Layer 2A runtime-quality tradeoff", fontsize=17, weight="bold", y=0.985)
+    fig.text(
+        0.5,
+        0.936,
+        "ChronoRAG wins the temporal-validity diagnostic, not raw retrieval speed.",
+        ha="center",
+        fontsize=12,
+        color="#333333",
+    )
+    fig.text(
+        0.5,
+        0.018,
+        "Source: fixed Layer 2A 200-question retrieval-only benchmark at top-k=5. Warm retrieval excludes one-time setup/model loading. No LLM, judge, Vertex, Gemini, or answer generation was used.",
+        ha="center",
+        fontsize=9.5,
+        color="#333333",
+    )
+    fig.tight_layout(rect=[0.02, 0.075, 0.98, 0.905])
+    png = FIG_DIR / "fig15_runtime_quality_tradeoff.png"
+    svg = FIG_DIR / "fig15_runtime_quality_tradeoff.svg"
+    fig.savefig(png, dpi=220, bbox_inches="tight")
+    fig.savefig(svg, bbox_inches="tight")
+    svg.write_text("\n".join(line.rstrip() for line in svg.read_text(encoding="utf-8").splitlines()) + "\n", encoding="utf-8")
+    plt.close(fig)
+    caption = "Runtime-quality tradeoff; ChronoRAG wins temporal validity, not raw speed."
+    record(png, "figure", caption, "runtime and Layer 2A comparison tables")
+    record(svg, "figure", caption, "runtime and Layer 2A comparison tables")
+
+
 def write_tables(
     table1: list[dict[str, str]],
     table2: list[dict[str, str]],
@@ -999,13 +1083,15 @@ Primary Pass.
 ![Temporal feature heatmap](../figures/fig9_temporal_feature_heatmap.png)
 ![One-query trace](../figures/fig10_one_query_trace.png)
 ![Metric family summary](../figures/fig11_metric_family_summary.png)
+![Runtime-quality tradeoff](../figures/fig15_runtime_quality_tradeoff.png)
 
 Place figures next to the claims they support: Figure 1 near the temporal
 misgrounding motivation, Figure 2 near the architecture, Figures 3-5 near
 Layer 2A retrieval and ablation results, Figure 6 near QA50 post-filtering,
 Figure 9 near trace/mechanism discussion, and Figure 10 near qualitative
-retrieval examples. Quantitative charts are generated from existing result
-artifacts; conceptual figures are labeled as schematics.
+retrieval examples, and Figure 15 near runtime/latency discussion.
+Quantitative charts are generated from existing result artifacts; conceptual
+figures are labeled as schematics.
 """
     write_text(GITHUB_DIR / "readme_figures_section.md", figures, "github-snippet", "Copy-paste README figure section.", "generated figures")
     links = """# Badges Or Links
@@ -1087,6 +1173,9 @@ def write_paper_notes() -> None:
 12. Figure 12: QA50 failure decomposition.
 13. Figure 13: claim boundary schematic.
 14. Figure 14: applications map schematic.
+15. Figure 15: Layer 2A runtime-quality tradeoff. ChronoRAG Full is the
+    temporal-validity diagnostic winner, while standard baselines win raw
+    retrieval speed.
 """,
         "paper-note",
         "Paper figure plan.",
@@ -1179,6 +1268,7 @@ explicitly marked as schematics.
 | [Figure 12: QA50 failure decomposition](figures/fig12_qa50_failure_decomposition.png) | Data-grounded | `chronorag/stdcomp/results/qa50_llm_baselines/*_outputs.jsonl` | Paper-supporting, LinkedIn-friendly |
 | [Figure 13: Claim boundary](figures/fig13_claim_boundary.png) | Schematic | Conceptual claim boundary from documented limitations | README-friendly, LinkedIn-friendly |
 | [Figure 14: Applications map](figures/fig14_applications_map.png) | Schematic | Conceptual application map | LinkedIn-friendly |
+| [Figure 15: Runtime-quality tradeoff](figures/fig15_runtime_quality_tradeoff.png) | Data-grounded | `docs/paper_assets/table_runtime_layer2a_retrieval.csv`, `docs/paper_assets/table1_layer2a_retrieval_standard_comparison.csv` | Paper-supporting |
 
 Figure 2 caption:
 ChronoRAG separates temporal role grounding from answer generation. Layer 2A
@@ -1203,6 +1293,8 @@ rather than collecting them as a detached gallery.
 
 - [Table 1: Layer 2A retrieval comparison](tables/table1_layer2a_retrieval_comparison.md)
 - [Table 2: Ablation comparison](tables/table2_ablation_comparison.md)
+- [Table 2 full: Layer 2A full ablation comparison](tables/table2_full_layer2a_ablation_comparison.md)
+- [Runtime: Layer 2A retrieval runtime](tables/table_runtime_layer2a_retrieval.md)
 - [Table 3: QA50 LLM post-filtering](tables/table3_qa50_llm_post_filtering.md)
 - [Table 4: Answer-level comparison](tables/table4_answer_level_comparison.md)
 - [Table 5: Score-only ablation](tables/table5_score_only_ablation.md)

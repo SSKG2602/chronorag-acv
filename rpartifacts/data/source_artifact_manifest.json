@@ -44,6 +44,12 @@
     },
     {
       "exists": true,
+      "key": "runtime",
+      "kind": "csv",
+      "path": "docs/paper_assets/table_runtime_layer2a_retrieval.csv"
+    },
+    {
+      "exists": true,
       "key": "qa50_extracted_md",
       "kind": "md",
       "path": "docs/paper_assets/chronorag_qa50_extracted_values.md"

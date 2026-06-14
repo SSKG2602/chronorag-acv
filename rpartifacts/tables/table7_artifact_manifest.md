@@ -43,6 +43,8 @@ Source artifact path: generated from `rpartifacts/generate_research_artifacts.py
 | rpartifacts/figures/fig13_claim_boundary.svg | figure | Conceptual claim-boundary schematic. | generated from existing artifacts or schematic |
 | rpartifacts/figures/fig14_applications_map.png | figure | Conceptual application map. | generated from existing artifacts or schematic |
 | rpartifacts/figures/fig14_applications_map.svg | figure | Conceptual application map. | generated from existing artifacts or schematic |
+| rpartifacts/figures/fig15_runtime_quality_tradeoff.png | figure | Runtime-quality tradeoff; ChronoRAG wins temporal validity, not raw speed. | runtime and Layer 2A comparison tables |
+| rpartifacts/figures/fig15_runtime_quality_tradeoff.svg | figure | Runtime-quality tradeoff; ChronoRAG wins temporal validity, not raw speed. | runtime and Layer 2A comparison tables |
 | rpartifacts/tables/table1_layer2a_retrieval_comparison.md | table | Table 1. Layer 2A Retrieval Comparison | docs/paper_assets/table1_layer2a_retrieval_standard_comparison.csv |
 | rpartifacts/tables/table2_ablation_comparison.md | table | Table 2. Ablation Comparison | docs/paper_assets/table2_layer2a_ablation_comparison.csv |
 | rpartifacts/tables/table2_full_layer2a_ablation_comparison.md | table | Table 2 full. Layer 2A Full Ablation Comparison | docs/paper_assets/table2_layer2a_full_ablation_comparison.csv |

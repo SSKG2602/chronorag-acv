@@ -15,3 +15,6 @@
 12. Figure 12: QA50 failure decomposition.
 13. Figure 13: claim boundary schematic.
 14. Figure 14: applications map schematic.
+15. Figure 15: Layer 2A runtime-quality tradeoff. ChronoRAG Full is the
+    temporal-validity diagnostic winner, while standard baselines win raw
+    retrieval speed.

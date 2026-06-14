@@ -9,10 +9,12 @@
 ![Temporal feature heatmap](../figures/fig9_temporal_feature_heatmap.png)
 ![One-query trace](../figures/fig10_one_query_trace.png)
 ![Metric family summary](../figures/fig11_metric_family_summary.png)
+![Runtime-quality tradeoff](../figures/fig15_runtime_quality_tradeoff.png)
 
 Place figures next to the claims they support: Figure 1 near the temporal
 misgrounding motivation, Figure 2 near the architecture, Figures 3-5 near
 Layer 2A retrieval and ablation results, Figure 6 near QA50 post-filtering,
 Figure 9 near trace/mechanism discussion, and Figure 10 near qualitative
-retrieval examples. Quantitative charts are generated from existing result
-artifacts; conceptual figures are labeled as schematics.
+retrieval examples, and Figure 15 near runtime/latency discussion.
+Quantitative charts are generated from existing result artifacts; conceptual
+figures are labeled as schematics.

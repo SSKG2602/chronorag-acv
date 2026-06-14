@@ -31,6 +31,7 @@ explicitly marked as schematics.
 | [Figure 12: QA50 failure decomposition](figures/fig12_qa50_failure_decomposition.png) | Data-grounded | `chronorag/stdcomp/results/qa50_llm_baselines/*_outputs.jsonl` | Paper-supporting, LinkedIn-friendly |
 | [Figure 13: Claim boundary](figures/fig13_claim_boundary.png) | Schematic | Conceptual claim boundary from documented limitations | README-friendly, LinkedIn-friendly |
 | [Figure 14: Applications map](figures/fig14_applications_map.png) | Schematic | Conceptual application map | LinkedIn-friendly |
+| [Figure 15: Runtime-quality tradeoff](figures/fig15_runtime_quality_tradeoff.png) | Data-grounded | `docs/paper_assets/table_runtime_layer2a_retrieval.csv`, `docs/paper_assets/table1_layer2a_retrieval_standard_comparison.csv` | Paper-supporting |
 
 Figure 2 caption:
 ChronoRAG separates temporal role grounding from answer generation. Layer 2A

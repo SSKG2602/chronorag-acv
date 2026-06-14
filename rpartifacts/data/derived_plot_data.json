@@ -771,5 +771,67 @@
       "method_label": "Dense-only",
       "mrr_at_k": "0.4799563492063493"
     }
+  ],
+  "layer2a_runtime": [
+    {
+      "Method": "BM25",
+      "Cases": "200",
+      "top-k": "5",
+      "Cold Total Seconds": "1.569",
+      "Warm Retrieval Seconds": "1.520",
+      "Mean Warm Seconds/Query": "0.008",
+      "Queries/Second": "131.559",
+      "Hardware": "Darwin; Apple M2; 8.0 GB RAM; Python 3.11.1; dense device mps:0",
+      "Timestamp": "2026-06-14T16:16:38+00:00",
+      "Notes": "Raw BM25 over standard raw_text rows; setup builds BM25 index once."
+    },
+    {
+      "Method": "Dense-only",
+      "Cases": "200",
+      "top-k": "5",
+      "Cold Total Seconds": "153.111",
+      "Warm Retrieval Seconds": "12.884",
+      "Mean Warm Seconds/Query": "0.064",
+      "Queries/Second": "15.523",
+      "Hardware": "Darwin; Apple M2; 8.0 GB RAM; Python 3.11.1; dense device mps:0",
+      "Timestamp": "2026-06-14T16:16:38+00:00",
+      "Notes": "Dense-only BAAI/bge-small-en-v1.5 cosine retrieval; doc embedding cache hit=True; device=mps:0."
+    },
+    {
+      "Method": "Date-filter RAG",
+      "Cases": "200",
+      "top-k": "5",
+      "Cold Total Seconds": "3.196",
+      "Warm Retrieval Seconds": "3.103",
+      "Mean Warm Seconds/Query": "0.016",
+      "Queries/Second": "64.462",
+      "Hardware": "Darwin; Apple M2; 8.0 GB RAM; Python 3.11.1; dense device mps:0",
+      "Timestamp": "2026-06-14T16:16:38+00:00",
+      "Notes": "Naive date-string filter followed by BM25; setup builds BM25 index once."
+    },
+    {
+      "Method": "Metadata Temporal RAG",
+      "Cases": "200",
+      "top-k": "5",
+      "Cold Total Seconds": "17.790",
+      "Warm Retrieval Seconds": "17.725",
+      "Mean Warm Seconds/Query": "0.089",
+      "Queries/Second": "11.283",
+      "Hardware": "Darwin; Apple M2; 8.0 GB RAM; Python 3.11.1; dense device mps:0",
+      "Timestamp": "2026-06-14T16:16:38+00:00",
+      "Notes": "Existing metadata-temporal scorer over ordinary precomputed raw-text chunks; no LLM."
+    },
+    {
+      "Method": "ChronoRAG Full",
+      "Cases": "200",
+      "top-k": "5",
+      "Cold Total Seconds": "287.195",
+      "Warm Retrieval Seconds": "284.030",
+      "Mean Warm Seconds/Query": "1.420",
+      "Queries/Second": "0.704",
+      "Hardware": "Darwin; Apple M2; 8.0 GB RAM; Python 3.11.1; dense device mps:0",
+      "Timestamp": "2026-06-14T16:16:38+00:00",
+      "Notes": "ChronoRAG Full retrieval with prepared TCC context, temporal fusion, and finalization; no LLM."
+    }
   ]
 }

@@ -582,6 +582,13 @@ used.
 Paper-ready runtime table:
 [`docs/paper_assets/table_runtime_layer2a_retrieval.md`](docs/paper_assets/table_runtime_layer2a_retrieval.md)
 
+In this Layer 2A standard-comparison setup, Dense-only is the only baseline
+that uses the `BAAI/bge-small-en-v1.5` embedding model. BM25, Date-filter RAG,
+Metadata Temporal RAG, and the measured ChronoRAG Full Layer 2A adapter do not
+rank by dense embedding similarity.
+
+![Layer 2A runtime-quality tradeoff](rpartifacts/figures/fig15_runtime_quality_tradeoff.png)
+
 ![Layer 2A retrieval comparison](rpartifacts/figures/fig3_layer2a_retrieval_comparison.png)
 
 BM25 and Date-filter RAG achieve higher broad Hit@5, while ChronoRAG Full is

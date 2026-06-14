@@ -235,6 +235,18 @@
       "type": "figure"
     },
     {
+      "description": "Runtime-quality tradeoff; ChronoRAG wins temporal validity, not raw speed.",
+      "path": "rpartifacts/figures/fig15_runtime_quality_tradeoff.png",
+      "source": "runtime and Layer 2A comparison tables",
+      "type": "figure"
+    },
+    {
+      "description": "Runtime-quality tradeoff; ChronoRAG wins temporal validity, not raw speed.",
+      "path": "rpartifacts/figures/fig15_runtime_quality_tradeoff.svg",
+      "source": "runtime and Layer 2A comparison tables",
+      "type": "figure"
+    },
+    {
       "description": "Table 1. Layer 2A Retrieval Comparison",
       "path": "rpartifacts/tables/table1_layer2a_retrieval_comparison.md",
       "source": "docs/paper_assets/table1_layer2a_retrieval_standard_comparison.csv",
