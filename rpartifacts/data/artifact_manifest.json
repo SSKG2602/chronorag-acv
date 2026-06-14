@@ -247,6 +247,12 @@
       "type": "table"
     },
     {
+      "description": "Table 2 full. Layer 2A Full Ablation Comparison",
+      "path": "rpartifacts/tables/table2_full_layer2a_ablation_comparison.md",
+      "source": "docs/paper_assets/table2_layer2a_full_ablation_comparison.csv",
+      "type": "table"
+    },
+    {
       "description": "Table 3. QA50 LLM Post-Filtering Baselines",
       "path": "rpartifacts/tables/table3_qa50_llm_post_filtering.md",
       "source": "docs/paper_assets/table3_qa50_llm_post_filter_baselines.csv",

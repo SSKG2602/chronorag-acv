@@ -55,6 +55,7 @@ rather than collecting them as a detached gallery.
 
 - [Table 1: Layer 2A retrieval comparison](tables/table1_layer2a_retrieval_comparison.md)
 - [Table 2: Ablation comparison](tables/table2_ablation_comparison.md)
+- [Table 2 full: Layer 2A full ablation comparison](tables/table2_full_layer2a_ablation_comparison.md)
 - [Table 3: QA50 LLM post-filtering](tables/table3_qa50_llm_post_filtering.md)
 - [Table 4: Answer-level comparison](tables/table4_answer_level_comparison.md)
 - [Table 5: Score-only ablation](tables/table5_score_only_ablation.md)

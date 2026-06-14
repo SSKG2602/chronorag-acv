@@ -28,10 +28,13 @@ Key polished artifact links:
 2. [Layer 2A ablation comparison](table2_layer2a_ablation_comparison.md)
    - CSV: `table2_layer2a_ablation_comparison.csv`
    - JSON: `chronorag/stdcomp/results/paper_tables/table2_layer2a_ablation_comparison.json`
-3. [QA50 standard retrieval + LLM temporal post-filtering baselines](table3_qa50_llm_post_filter_baselines.md)
+3. [Layer 2A full ablation comparison](table2_layer2a_full_ablation_comparison.md)
+   - CSV: `table2_layer2a_full_ablation_comparison.csv`
+   - Source: `benchmarks/layer2_crossdomain/results/layer2_ablation_v3_ablation200.md`
+4. [QA50 standard retrieval + LLM temporal post-filtering baselines](table3_qa50_llm_post_filter_baselines.md)
    - CSV: `table3_qa50_llm_post_filter_baselines.csv`
    - JSON: `chronorag/stdcomp/results/paper_tables/table3_qa50_llm_post_filter_baselines.json`
-4. [QA50 answer-level comparison](table4_qa50_answer_level_comparison.md)
+5. [QA50 answer-level comparison](table4_qa50_answer_level_comparison.md)
    - CSV: `table4_qa50_answer_level_comparison.csv`
    - JSON: `chronorag/stdcomp/results/paper_tables/table4_qa50_answer_level_comparison.json`
 
