@@ -119,6 +119,18 @@
       "key": "date_filter_qa50_outputs",
       "kind": "jsonl",
       "path": "chronorag/stdcomp/results/qa50_llm_baselines/date_filter_llm_qa50_outputs.jsonl"
+    },
+    {
+      "exists": true,
+      "key": "temporal_trace_jsonl",
+      "kind": "jsonl",
+      "path": "rpartifacts/data/temporal_feature_trace.jsonl"
+    },
+    {
+      "exists": true,
+      "key": "temporal_trace_csv",
+      "kind": "csv",
+      "path": "rpartifacts/data/temporal_feature_trace.csv"
     }
   ]
 }

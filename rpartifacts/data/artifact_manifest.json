@@ -133,13 +133,7 @@
       "type": "figure"
     },
     {
-      "description": "Feature heatmap not generated because candidate-level traces are unavailable.",
-      "path": "rpartifacts/figures/fig9_temporal_feature_heatmap_not_available.md",
-      "source": "artifact schema inspection",
-      "type": "figure-note"
-    },
-    {
-      "description": "Future candidate-trace logging recommendation.",
+      "description": "Candidate-trace logging recommendation.",
       "path": "rpartifacts/paper/temporal_feature_trace_logging_recommendation.md",
       "source": "artifact schema inspection",
       "type": "paper-note"
@@ -149,6 +143,30 @@
       "path": "rpartifacts/data/candidate_trace_sample_schema.json",
       "source": "artifact schema inspection",
       "type": "data-schema"
+    },
+    {
+      "description": "Generated from retrieval-only temporal feature trace; values are min-max normalized per column.",
+      "path": "rpartifacts/figures/fig9_temporal_feature_heatmap.png",
+      "source": "generated from existing artifacts or schematic",
+      "type": "figure"
+    },
+    {
+      "description": "Generated from retrieval-only temporal feature trace; values are min-max normalized per column.",
+      "path": "rpartifacts/figures/fig9_temporal_feature_heatmap.svg",
+      "source": "generated from existing artifacts or schematic",
+      "type": "figure"
+    },
+    {
+      "description": "Figure 9 temporal feature heatmap provenance and normalization note.",
+      "path": "rpartifacts/paper/temporal_feature_heatmap.md",
+      "source": "retrieval-only trace export",
+      "type": "paper-note"
+    },
+    {
+      "description": "Superseded Figure 9 not-available note retained for provenance.",
+      "path": "rpartifacts/figures/fig9_temporal_feature_heatmap_not_available.md",
+      "source": "retrieval-only trace export",
+      "type": "figure-note"
     },
     {
       "description": "Real one-query trace from Layer 2A artifacts.",

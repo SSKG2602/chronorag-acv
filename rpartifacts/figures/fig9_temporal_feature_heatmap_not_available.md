@@ -1,10 +1,11 @@
-# Figure 9 Temporal Feature Heatmap Not Available
+# Figure 9 Heatmap Availability
 
-Candidate-level temporal feature traces are not stored in the existing result
-artifacts. The current benchmark artifacts store selected evidence and
-aggregate metrics, but not per-candidate scoring components. Future
-retrieval-only runs should persist a per-query candidate trace with semantic
-score, temporal fit, valid-time fit, transaction penalty, forbidden penalty,
-source/metric fit, slot assignment, and final score.
+A real Figure 9 heatmap is now generated from
+`rpartifacts/data/temporal_feature_trace.jsonl`. This file is retained only as
+provenance for the earlier not-available state.
 
-No synthetic numeric heatmap was generated.
+Use:
+
+- `rpartifacts/figures/fig9_temporal_feature_heatmap.png`
+- `rpartifacts/figures/fig9_temporal_feature_heatmap.svg`
+- `rpartifacts/paper/temporal_feature_heatmap.md`

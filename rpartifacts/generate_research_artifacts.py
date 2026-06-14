@@ -43,6 +43,8 @@ SOURCES = {
     "bm25_qa50_outputs": ROOT / "chronorag/stdcomp/results/qa50_llm_baselines/bm25_llm_qa50_outputs.jsonl",
     "dense_qa50_outputs": ROOT / "chronorag/stdcomp/results/qa50_llm_baselines/dense_llm_qa50_outputs.jsonl",
     "date_filter_qa50_outputs": ROOT / "chronorag/stdcomp/results/qa50_llm_baselines/date_filter_llm_qa50_outputs.jsonl",
+    "temporal_trace_jsonl": ROOT / "rpartifacts/data/temporal_feature_trace.jsonl",
+    "temporal_trace_csv": ROOT / "rpartifacts/data/temporal_feature_trace.csv",
 }
 
 METRIC_DEFINITIONS = {
@@ -72,6 +74,7 @@ def main() -> None:
     ablation = read_json_source("ablation_json")
     stdcomp = read_json_source("stdcomp_json")
     qa50_extracted = read_json_source("qa50_extracted_json")
+    temporal_trace = read_jsonl_source("temporal_trace_jsonl")
 
     write_data_manifest()
     write_derived_data(table1, table2, table3, table4, topk, qa50_extracted)
@@ -84,7 +87,7 @@ def main() -> None:
     figure6(table3, table4)
     figure7(table3, table4, qa50_extracted)
     figure8(topk)
-    figure9_feature_heatmap_note()
+    figure9_temporal_feature_heatmap(temporal_trace)
     figure10_one_query_trace(stdcomp)
     figure11_metric_family_summary(table1, table3, table4)
     figure12_qa50_failure_decomposition()
@@ -130,6 +133,13 @@ def read_json_source(key: str) -> dict[str, Any]:
     if not path.exists():
         return {}
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def read_jsonl_source(key: str) -> list[dict[str, Any]]:
+    path = SOURCES[key]
+    if not path.exists():
+        return []
+    return read_jsonl(path)
 
 
 def write_data_manifest() -> None:
@@ -458,39 +468,97 @@ def figure8_split(
     save_figure(fig, stem, caption)
 
 
-def figure9_feature_heatmap_note() -> None:
-    text = """# Figure 9 Temporal Feature Heatmap Not Available
+def figure9_temporal_feature_heatmap(trace_rows: list[dict[str, Any]]) -> None:
+    write_candidate_trace_schema()
+    if not trace_rows:
+        figure9_feature_heatmap_note("No temporal feature trace rows were found. Run `python3 rpartifacts/export_temporal_feature_trace.py ...` first.")
+        return
 
-Candidate-level temporal feature traces are not stored in the existing result
-artifacts. The current benchmark artifacts store selected evidence and
-aggregate metrics, but not per-candidate scoring components. Future
-retrieval-only runs should persist a per-query candidate trace with semantic
-score, temporal fit, valid-time fit, transaction penalty, forbidden penalty,
-source/metric fit, slot assignment, and final score.
+    preferred_query = "l2q:0000:exact_valid_time_retrieval"
+    query_ids = []
+    for row in trace_rows:
+        query_id = str(row.get("query_id") or "")
+        if query_id and query_id not in query_ids:
+            query_ids.append(query_id)
+    main_query = preferred_query if preferred_query in query_ids else query_ids[0]
+    rows = [row for row in trace_rows if row.get("query_id") == main_query]
+    rows.sort(key=lambda row: (int_or_large(row.get("rank_after_finalization")), int_or_large(row.get("rank_before_finalization")), str(row.get("candidate_evidence_id"))))
 
-No synthetic numeric heatmap was generated.
+    desired_columns = [
+        "semantic_score",
+        "bm25_score",
+        "dense_score",
+        "temporal_precision_score",
+        "valid_time_fit",
+        "interval_overlap_score",
+        "transaction_time_penalty",
+        "forbidden_time_penalty",
+        "source_metric_score",
+        "slot_score",
+        "fusion_score",
+        "final_score",
+    ]
+    numeric_columns = [column for column in desired_columns if any(as_number(row.get(column)) is not None for row in rows)]
+    if not numeric_columns:
+        figure9_feature_heatmap_note("Temporal trace rows exist, but no numeric score columns are populated.")
+        return
+
+    raw_matrix = [[as_number(row.get(column)) for column in numeric_columns] for row in rows]
+    normalized_matrix = normalize_columns(raw_matrix)
+    fig_height = max(7.5, min(12.0, 0.42 * len(rows) + 2.8))
+    fig, ax = plt.subplots(figsize=(14, fig_height))
+    image = ax.imshow(normalized_matrix, aspect="auto", cmap="viridis", vmin=0, vmax=1)
+    ax.set_title("Figure 9. Temporal feature heatmap")
+    ax.set_xticks(range(len(numeric_columns)))
+    ax.set_xticklabels([metric_label(column) for column in numeric_columns], rotation=35, ha="right")
+    ax.set_yticks(range(len(rows)))
+    ax.set_yticklabels([heatmap_row_label(row) for row in rows], fontsize=9)
+    ax.set_xlabel("Available retrieval-time numeric fields")
+    ax.set_ylabel("Candidate evidence")
+    cbar = fig.colorbar(image, ax=ax, fraction=0.035, pad=0.02)
+    cbar.set_label("Min-max normalized value")
+    save_figure(
+        fig,
+        "fig9_temporal_feature_heatmap",
+        "Generated from retrieval-only temporal feature trace; values are min-max normalized per column.",
+    )
+    write_temporal_feature_heatmap_note(main_query, rows, numeric_columns, desired_columns)
+    write_superseded_heatmap_note()
+
+
+def figure9_feature_heatmap_note(reason: str) -> None:
+    text = f"""# Figure 9 Temporal Feature Heatmap Not Available
+
+{reason}
+
+Candidate-level temporal feature traces must include at least one real numeric
+retrieval-time score column before a heatmap can be generated. No synthetic
+numeric heatmap was generated.
 """
     path = FIG_DIR / "fig9_temporal_feature_heatmap_not_available.md"
     path.write_text(text, encoding="utf-8")
-    record(path, "figure-note", "Feature heatmap not generated because candidate-level traces are unavailable.", "artifact schema inspection")
+    record(path, "figure-note", "Feature heatmap not generated because numeric candidate traces are unavailable.", "artifact schema inspection")
+
+
+def write_candidate_trace_schema() -> None:
     recommendation = """# Temporal Feature Trace Logging Recommendation
 
-Candidate-level temporal feature traces are not stored in the existing
-artifacts. The current benchmark artifacts store selected evidence and
-aggregate metrics, but not per-candidate scoring components. Future
-retrieval-only runs should persist a per-query candidate trace with semantic
-score, temporal fit, valid-time fit, transaction penalty, forbidden penalty,
-source/metric fit, slot assignment, and final score.
+The current Figure 9 trace exporter records the score fields exposed by the
+retrieval pipeline. Future retrieval-only runs should keep persisting a
+per-query candidate trace with semantic score, temporal fit, valid-time fit,
+transaction penalty, forbidden penalty, source/metric fit, slot assignment, and
+final score.
 
 Recommended future JSONL path:
 `rpartifacts/data/candidate_trace_sample_schema.json`
 
-This is a schema recommendation only. It is not benchmark data and contains no
-synthetic candidate scores.
+This recommendation file is a schema guide. The actual Figure 9 trace data is
+stored separately in `rpartifacts/data/temporal_feature_trace.jsonl` and
+`rpartifacts/data/temporal_feature_trace.csv`.
 """
     rec_path = PAPER_DIR / "temporal_feature_trace_logging_recommendation.md"
     rec_path.write_text(recommendation, encoding="utf-8")
-    record(rec_path, "paper-note", "Future candidate-trace logging recommendation.", "artifact schema inspection")
+    record(rec_path, "paper-note", "Candidate-trace logging recommendation.", "artifact schema inspection")
     schema = {
         "description": "Schema recommendation only; not benchmark data.",
         "recommended_jsonl_path": "rpartifacts/data/candidate_traces.jsonl",
@@ -515,6 +583,69 @@ synthetic candidate scores.
     }
     write_json(DATA_DIR / "candidate_trace_sample_schema.json", schema)
     record(DATA_DIR / "candidate_trace_sample_schema.json", "data-schema", "Candidate trace schema recommendation; contains no fake scores.", "artifact schema inspection")
+
+
+def write_temporal_feature_heatmap_note(
+    query_id: str,
+    rows: list[dict[str, Any]],
+    numeric_columns: list[str],
+    desired_columns: list[str],
+) -> None:
+    missing = [column for column in desired_columns if column not in numeric_columns]
+    caption = (
+        "Figure 9 visualizes candidate-level retrieval signals for a representative Layer 2A query. "
+        "Rows are candidate evidence items and columns are available retrieval-time scoring features. "
+        "Values are normalized for visualization. The figure is generated from a retrieval-only trace export "
+        "and does not use LLM, Vertex, Gemini, judge, or answer-generation calls."
+    )
+    lines = [
+        "# Temporal Feature Heatmap",
+        "",
+        caption,
+        "",
+        "Only score fields exposed by the current retrieval pipeline are shown; missing internal components are left out rather than reconstructed.",
+        "",
+        f"- Query ID: `{query_id}`",
+        f"- Query text: {rows[0].get('query_text') if rows else 'n/a'}",
+        f"- Candidate rows shown: {len(rows)}",
+        f"- Source JSONL: `{rel(SOURCES['temporal_trace_jsonl'])}`",
+        f"- Source CSV: `{rel(SOURCES['temporal_trace_csv'])}`",
+        "- Value mode: raw values are exported in the JSONL/CSV; heatmap colors are min-max normalized per column to 0-1.",
+        "",
+        "Numeric fields included:",
+        "",
+    ]
+    lines.extend(f"- `{column}`" for column in numeric_columns)
+    lines.extend(["", "Desired fields unavailable or blank in this trace:", ""])
+    lines.extend(f"- `{column}`" for column in missing)
+    lines.extend(
+        [
+            "",
+            "Trace provenance: generated by `python3 rpartifacts/export_temporal_feature_trace.py` using deterministic retrieval-only code over the Layer 2A question and corpus JSONL files.",
+            "",
+        ]
+    )
+    path = PAPER_DIR / "temporal_feature_heatmap.md"
+    path.write_text("\n".join(lines), encoding="utf-8")
+    record(path, "paper-note", "Figure 9 temporal feature heatmap provenance and normalization note.", "retrieval-only trace export")
+
+
+def write_superseded_heatmap_note() -> None:
+    text = """# Figure 9 Heatmap Availability
+
+A real Figure 9 heatmap is now generated from
+`rpartifacts/data/temporal_feature_trace.jsonl`. This file is retained only as
+provenance for the earlier not-available state.
+
+Use:
+
+- `rpartifacts/figures/fig9_temporal_feature_heatmap.png`
+- `rpartifacts/figures/fig9_temporal_feature_heatmap.svg`
+- `rpartifacts/paper/temporal_feature_heatmap.md`
+"""
+    path = FIG_DIR / "fig9_temporal_feature_heatmap_not_available.md"
+    path.write_text(text, encoding="utf-8")
+    record(path, "figure-note", "Superseded Figure 9 not-available note retained for provenance.", "retrieval-only trace export")
 
 
 def figure10_one_query_trace(stdcomp: dict[str, Any]) -> None:
@@ -942,7 +1073,7 @@ def write_paper_notes() -> None:
 6. Figure 6: QA50 LLM post-filtering comparison.
 7. Figure 7: pre/post injection fairness split.
 8. Figure 8: top-k sensitivity, with split Figure 8a and Figure 8b variants for readability.
-9. Figure 9: temporal feature heatmap not available until candidate traces are persisted.
+9. Figure 9: temporal feature heatmap from retrieval-only candidate trace export.
 10. Figure 10: real one-query trace.
 11. Figure 11: metric family summary.
 12. Figure 12: QA50 failure decomposition.
@@ -1034,7 +1165,7 @@ marked as schematics.
 | [Figure 8: Top-k sensitivity](figures/fig8_topk_sensitivity.png) | Data-grounded | `docs/paper_assets/topk_sensitivity.csv` | Paper-supporting |
 | [Figure 8a: Ranking sensitivity](figures/fig8a_topk_hit_sensitivity.png) | Data-grounded | `docs/paper_assets/topk_sensitivity.csv` | Readability variant |
 | [Figure 8b: Temporal-validity sensitivity](figures/fig8b_topk_temporal_validity_sensitivity.png) | Data-grounded | `docs/paper_assets/topk_sensitivity.csv` | Readability variant |
-| [Figure 9: Feature heatmap unavailable](figures/fig9_temporal_feature_heatmap_not_available.md) | Not available | Candidate-level feature traces are not persisted | Limitation note |
+| [Figure 9: Temporal feature heatmap](figures/fig9_temporal_feature_heatmap.png) | Data-grounded | `rpartifacts/data/temporal_feature_trace.jsonl`, `rpartifacts/data/temporal_feature_trace.csv` | Paper-critical |
 | [Figure 10: One-query trace](figures/fig10_one_query_trace.png) | Data-grounded | `chronorag/stdcomp/results/stdcomp_layer2a_comparison.json`, `chronorag/stdcomp/results/bm25_ranked_outputs.json` | Paper-critical, README-friendly |
 | [Figure 11: Metric family summary](figures/fig11_metric_family_summary.png) | Data-grounded | Layer 2A and QA50 paper table CSVs | Paper-supporting |
 | [Figure 12: QA50 failure decomposition](figures/fig12_qa50_failure_decomposition.png) | Data-grounded | `chronorag/stdcomp/results/qa50_llm_baselines/*_outputs.jsonl` | Paper-supporting, LinkedIn-friendly |
@@ -1046,10 +1177,10 @@ ChronoRAG separates temporal role grounding from answer generation. Layer 2A
 evaluates selected evidence before answer synthesis, while Layer 2B evaluates
 answer-contract behavior after generation.
 
-Figure 9 is not generated as a heatmap because candidate-level temporal feature
-traces are not stored in existing artifacts. See
-[fig9_temporal_feature_heatmap_not_available.md](figures/fig9_temporal_feature_heatmap_not_available.md)
-and [paper/temporal_feature_trace_logging_recommendation.md](paper/temporal_feature_trace_logging_recommendation.md).
+Figure 9 is generated from a retrieval-only candidate trace export. See
+[paper/temporal_feature_heatmap.md](paper/temporal_feature_heatmap.md) for
+normalization and provenance details. The schema recommendation remains at
+[paper/temporal_feature_trace_logging_recommendation.md](paper/temporal_feature_trace_logging_recommendation.md).
 
 ## GitHub/LinkedIn Friendly Assets
 
@@ -1085,9 +1216,9 @@ python3 rpartifacts/generate_research_artifacts.py
 Do not claim generic open-domain RAG superiority or SOTA. Do not treat
 post-injection answer-level evidence availability as baseline retrieval
 availability. Do not present conceptual schematics as experimental results. Do
-not claim a temporal feature heatmap until candidate-level feature traces are
-persisted. Do not present Figure 12 as a new experiment; it is derived from
-stored QA50 baseline output JSONL files.
+not present Figure 9 as an LLM or answer-generation result; it is a
+retrieval-only candidate trace. Do not present Figure 12 as a new experiment;
+it is derived from stored QA50 baseline output JSONL files.
 """
     write_text(OUT / "README.md", text, "index", "Research artifact package index.", "generated artifacts")
 
@@ -1217,6 +1348,88 @@ def to_float(value: Any) -> float:
         return float(value)
     except (TypeError, ValueError):
         return 0.0
+
+
+def as_number(value: Any) -> float | None:
+    if value in (None, ""):
+        return None
+    if isinstance(value, bool):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def int_or_large(value: Any) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 10**9
+
+
+def normalize_columns(matrix: list[list[float | None]]) -> list[list[float]]:
+    if not matrix:
+        return []
+    columns = len(matrix[0])
+    mins: list[float] = []
+    maxes: list[float] = []
+    for col in range(columns):
+        values = [row[col] for row in matrix if row[col] is not None]
+        mins.append(min(values) if values else 0.0)
+        maxes.append(max(values) if values else 0.0)
+    normalized: list[list[float]] = []
+    for row in matrix:
+        norm_row = []
+        for col, value in enumerate(row):
+            if value is None:
+                norm_row.append(0.0)
+                continue
+            lo = mins[col]
+            hi = maxes[col]
+            if hi == lo:
+                norm_row.append(1.0 if value > 0 else 0.0)
+            else:
+                norm_row.append((value - lo) / (hi - lo))
+        normalized.append(norm_row)
+    return normalized
+
+
+def metric_label(column: str) -> str:
+    labels = {
+        "semantic_score": "Semantic\nscore",
+        "bm25_score": "BM25\nscore",
+        "dense_score": "Dense\nscore",
+        "temporal_precision_score": "Temporal\nprecision",
+        "valid_time_fit": "Valid-time\nfit",
+        "interval_overlap_score": "Interval\noverlap",
+        "transaction_time_penalty": "Transaction\npenalty",
+        "forbidden_time_penalty": "Forbidden\npenalty",
+        "source_metric_score": "Source/metric\nadjustment",
+        "slot_score": "Slot\nscore",
+        "fusion_score": "Fusion\nscore",
+        "final_score": "Final\nscore",
+    }
+    return labels.get(column, column.replace("_", "\n"))
+
+
+def heatmap_row_label(row: dict[str, Any]) -> str:
+    label = short_evidence_id(str(row.get("candidate_evidence_id") or "unknown"))
+    markers = []
+    if row.get("selected"):
+        markers.append("selected")
+    if row.get("expected"):
+        markers.append("expected")
+    if row.get("forbidden"):
+        markers.append("forbidden")
+    return f"{label} [{' '.join(markers)}]" if markers else label
+
+
+def short_evidence_id(evidence_id: str) -> str:
+    parts = evidence_id.split(":")
+    if len(parts) >= 4:
+        return ":".join(parts[-3:])
+    return evidence_id
 
 
 def nested_metric(values: Any, key: str, default: float) -> float:

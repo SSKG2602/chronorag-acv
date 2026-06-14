@@ -10,6 +10,7 @@ Key polished artifact links:
 
 - [Paper figure plan](../../rpartifacts/paper/paper_figure_plan.md)
 - [One-query trace provenance](../../rpartifacts/paper/one_query_trace.md)
+- [Temporal feature heatmap provenance](../../rpartifacts/paper/temporal_feature_heatmap.md)
 - [Temporal feature trace logging recommendation](../../rpartifacts/paper/temporal_feature_trace_logging_recommendation.md)
 
 1. [Layer 2A retrieval-only standard comparison](table1_layer2a_retrieval_standard_comparison.md)

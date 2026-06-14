@@ -9,7 +9,7 @@
 6. Figure 6: QA50 LLM post-filtering comparison.
 7. Figure 7: pre/post injection fairness split.
 8. Figure 8: top-k sensitivity, with split Figure 8a and Figure 8b variants for readability.
-9. Figure 9: temporal feature heatmap not available until candidate traces are persisted.
+9. Figure 9: temporal feature heatmap from retrieval-only candidate trace export.
 10. Figure 10: real one-query trace.
 11. Figure 11: metric family summary.
 12. Figure 12: QA50 failure decomposition.

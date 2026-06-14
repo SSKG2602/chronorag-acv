@@ -25,7 +25,7 @@ marked as schematics.
 | [Figure 8: Top-k sensitivity](figures/fig8_topk_sensitivity.png) | Data-grounded | `docs/paper_assets/topk_sensitivity.csv` | Paper-supporting |
 | [Figure 8a: Ranking sensitivity](figures/fig8a_topk_hit_sensitivity.png) | Data-grounded | `docs/paper_assets/topk_sensitivity.csv` | Readability variant |
 | [Figure 8b: Temporal-validity sensitivity](figures/fig8b_topk_temporal_validity_sensitivity.png) | Data-grounded | `docs/paper_assets/topk_sensitivity.csv` | Readability variant |
-| [Figure 9: Feature heatmap unavailable](figures/fig9_temporal_feature_heatmap_not_available.md) | Not available | Candidate-level feature traces are not persisted | Limitation note |
+| [Figure 9: Temporal feature heatmap](figures/fig9_temporal_feature_heatmap.png) | Data-grounded | `rpartifacts/data/temporal_feature_trace.jsonl`, `rpartifacts/data/temporal_feature_trace.csv` | Paper-critical |
 | [Figure 10: One-query trace](figures/fig10_one_query_trace.png) | Data-grounded | `chronorag/stdcomp/results/stdcomp_layer2a_comparison.json`, `chronorag/stdcomp/results/bm25_ranked_outputs.json` | Paper-critical, README-friendly |
 | [Figure 11: Metric family summary](figures/fig11_metric_family_summary.png) | Data-grounded | Layer 2A and QA50 paper table CSVs | Paper-supporting |
 | [Figure 12: QA50 failure decomposition](figures/fig12_qa50_failure_decomposition.png) | Data-grounded | `chronorag/stdcomp/results/qa50_llm_baselines/*_outputs.jsonl` | Paper-supporting, LinkedIn-friendly |
@@ -37,10 +37,10 @@ ChronoRAG separates temporal role grounding from answer generation. Layer 2A
 evaluates selected evidence before answer synthesis, while Layer 2B evaluates
 answer-contract behavior after generation.
 
-Figure 9 is not generated as a heatmap because candidate-level temporal feature
-traces are not stored in existing artifacts. See
-[fig9_temporal_feature_heatmap_not_available.md](figures/fig9_temporal_feature_heatmap_not_available.md)
-and [paper/temporal_feature_trace_logging_recommendation.md](paper/temporal_feature_trace_logging_recommendation.md).
+Figure 9 is generated from a retrieval-only candidate trace export. See
+[paper/temporal_feature_heatmap.md](paper/temporal_feature_heatmap.md) for
+normalization and provenance details. The schema recommendation remains at
+[paper/temporal_feature_trace_logging_recommendation.md](paper/temporal_feature_trace_logging_recommendation.md).
 
 ## GitHub/LinkedIn Friendly Assets
 
@@ -76,6 +76,6 @@ python3 rpartifacts/generate_research_artifacts.py
 Do not claim generic open-domain RAG superiority or SOTA. Do not treat
 post-injection answer-level evidence availability as baseline retrieval
 availability. Do not present conceptual schematics as experimental results. Do
-not claim a temporal feature heatmap until candidate-level feature traces are
-persisted. Do not present Figure 12 as a new experiment; it is derived from
-stored QA50 baseline output JSONL files.
+not present Figure 9 as an LLM or answer-generation result; it is a
+retrieval-only candidate trace. Do not present Figure 12 as a new experiment;
+it is derived from stored QA50 baseline output JSONL files.
