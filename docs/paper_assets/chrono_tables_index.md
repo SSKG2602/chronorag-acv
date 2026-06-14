@@ -6,6 +6,12 @@ Use these tables as the paper-ready result boundary for Layer 2A retrieval, Laye
 
 Research-artifact package with generated paper figures, GitHub snippets, LinkedIn drafts, and paper inserts: [`rpartifacts/README.md`](../../rpartifacts/README.md)
 
+Key polished artifact links:
+
+- [Paper figure plan](../../rpartifacts/paper/paper_figure_plan.md)
+- [One-query trace provenance](../../rpartifacts/paper/one_query_trace.md)
+- [Temporal feature trace logging recommendation](../../rpartifacts/paper/temporal_feature_trace_logging_recommendation.md)
+
 1. [Layer 2A retrieval-only standard comparison](table1_layer2a_retrieval_standard_comparison.md)
    - CSV: `table1_layer2a_retrieval_standard_comparison.csv`
    - JSON: `chronorag/stdcomp/results/paper_tables/table1_layer2a_retrieval_standard_comparison.json`

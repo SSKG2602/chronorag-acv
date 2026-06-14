@@ -1015,6 +1015,7 @@ Selected figures:
 - [Figure 3: Layer 2A retrieval comparison](rpartifacts/figures/fig3_layer2a_retrieval_comparison.png)
 - [Figure 5: Score-only ablation](rpartifacts/figures/fig5_score_only_ablation.png)
 - [Figure 6: QA50 LLM post-filtering](rpartifacts/figures/fig6_qa50_llm_post_filtering.png)
+- [Figure 10: One-query retrieval trace](rpartifacts/figures/fig10_one_query_trace.png)
 
 Reusable snippets and paper planning:
 

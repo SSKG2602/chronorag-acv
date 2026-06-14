@@ -8,8 +8,8 @@ Source artifact path: generated from `rpartifacts/generate_research_artifacts.py
 | rpartifacts/data/derived_plot_data.json | data | Normalized data used by rpartifacts figures. | existing result artifacts |
 | rpartifacts/figures/fig1_temporal_misgrounding_concept.png | figure | Conceptual schematic; not an experimental result. | generated from existing artifacts or schematic |
 | rpartifacts/figures/fig1_temporal_misgrounding_concept.svg | figure | Conceptual schematic; not an experimental result. | generated from existing artifacts or schematic |
-| rpartifacts/figures/fig2_chronorag_architecture.png | figure | Architecture schematic; not an experimental result. | generated from existing artifacts or schematic |
-| rpartifacts/figures/fig2_chronorag_architecture.svg | figure | Architecture schematic; not an experimental result. | generated from existing artifacts or schematic |
+| rpartifacts/figures/fig2_chronorag_architecture.png | figure | Architecture schematic with fixed coordinates; no experimental result. | generated from existing artifacts or schematic |
+| rpartifacts/figures/fig2_chronorag_architecture.svg | figure | Architecture schematic with fixed coordinates; no experimental result. | generated from existing artifacts or schematic |
 | rpartifacts/figures/fig3_layer2a_retrieval_comparison.png | figure | Generated from Table 1. BM25 and Date-filter have higher broad Hit@5; ChronoRAG is strongest on temporal-validity diagnostics. | generated from existing artifacts or schematic |
 | rpartifacts/figures/fig3_layer2a_retrieval_comparison.svg | figure | Generated from Table 1. BM25 and Date-filter have higher broad Hit@5; ChronoRAG is strongest on temporal-validity diagnostics. | generated from existing artifacts or schematic |
 | rpartifacts/figures/fig4_temporal_validity_diagnostics.png | figure | Generated from Table 1 and ablation artifact. | generated from existing artifacts or schematic |
@@ -22,10 +22,24 @@ Source artifact path: generated from `rpartifacts/generate_research_artifacts.py
 | rpartifacts/figures/fig7_injection_fairness_split.svg | figure | Pre-injection is the fair retrieval-availability comparison. Post-injection measures answer behavior when expected evidence is available. | generated from existing artifacts or schematic |
 | rpartifacts/figures/fig8_topk_sensitivity.png | figure | Generated from top-k sensitivity artifact. | generated from existing artifacts or schematic |
 | rpartifacts/figures/fig8_topk_sensitivity.svg | figure | Generated from top-k sensitivity artifact. | generated from existing artifacts or schematic |
+| rpartifacts/figures/fig8a_topk_hit_sensitivity.png | figure | Generated from top-k sensitivity artifact. | generated from existing artifacts or schematic |
+| rpartifacts/figures/fig8a_topk_hit_sensitivity.svg | figure | Generated from top-k sensitivity artifact. | generated from existing artifacts or schematic |
+| rpartifacts/figures/fig8b_topk_temporal_validity_sensitivity.png | figure | Generated from top-k sensitivity artifact. | generated from existing artifacts or schematic |
+| rpartifacts/figures/fig8b_topk_temporal_validity_sensitivity.svg | figure | Generated from top-k sensitivity artifact. | generated from existing artifacts or schematic |
 | rpartifacts/figures/fig9_temporal_feature_heatmap_not_available.md | figure-note | Feature heatmap not generated because candidate-level traces are unavailable. | artifact schema inspection |
+| rpartifacts/paper/temporal_feature_trace_logging_recommendation.md | paper-note | Future candidate-trace logging recommendation. | artifact schema inspection |
+| rpartifacts/data/candidate_trace_sample_schema.json | data-schema | Candidate trace schema recommendation; contains no fake scores. | artifact schema inspection |
 | rpartifacts/paper/one_query_trace.md | paper-note | Real one-query trace from Layer 2A artifacts. | stdcomp case reports |
 | rpartifacts/figures/fig10_one_query_trace.png | figure | Generated from real Layer 2A case reports. | generated from existing artifacts or schematic |
 | rpartifacts/figures/fig10_one_query_trace.svg | figure | Generated from real Layer 2A case reports. | generated from existing artifacts or schematic |
+| rpartifacts/figures/fig11_metric_family_summary.png | figure | ChronoRAG's strongest gains are on temporal-validity and answer-contract metrics, not generic broad recall. | generated from existing artifacts or schematic |
+| rpartifacts/figures/fig11_metric_family_summary.svg | figure | ChronoRAG's strongest gains are on temporal-validity and answer-contract metrics, not generic broad recall. | generated from existing artifacts or schematic |
+| rpartifacts/figures/fig12_qa50_failure_decomposition.png | figure | QA50 standard retrieval + LLM baselines fail both because evidence is absent from top-k and because the LLM fails strict temporal contract even when evidence is present. | generated from existing artifacts or schematic |
+| rpartifacts/figures/fig12_qa50_failure_decomposition.svg | figure | QA50 standard retrieval + LLM baselines fail both because evidence is absent from top-k and because the LLM fails strict temporal contract even when evidence is present. | generated from existing artifacts or schematic |
+| rpartifacts/figures/fig13_claim_boundary.png | figure | Conceptual claim-boundary schematic. | generated from existing artifacts or schematic |
+| rpartifacts/figures/fig13_claim_boundary.svg | figure | Conceptual claim-boundary schematic. | generated from existing artifacts or schematic |
+| rpartifacts/figures/fig14_applications_map.png | figure | Conceptual application map. | generated from existing artifacts or schematic |
+| rpartifacts/figures/fig14_applications_map.svg | figure | Conceptual application map. | generated from existing artifacts or schematic |
 | rpartifacts/tables/table1_layer2a_retrieval_comparison.md | table | Table 1. Layer 2A Retrieval Comparison | docs/paper_assets/table1_layer2a_retrieval_standard_comparison.csv |
 | rpartifacts/tables/table2_ablation_comparison.md | table | Table 2. Ablation Comparison | docs/paper_assets/table2_layer2a_ablation_comparison.csv |
 | rpartifacts/tables/table3_qa50_llm_post_filtering.md | table | Table 3. QA50 LLM Post-Filtering Baselines | docs/paper_assets/table3_qa50_llm_post_filter_baselines.csv |

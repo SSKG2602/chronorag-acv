@@ -25,13 +25,13 @@
       "type": "figure"
     },
     {
-      "description": "Architecture schematic; not an experimental result.",
+      "description": "Architecture schematic with fixed coordinates; no experimental result.",
       "path": "rpartifacts/figures/fig2_chronorag_architecture.png",
       "source": "generated from existing artifacts or schematic",
       "type": "figure"
     },
     {
-      "description": "Architecture schematic; not an experimental result.",
+      "description": "Architecture schematic with fixed coordinates; no experimental result.",
       "path": "rpartifacts/figures/fig2_chronorag_architecture.svg",
       "source": "generated from existing artifacts or schematic",
       "type": "figure"
@@ -109,10 +109,46 @@
       "type": "figure"
     },
     {
+      "description": "Generated from top-k sensitivity artifact.",
+      "path": "rpartifacts/figures/fig8a_topk_hit_sensitivity.png",
+      "source": "generated from existing artifacts or schematic",
+      "type": "figure"
+    },
+    {
+      "description": "Generated from top-k sensitivity artifact.",
+      "path": "rpartifacts/figures/fig8a_topk_hit_sensitivity.svg",
+      "source": "generated from existing artifacts or schematic",
+      "type": "figure"
+    },
+    {
+      "description": "Generated from top-k sensitivity artifact.",
+      "path": "rpartifacts/figures/fig8b_topk_temporal_validity_sensitivity.png",
+      "source": "generated from existing artifacts or schematic",
+      "type": "figure"
+    },
+    {
+      "description": "Generated from top-k sensitivity artifact.",
+      "path": "rpartifacts/figures/fig8b_topk_temporal_validity_sensitivity.svg",
+      "source": "generated from existing artifacts or schematic",
+      "type": "figure"
+    },
+    {
       "description": "Feature heatmap not generated because candidate-level traces are unavailable.",
       "path": "rpartifacts/figures/fig9_temporal_feature_heatmap_not_available.md",
       "source": "artifact schema inspection",
       "type": "figure-note"
+    },
+    {
+      "description": "Future candidate-trace logging recommendation.",
+      "path": "rpartifacts/paper/temporal_feature_trace_logging_recommendation.md",
+      "source": "artifact schema inspection",
+      "type": "paper-note"
+    },
+    {
+      "description": "Candidate trace schema recommendation; contains no fake scores.",
+      "path": "rpartifacts/data/candidate_trace_sample_schema.json",
+      "source": "artifact schema inspection",
+      "type": "data-schema"
     },
     {
       "description": "Real one-query trace from Layer 2A artifacts.",
@@ -129,6 +165,54 @@
     {
       "description": "Generated from real Layer 2A case reports.",
       "path": "rpartifacts/figures/fig10_one_query_trace.svg",
+      "source": "generated from existing artifacts or schematic",
+      "type": "figure"
+    },
+    {
+      "description": "ChronoRAG's strongest gains are on temporal-validity and answer-contract metrics, not generic broad recall.",
+      "path": "rpartifacts/figures/fig11_metric_family_summary.png",
+      "source": "generated from existing artifacts or schematic",
+      "type": "figure"
+    },
+    {
+      "description": "ChronoRAG's strongest gains are on temporal-validity and answer-contract metrics, not generic broad recall.",
+      "path": "rpartifacts/figures/fig11_metric_family_summary.svg",
+      "source": "generated from existing artifacts or schematic",
+      "type": "figure"
+    },
+    {
+      "description": "QA50 standard retrieval + LLM baselines fail both because evidence is absent from top-k and because the LLM fails strict temporal contract even when evidence is present.",
+      "path": "rpartifacts/figures/fig12_qa50_failure_decomposition.png",
+      "source": "generated from existing artifacts or schematic",
+      "type": "figure"
+    },
+    {
+      "description": "QA50 standard retrieval + LLM baselines fail both because evidence is absent from top-k and because the LLM fails strict temporal contract even when evidence is present.",
+      "path": "rpartifacts/figures/fig12_qa50_failure_decomposition.svg",
+      "source": "generated from existing artifacts or schematic",
+      "type": "figure"
+    },
+    {
+      "description": "Conceptual claim-boundary schematic.",
+      "path": "rpartifacts/figures/fig13_claim_boundary.png",
+      "source": "generated from existing artifacts or schematic",
+      "type": "figure"
+    },
+    {
+      "description": "Conceptual claim-boundary schematic.",
+      "path": "rpartifacts/figures/fig13_claim_boundary.svg",
+      "source": "generated from existing artifacts or schematic",
+      "type": "figure"
+    },
+    {
+      "description": "Conceptual application map.",
+      "path": "rpartifacts/figures/fig14_applications_map.png",
+      "source": "generated from existing artifacts or schematic",
+      "type": "figure"
+    },
+    {
+      "description": "Conceptual application map.",
+      "path": "rpartifacts/figures/fig14_applications_map.svg",
       "source": "generated from existing artifacts or schematic",
       "type": "figure"
     },

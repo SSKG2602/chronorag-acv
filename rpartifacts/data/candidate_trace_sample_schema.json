@@ -1,0 +1,24 @@
+{
+  "description": "Schema recommendation only; not benchmark data.",
+  "recommended_jsonl_path": "rpartifacts/data/candidate_traces.jsonl",
+  "record_schema": {
+    "candidate_rank": "integer",
+    "case_id": "string",
+    "evidence_id": "string",
+    "final_score": "number|null",
+    "forbidden_penalty": "number|null",
+    "method": "string",
+    "query": "string",
+    "selected": "boolean",
+    "semantic_score": "number|null",
+    "slot_assignment": "string|null",
+    "slot_fit": "number|null",
+    "source_metric_fit": "number|null",
+    "suppression_reasons": [
+      "string"
+    ],
+    "temporal_fit": "number|null",
+    "transaction_penalty": "number|null",
+    "valid_time_fit": "number|null"
+  }
+}
