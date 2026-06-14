@@ -1,0 +1,4 @@
+method,cases,retrieval_hit_at_1,retrieval_hit_at_5,retrieval_mrr_at_5,strict_combined_pass,deterministic_hard_contract_pass,llm_judge_overall_pass,llm_judge_semantic_pass,valid_time_used_correct,expected_evidence_cited,provider_errors,judge_errors,answer_correctness,expected_evidence_available_to_model
+BM25 + LLM,50,0.36,0.64,0.46066666666666656,0.4,0.42,0.68,0.78,0.46,0.56,0,7,0.78,0.56
+Dense-only + LLM,50,0.4,0.52,0.44233333333333325,0.32,0.34,0.68,0.82,0.44,0.44,0,3,0.82,0.44
+Date-filter RAG + LLM,50,0.4,0.66,0.5006666666666667,0.4,0.44,0.76,0.9,0.46,0.58,0,0,0.9,0.58

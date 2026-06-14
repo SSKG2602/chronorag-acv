@@ -1,0 +1,284 @@
+{
+  "columns": [
+    {
+      "key": "method",
+      "label": "Method"
+    },
+    {
+      "key": "cases",
+      "label": "Cases"
+    },
+    {
+      "key": "retrieval_hit_at_1",
+      "label": "Retrieval Hit@1"
+    },
+    {
+      "key": "retrieval_hit_at_5",
+      "label": "Retrieval Hit@5"
+    },
+    {
+      "key": "retrieval_mrr_at_5",
+      "label": "Retrieval MRR@5"
+    },
+    {
+      "key": "strict_combined_pass",
+      "label": "Strict Combined Pass"
+    },
+    {
+      "key": "deterministic_hard_contract_pass",
+      "label": "Deterministic Hard-Contract Pass"
+    },
+    {
+      "key": "llm_judge_overall_pass",
+      "label": "LLM Judge Overall Pass"
+    },
+    {
+      "key": "llm_judge_semantic_pass",
+      "label": "LLM Judge Semantic Pass"
+    },
+    {
+      "key": "valid_time_used_correct",
+      "label": "Valid Time Used Correct"
+    },
+    {
+      "key": "expected_evidence_cited",
+      "label": "Expected Evidence Cited"
+    },
+    {
+      "key": "provider_errors",
+      "label": "Provider Errors"
+    },
+    {
+      "key": "judge_errors",
+      "label": "Judge Errors"
+    }
+  ],
+  "metadata": {
+    "generated_at": "2026-06-13T23:05:31.522392+00:00",
+    "manifest": {
+      "benchmark": "layer2b_manual_50_qa",
+      "command": "/Users/shreyasshashi/Desktop/chronorag/chronorag/stdcomp/evaluate_qa50_llm_baselines.py --top-k 5 --methods bm25,dense,date_filter --sleep-seconds 8 --max-cases 50 --resume --project ginkgo-2026 --retry-max-attempts 5 --retry-base-sleep-seconds 10 --retry-max-sleep-seconds 90 --out-dir chronorag/stdcomp/results/qa50_llm_baselines",
+      "corpus": {
+        "path": "benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl",
+        "rows": 5000,
+        "sha256": "fe0782eea177ccd1ac90ce21c730c8c69f65c8be388534bc141d3a01a6269287"
+      },
+      "dense_model": "BAAI/bge-small-en-v1.5",
+      "experiment": "qa50_llm_standard_retrieval_baselines",
+      "fairness_constraints": [
+        "Same top_k for all methods.",
+        "Same QA cases, corpus, LLM model, temperature, prompt template, validator, and judge settings for all methods.",
+        "No ChronoRAG retrieval features, TCC, temporal fusion, or forbidden-time suppression in standard retrievers.",
+        "Gold expected evidence IDs are not included in the answer prompt."
+      ],
+      "force": false,
+      "judge_enabled": true,
+      "judge_max_output_tokens": 5000,
+      "judge_runs": 1,
+      "judge_temperature": 0.0,
+      "max_output_tokens": 5000,
+      "methods": [
+        "bm25",
+        "dense",
+        "date_filter"
+      ],
+      "model": "gemini-2.5-flash",
+      "qa": {
+        "path": "benchmarks/layer2_crossdomain/data/layer2b_manual_50_qa.jsonl",
+        "rows_selected": 50,
+        "sha256": "6e41ad8f6bd075060d15a14d175019316417656d8eaacd8f841999a2f9668727"
+      },
+      "resume": true,
+      "sleep_seconds": 8.0,
+      "temperature": 0.0,
+      "top_k": 5
+    },
+    "rerun_performed": false,
+    "sources": [
+      {
+        "exists": true,
+        "path": "chronorag/stdcomp/results/qa50_llm_baselines/bm25_llm_qa50_metrics.json",
+        "sha256": "c713569fc64a4d49b759eac5d77c31d19496ac9e156fcb19af6453b99d0381f9"
+      },
+      {
+        "exists": true,
+        "path": "chronorag/stdcomp/results/qa50_llm_baselines/dense_llm_qa50_metrics.json",
+        "sha256": "e0771bda949e33bcaf37812f02a82d055c381bb72ed8524a338170d1f2019a1e"
+      },
+      {
+        "exists": true,
+        "path": "chronorag/stdcomp/results/qa50_llm_baselines/date_filter_llm_qa50_metrics.json",
+        "sha256": "c3cead6dcbb72ae14290d1b3b8bef6f114c11949edc557f6b1603ef4b701d52e"
+      },
+      {
+        "exists": true,
+        "path": "chronorag/stdcomp/results/qa50_llm_baselines/qa50_llm_run_manifest.json",
+        "sha256": "c32eb5194731634b5bc2f03decab4d835e5668c098d8bb6448dbf1c9f0c128ab"
+      }
+    ],
+    "table_id": "table3_qa50_llm_post_filter_baselines_with_ci",
+    "title": "QA50 standard retrieval + LLM temporal post-filtering baselines with Wilson 95% CI",
+    "wilson_ci": {
+      "count_source": "Counts inferred by round(metric * cases) when explicit counts were not present.",
+      "mrr_note": "MRR values do not receive Wilson CIs.",
+      "z": 1.959963984540054
+    }
+  },
+  "notes": [
+    "Extracted from existing QA50 LLM baseline artifacts; no retriever, Vertex/Gemini, validator, or judge rerun.",
+    "All methods use top-k=5, Gemini 2.5 Flash, temperature 0.0, same QA50 cases, same 5,000-row corpus, same prompt template, and same validator/judge settings.",
+    "Gold evidence IDs were not included in prompts.",
+    "The existing Layer 2B answer schema does not expose a separate transaction_time_used_as_valid_time field; valid-time correctness is reported instead.",
+    "Despite explicit instructions to distinguish valid time from transaction time, BM25 + LLM, Dense-only + LLM, and Date-filter RAG + LLM reached strict combined pass of 0.4000, 0.3200, and 0.4000 respectively.",
+    "Wilson 95% confidence intervals are shown for proportion metrics only; counts are inferred from ratio times cases where needed."
+  ],
+  "rows": [
+    {
+      "answer_correctness": 0.78,
+      "cases": 50,
+      "deterministic_hard_contract_pass": 0.42,
+      "deterministic_hard_contract_pass_ci95_high": 0.5576655823142176,
+      "deterministic_hard_contract_pass_ci95_low": 0.2937500335471198,
+      "deterministic_hard_contract_pass_count": 21,
+      "deterministic_hard_contract_pass_denominator": 50,
+      "expected_evidence_available_to_model": 0.56,
+      "expected_evidence_cited": 0.56,
+      "expected_evidence_cited_ci95_high": 0.6883780078874284,
+      "expected_evidence_cited_ci95_low": 0.4230602802165686,
+      "expected_evidence_cited_count": 28,
+      "expected_evidence_cited_denominator": 50,
+      "judge_errors": 7,
+      "llm_judge_overall_pass": 0.68,
+      "llm_judge_overall_pass_ci95_high": 0.7924178373934316,
+      "llm_judge_overall_pass_ci95_low": 0.5418970269185592,
+      "llm_judge_overall_pass_count": 34,
+      "llm_judge_overall_pass_denominator": 50,
+      "llm_judge_semantic_pass": 0.78,
+      "llm_judge_semantic_pass_ci95_high": 0.8724608402978559,
+      "llm_judge_semantic_pass_ci95_low": 0.6475845041874634,
+      "llm_judge_semantic_pass_count": 39,
+      "llm_judge_semantic_pass_denominator": 50,
+      "method": "BM25 + LLM",
+      "provider_errors": 0,
+      "retrieval_hit_at_1": 0.36,
+      "retrieval_hit_at_1_ci95_high": 0.49858983123887307,
+      "retrieval_hit_at_1_ci95_low": 0.24138749651846741,
+      "retrieval_hit_at_1_count": 18,
+      "retrieval_hit_at_1_denominator": 50,
+      "retrieval_hit_at_5": 0.64,
+      "retrieval_hit_at_5_ci95_high": 0.7586125034815325,
+      "retrieval_hit_at_5_ci95_low": 0.501410168761127,
+      "retrieval_hit_at_5_count": 32,
+      "retrieval_hit_at_5_denominator": 50,
+      "retrieval_mrr_at_5": 0.46066666666666656,
+      "strict_combined_pass": 0.4,
+      "strict_combined_pass_ci95_high": 0.5381856225241064,
+      "strict_combined_pass_ci95_low": 0.27608389730256544,
+      "strict_combined_pass_count": 20,
+      "strict_combined_pass_denominator": 50,
+      "valid_time_used_correct": 0.46,
+      "valid_time_used_correct_ci95_high": 0.5960112860084253,
+      "valid_time_used_correct_ci95_low": 0.3296965219222435,
+      "valid_time_used_correct_count": 23,
+      "valid_time_used_correct_denominator": 50
+    },
+    {
+      "answer_correctness": 0.82,
+      "cases": 50,
+      "deterministic_hard_contract_pass": 0.34,
+      "deterministic_hard_contract_pass_ci95_high": 0.478461739497674,
+      "deterministic_hard_contract_pass_ci95_low": 0.2243694922250009,
+      "deterministic_hard_contract_pass_count": 17,
+      "deterministic_hard_contract_pass_denominator": 50,
+      "expected_evidence_available_to_model": 0.44,
+      "expected_evidence_cited": 0.44,
+      "expected_evidence_cited_ci95_high": 0.5769397197834315,
+      "expected_evidence_cited_ci95_low": 0.3116219921125717,
+      "expected_evidence_cited_count": 22,
+      "expected_evidence_cited_denominator": 50,
+      "judge_errors": 3,
+      "llm_judge_overall_pass": 0.68,
+      "llm_judge_overall_pass_ci95_high": 0.7924178373934316,
+      "llm_judge_overall_pass_ci95_low": 0.5418970269185592,
+      "llm_judge_overall_pass_count": 34,
+      "llm_judge_overall_pass_denominator": 50,
+      "llm_judge_semantic_pass": 0.82,
+      "llm_judge_semantic_pass_ci95_high": 0.9022980732976582,
+      "llm_judge_semantic_pass_ci95_low": 0.6920394632569922,
+      "llm_judge_semantic_pass_count": 41,
+      "llm_judge_semantic_pass_denominator": 50,
+      "method": "Dense-only + LLM",
+      "provider_errors": 0,
+      "retrieval_hit_at_1": 0.4,
+      "retrieval_hit_at_1_ci95_high": 0.5381856225241064,
+      "retrieval_hit_at_1_ci95_low": 0.27608389730256544,
+      "retrieval_hit_at_1_count": 20,
+      "retrieval_hit_at_1_denominator": 50,
+      "retrieval_hit_at_5": 0.52,
+      "retrieval_hit_at_5_ci95_high": 0.6520286471342196,
+      "retrieval_hit_at_5_ci95_low": 0.38511744890044614,
+      "retrieval_hit_at_5_count": 26,
+      "retrieval_hit_at_5_denominator": 50,
+      "retrieval_mrr_at_5": 0.44233333333333325,
+      "strict_combined_pass": 0.32,
+      "strict_combined_pass_ci95_high": 0.45810297308144077,
+      "strict_combined_pass_ci95_low": 0.20758216260656848,
+      "strict_combined_pass_count": 16,
+      "strict_combined_pass_denominator": 50,
+      "valid_time_used_correct": 0.44,
+      "valid_time_used_correct_ci95_high": 0.5769397197834315,
+      "valid_time_used_correct_ci95_low": 0.3116219921125717,
+      "valid_time_used_correct_count": 22,
+      "valid_time_used_correct_denominator": 50
+    },
+    {
+      "answer_correctness": 0.9,
+      "cases": 50,
+      "deterministic_hard_contract_pass": 0.44,
+      "deterministic_hard_contract_pass_ci95_high": 0.5769397197834315,
+      "deterministic_hard_contract_pass_ci95_low": 0.3116219921125717,
+      "deterministic_hard_contract_pass_count": 22,
+      "deterministic_hard_contract_pass_denominator": 50,
+      "expected_evidence_available_to_model": 0.58,
+      "expected_evidence_cited": 0.58,
+      "expected_evidence_cited_ci95_high": 0.7062499664528802,
+      "expected_evidence_cited_ci95_low": 0.4423344176857823,
+      "expected_evidence_cited_count": 29,
+      "expected_evidence_cited_denominator": 50,
+      "judge_errors": 0,
+      "llm_judge_overall_pass": 0.76,
+      "llm_judge_overall_pass_ci95_high": 0.8570260860300828,
+      "llm_judge_overall_pass_ci95_low": 0.6258731624205708,
+      "llm_judge_overall_pass_count": 38,
+      "llm_judge_overall_pass_denominator": 50,
+      "llm_judge_semantic_pass": 0.9,
+      "llm_judge_semantic_pass_ci95_high": 0.9565242350681096,
+      "llm_judge_semantic_pass_ci95_low": 0.7863976856252035,
+      "llm_judge_semantic_pass_count": 45,
+      "llm_judge_semantic_pass_denominator": 50,
+      "method": "Date-filter RAG + LLM",
+      "provider_errors": 0,
+      "retrieval_hit_at_1": 0.4,
+      "retrieval_hit_at_1_ci95_high": 0.5381856225241064,
+      "retrieval_hit_at_1_ci95_low": 0.27608389730256544,
+      "retrieval_hit_at_1_count": 20,
+      "retrieval_hit_at_1_denominator": 50,
+      "retrieval_hit_at_5": 0.66,
+      "retrieval_hit_at_5_ci95_high": 0.7756305077749992,
+      "retrieval_hit_at_5_ci95_low": 0.521538260502326,
+      "retrieval_hit_at_5_count": 33,
+      "retrieval_hit_at_5_denominator": 50,
+      "retrieval_mrr_at_5": 0.5006666666666667,
+      "strict_combined_pass": 0.4,
+      "strict_combined_pass_ci95_high": 0.5381856225241064,
+      "strict_combined_pass_ci95_low": 0.27608389730256544,
+      "strict_combined_pass_count": 20,
+      "strict_combined_pass_denominator": 50,
+      "valid_time_used_correct": 0.46,
+      "valid_time_used_correct_ci95_high": 0.5960112860084253,
+      "valid_time_used_correct_ci95_low": 0.3296965219222435,
+      "valid_time_used_correct_count": 23,
+      "valid_time_used_correct_denominator": 50
+    }
+  ]
+}

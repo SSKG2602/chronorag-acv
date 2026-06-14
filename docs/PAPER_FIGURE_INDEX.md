@@ -13,9 +13,11 @@ attribution cards, and answer-contract validation.
 
 Path: `docs/paper_assets/layer2a_retrieval_comparison.png`
 
-Caption: Cross-domain retrieval results comparing the proposed ChronoRAG method
-against the temporal metadata baseline across Generic Hit@1, Generic Hit@5,
-Forbidden Absent@5, and Category Primary Pass.
+Caption: Cross-domain retrieval results comparing ChronoRAG against BM25,
+Dense-only, Date-filter RAG, and Metadata Temporal RAG baselines. BM25 and
+Date-filter RAG have higher broad Hit@5, while ChronoRAG Full has stronger
+Hit@1, MRR@5, Forbidden Absent@5, and Category Primary Pass, supporting
+temporal-validity retrieval rather than generic retrieval superiority.
 
 ## Figure 3: Ablation Study
 
@@ -30,8 +32,10 @@ quality.
 Path: `docs/paper_assets/layer2b_answer_validation.png`
 
 Caption: Natural-language temporal QA validation results under deterministic
-hard-contract, LLM judge semantic, strict combined, and manual-audited
-acceptable criteria.
+hard-contract, LLM judge overall, LLM judge semantic, strict combined, and
+manual-audited acceptable criteria. Answer-level ChronoRAG results should be
+read separately from pre-injection retrieval availability and standard
+retrieval + LLM post-filtering baselines.
 
 ## Figure 5: Evidence Finalization Schematic
 

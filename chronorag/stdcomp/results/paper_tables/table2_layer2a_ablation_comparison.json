@@ -1,0 +1,136 @@
+{
+  "columns": [
+    {
+      "key": "method",
+      "label": "Method"
+    },
+    {
+      "key": "cases",
+      "label": "Cases"
+    },
+    {
+      "key": "hit_at_1",
+      "label": "Hit@1"
+    },
+    {
+      "key": "hit_at_5",
+      "label": "Hit@5"
+    },
+    {
+      "key": "mrr_at_5",
+      "label": "MRR@5"
+    },
+    {
+      "key": "forbidden_absent_at_5",
+      "label": "Forbidden Absent@5"
+    },
+    {
+      "key": "category_primary_pass",
+      "label": "Category Primary Pass"
+    }
+  ],
+  "metadata": {
+    "generated_at": "2026-06-13T23:05:27.603942+00:00",
+    "note": "Dry-run retrieval-only ablation report. No Vertex, no answer-quality scoring, no SOTA claim.",
+    "rerun_performed": false,
+    "sources": [
+      {
+        "exists": true,
+        "path": "benchmarks/layer2_crossdomain/results/layer2_ablation_v3_ablation200.json",
+        "sha256": "d80a17308ebbd9213d178fb7723408fcafc01541ea85bd5bbb849713a5d09f89"
+      }
+    ],
+    "suffix": "v3_ablation200",
+    "table_id": "table2_layer2a_ablation_comparison",
+    "title": "Layer 2A ablation comparison"
+  },
+  "notes": [
+    "Extracted from existing Layer 2A ablation artifact; no retrieval, model, validator, or judge rerun.",
+    "MRR@5 is n/a because this ablation artifact does not contain MRR values.",
+    "Rows include the requested ablations plus other clearly named variants present in the artifact.",
+    "The Score-only ablation achieved the highest raw Hit@5 at 0.9850, but Forbidden Absent@5 fell to 0.6500 and Category Primary Pass fell to 0.5625.",
+    "ChronoRAG Full achieved lower broad Hit@5 at 0.8950 but much stronger Forbidden Absent@5 at 0.9950 and Category Primary Pass at 0.9625."
+  ],
+  "rows": [
+    {
+      "artifact_method": "chronorag_full",
+      "cases": 200,
+      "category_primary_pass": 0.9625,
+      "forbidden_absent_at_5": 0.995,
+      "hit_at_1": 0.825,
+      "hit_at_5": 0.895,
+      "method": "ChronoRAG Full",
+      "mrr_at_5": null
+    },
+    {
+      "artifact_method": "metadata_temporal_rag",
+      "cases": 200,
+      "category_primary_pass": 0.48125,
+      "forbidden_absent_at_5": 0.695,
+      "hit_at_1": 0.69,
+      "hit_at_5": 0.86,
+      "method": "Metadata Temporal RAG",
+      "mrr_at_5": null
+    },
+    {
+      "artifact_method": "chronorag_no_temporal_precision",
+      "cases": 200,
+      "category_primary_pass": 0.75,
+      "forbidden_absent_at_5": 0.945,
+      "hit_at_1": 0.75,
+      "hit_at_5": 0.85,
+      "method": "No Temporal Precision",
+      "mrr_at_5": null
+    },
+    {
+      "artifact_method": "chronorag_no_slot_assembler",
+      "cases": 200,
+      "category_primary_pass": 0.775,
+      "forbidden_absent_at_5": 0.815,
+      "hit_at_1": 0.83,
+      "hit_at_5": 0.89,
+      "method": "No Slot Assembler",
+      "mrr_at_5": null
+    },
+    {
+      "artifact_method": "chronorag_score_only",
+      "cases": 200,
+      "category_primary_pass": 0.5625,
+      "forbidden_absent_at_5": 0.65,
+      "hit_at_1": 0.815,
+      "hit_at_5": 0.985,
+      "method": "Score-only",
+      "mrr_at_5": null
+    },
+    {
+      "artifact_method": "chronorag_no_tcc",
+      "cases": 200,
+      "category_primary_pass": 0.9625,
+      "forbidden_absent_at_5": 0.995,
+      "hit_at_1": 0.835,
+      "hit_at_5": 0.895,
+      "method": "No TCC",
+      "mrr_at_5": null
+    },
+    {
+      "artifact_method": "chronorag_no_transaction_role",
+      "cases": 200,
+      "category_primary_pass": 0.9625,
+      "forbidden_absent_at_5": 0.995,
+      "hit_at_1": 0.825,
+      "hit_at_5": 0.895,
+      "method": "No Transaction Role",
+      "mrr_at_5": null
+    },
+    {
+      "artifact_method": "chronorag_no_source_metric",
+      "cases": 200,
+      "category_primary_pass": 0.96875,
+      "forbidden_absent_at_5": 1.0,
+      "hit_at_1": 0.83,
+      "hit_at_5": 0.89,
+      "method": "No Source/Metric Adjustment",
+      "mrr_at_5": null
+    }
+  ]
+}

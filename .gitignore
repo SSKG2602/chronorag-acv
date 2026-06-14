@@ -57,6 +57,10 @@ venv/
 # Generated Layer 2 benchmark corpus
 benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl
 
+# Generated standard-comparison embedding caches
+chronorag/stdcomp/results/cache/
+chronorag/stdcomp/results/qa50_llm_baselines/cache/
+
 # Layer 2 runtime logs
 benchmarks/layer2_crossdomain/run_logs/
 

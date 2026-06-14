@@ -1,0 +1,111 @@
+{
+  "columns": [
+    {
+      "key": "method",
+      "label": "Method"
+    },
+    {
+      "key": "cases",
+      "label": "Cases"
+    },
+    {
+      "key": "hit_at_1",
+      "label": "Hit@1"
+    },
+    {
+      "key": "hit_at_5",
+      "label": "Hit@5"
+    },
+    {
+      "key": "mrr_at_5",
+      "label": "MRR@5"
+    },
+    {
+      "key": "forbidden_absent_at_5",
+      "label": "Forbidden Absent@5"
+    },
+    {
+      "key": "category_primary_pass",
+      "label": "Category Primary Pass"
+    }
+  ],
+  "metadata": {
+    "corpus": {
+      "path": "benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl",
+      "rows": 5000,
+      "sha256": "fe0782eea177ccd1ac90ce21c730c8c69f65c8be388534bc141d3a01a6269287"
+    },
+    "generated_at": "2026-06-13T23:05:27.591307+00:00",
+    "queries": {
+      "path": "benchmarks/layer2_crossdomain/data/layer2_questions.jsonl",
+      "rows": 200,
+      "sha256": "d8dcaf4e306fa7f3c8d3ccd02aeee7af5c03ce23250d2a47d470c2c7e5c98b7a"
+    },
+    "rerun_performed": false,
+    "sources": [
+      {
+        "exists": true,
+        "path": "chronorag/stdcomp/results/stdcomp_layer2a_comparison.json",
+        "sha256": "e75e58b3c4b7bca46c20b08fb37234588836f466dfec128eeff3ff3c330e97e0"
+      }
+    ],
+    "table_id": "table1_layer2a_retrieval_standard_comparison",
+    "title": "Layer 2A retrieval-only standard comparison",
+    "top_k": 5
+  },
+  "notes": [
+    "Extracted from existing Layer 2A standard-comparison artifact; no retrieval or model rerun.",
+    "Top-k: 5. Benchmark: Layer 2A 200-case retrieval-only comparison.",
+    "Metrics are scored over selected evidence IDs.",
+    "BM25 and Date-filter RAG have higher broad Hit@5, but ChronoRAG Full has stronger Hit@1, MRR@5, Forbidden Absent@5, and Category Primary Pass.",
+    "This supports temporal-validity retrieval, not generic retrieval superiority.",
+    "Forbidden Absent@5 and Category Primary Pass complement Hit@k and MRR@5 by measuring temporal-invalidity exclusion and source/category correctness."
+  ],
+  "rows": [
+    {
+      "cases": 200,
+      "category_primary_pass": 0.575,
+      "forbidden_absent_at_5": 0.76,
+      "hit_at_1": 0.775,
+      "hit_at_5": 0.935,
+      "method": "BM25",
+      "mrr_at_5": 0.8466666666666669
+    },
+    {
+      "cases": 200,
+      "category_primary_pass": 0.3,
+      "forbidden_absent_at_5": 0.795,
+      "hit_at_1": 0.385,
+      "hit_at_5": 0.61,
+      "method": "Dense-only",
+      "mrr_at_5": 0.47100000000000003
+    },
+    {
+      "cases": 200,
+      "category_primary_pass": 0.6,
+      "forbidden_absent_at_5": 0.765,
+      "hit_at_1": 0.775,
+      "hit_at_5": 0.935,
+      "method": "Date-filter RAG",
+      "mrr_at_5": 0.8475000000000001
+    },
+    {
+      "cases": 200,
+      "category_primary_pass": 0.48125,
+      "forbidden_absent_at_5": 0.695,
+      "hit_at_1": 0.69,
+      "hit_at_5": 0.86,
+      "method": "Metadata Temporal RAG",
+      "mrr_at_5": 0.7678333333333334
+    },
+    {
+      "cases": 200,
+      "category_primary_pass": 0.9625,
+      "forbidden_absent_at_5": 0.995,
+      "hit_at_1": 0.825,
+      "hit_at_5": 0.895,
+      "method": "ChronoRAG Full",
+      "mrr_at_5": 0.8554166666666668
+    }
+  ]
+}

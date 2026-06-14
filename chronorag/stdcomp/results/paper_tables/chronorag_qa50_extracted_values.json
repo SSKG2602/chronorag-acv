@@ -1,0 +1,120 @@
+{
+  "generated_at": "2026-06-13T23:05:35.162059+00:00",
+  "metrics": {
+    "answer_rows": {
+      "count": 50,
+      "denominator": 50,
+      "field_path": "answer rows",
+      "status": "available",
+      "type": "count",
+      "value": 1.0
+    },
+    "cases": {
+      "count": 50,
+      "denominator": 50,
+      "field_path": "judge rows",
+      "status": "available",
+      "type": "count",
+      "value": 1.0
+    },
+    "deterministic_hard_contract_pass": {
+      "count": 38,
+      "denominator": 50,
+      "field_path": "judge row deterministic_overall_contract_pass",
+      "status": "available",
+      "type": "ratio",
+      "value": 0.76
+    },
+    "expected_evidence_available_after_injection": {
+      "count": 50,
+      "denominator": 50,
+      "field_path": "retrieval_metadata.expected_evidence_available_to_model",
+      "status": "available",
+      "type": "ratio",
+      "value": 1.0
+    },
+    "expected_evidence_cited": {
+      "count": 49,
+      "denominator": 50,
+      "field_path": "deterministic_validation.expected_evidence_cited",
+      "status": "available",
+      "type": "ratio",
+      "value": 0.98
+    },
+    "expected_evidence_injected": {
+      "count": 18,
+      "denominator": 50,
+      "field_path": "retrieval_metadata.expected_evidence_injected",
+      "status": "available",
+      "type": "ratio",
+      "value": 0.36
+    },
+    "expected_evidence_retrieved_pre_injection_all": {
+      "count": 32,
+      "denominator": 50,
+      "field_path": "retrieval_metadata.expected_evidence_retrieved_before_injection",
+      "status": "available",
+      "type": "ratio",
+      "value": 0.64
+    },
+    "expected_evidence_retrieved_pre_injection_any": {
+      "count": 37,
+      "denominator": 50,
+      "field_path": "expected_evidence_ids \u2229 retrieval_metadata.retrieved_evidence_ids_before_injection",
+      "status": "available",
+      "type": "ratio",
+      "value": 0.74
+    },
+    "judge_overall_pass": {
+      "count": 38,
+      "denominator": 50,
+      "field_path": "judge_validation.overall_judge_pass",
+      "status": "available",
+      "type": "ratio",
+      "value": 0.76
+    },
+    "judge_semantic_pass": {
+      "count": 48,
+      "denominator": 50,
+      "field_path": "judge_validation.semantic_answer_correct",
+      "status": "available",
+      "type": "ratio",
+      "value": 0.96
+    },
+    "strict_combined_pass": {
+      "count": 35,
+      "denominator": 50,
+      "field_path": "judge row combined_pass",
+      "status": "available",
+      "type": "ratio",
+      "value": 0.7
+    },
+    "valid_time_correct": {
+      "count": 42,
+      "denominator": 50,
+      "field_path": "judge_validation.valid_time_correct",
+      "status": "available",
+      "type": "ratio",
+      "value": 0.84
+    },
+    "valid_time_present": {
+      "count": 41,
+      "denominator": 50,
+      "field_path": "deterministic_validation.valid_time_present",
+      "status": "available",
+      "type": "ratio",
+      "value": 0.82
+    }
+  },
+  "notes": [
+    "Values extracted from existing ChronoRAG QA50 answer and judge artifacts only.",
+    "Pre-injection any expected evidence is computed from expected_evidence_ids intersecting retrieval_metadata.retrieved_evidence_ids_before_injection.",
+    "Pre-injection all expected evidence uses retrieval_metadata.expected_evidence_retrieved_before_injection when present; this field is all-expected coverage in the existing runner.",
+    "Post-injection availability uses retrieval_metadata.expected_evidence_available_to_model with validation.expected_evidence_available_to_model as fallback."
+  ],
+  "rerun_performed": false,
+  "sources": [
+    "benchmarks/layer2_crossdomain/results/layer2b_chronorag_full_layer2b_full50_vertex_final_results.jsonl",
+    "benchmarks/layer2_crossdomain/results/layer2b_judge_layer2b_full50_judge_final_results.jsonl"
+  ]
+}

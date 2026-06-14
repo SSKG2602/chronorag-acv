@@ -1,0 +1,197 @@
+{
+  "columns": [
+    {
+      "key": "method",
+      "label": "Method"
+    },
+    {
+      "key": "cases",
+      "label": "Cases"
+    },
+    {
+      "key": "hit_at_1",
+      "label": "Hit@1"
+    },
+    {
+      "key": "hit_at_5",
+      "label": "Hit@5"
+    },
+    {
+      "key": "mrr_at_5",
+      "label": "MRR@5"
+    },
+    {
+      "key": "forbidden_absent_at_5",
+      "label": "Forbidden Absent@5"
+    },
+    {
+      "key": "category_primary_pass",
+      "label": "Category Primary Pass"
+    }
+  ],
+  "metadata": {
+    "corpus": {
+      "path": "benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl",
+      "rows": 5000,
+      "sha256": "fe0782eea177ccd1ac90ce21c730c8c69f65c8be388534bc141d3a01a6269287"
+    },
+    "generated_at": "2026-06-13T23:05:31.520463+00:00",
+    "queries": {
+      "path": "benchmarks/layer2_crossdomain/data/layer2_questions.jsonl",
+      "rows": 200,
+      "sha256": "d8dcaf4e306fa7f3c8d3ccd02aeee7af5c03ce23250d2a47d470c2c7e5c98b7a"
+    },
+    "rerun_performed": false,
+    "sources": [
+      {
+        "exists": true,
+        "path": "chronorag/stdcomp/results/stdcomp_layer2a_comparison.json",
+        "sha256": "e75e58b3c4b7bca46c20b08fb37234588836f466dfec128eeff3ff3c330e97e0"
+      }
+    ],
+    "table_id": "table1_layer2a_retrieval_standard_comparison_with_ci",
+    "title": "Layer 2A retrieval-only standard comparison with Wilson 95% CI",
+    "top_k": 5,
+    "wilson_ci": {
+      "count_source": "Counts inferred by round(metric * cases) when explicit counts were not present.",
+      "mrr_note": "MRR values do not receive Wilson CIs.",
+      "z": 1.959963984540054
+    }
+  },
+  "notes": [
+    "Extracted from existing Layer 2A standard-comparison artifact; no retrieval or model rerun.",
+    "Top-k: 5. Benchmark: Layer 2A 200-case retrieval-only comparison.",
+    "Metrics are scored over selected evidence IDs.",
+    "BM25 and Date-filter RAG have higher broad Hit@5, but ChronoRAG Full has stronger Hit@1, MRR@5, Forbidden Absent@5, and Category Primary Pass.",
+    "This supports temporal-validity retrieval, not generic retrieval superiority.",
+    "Forbidden Absent@5 and Category Primary Pass complement Hit@k and MRR@5 by measuring temporal-invalidity exclusion and source/category correctness.",
+    "Wilson 95% confidence intervals are shown for proportion metrics only; counts are inferred from ratio times cases where needed."
+  ],
+  "rows": [
+    {
+      "cases": 200,
+      "category_primary_pass": 0.575,
+      "category_primary_pass_ci95_high": 0.6414638745648614,
+      "category_primary_pass_ci95_low": 0.5057093264785485,
+      "category_primary_pass_count": 115,
+      "category_primary_pass_denominator": 200,
+      "forbidden_absent_at_5": 0.76,
+      "forbidden_absent_at_5_ci95_high": 0.8139338400758631,
+      "forbidden_absent_at_5_ci95_low": 0.6962665902079583,
+      "forbidden_absent_at_5_count": 152,
+      "forbidden_absent_at_5_denominator": 200,
+      "hit_at_1": 0.775,
+      "hit_at_1_ci95_high": 0.8273763028491088,
+      "hit_at_1_ci95_low": 0.7122587676433947,
+      "hit_at_1_count": 155,
+      "hit_at_1_denominator": 200,
+      "hit_at_5": 0.935,
+      "hit_at_5_ci95_high": 0.961623645350847,
+      "hit_at_5_ci95_low": 0.8919809207009312,
+      "hit_at_5_count": 187,
+      "hit_at_5_denominator": 200,
+      "method": "BM25",
+      "mrr_at_5": 0.8466666666666669
+    },
+    {
+      "cases": 200,
+      "category_primary_pass": 0.3,
+      "category_primary_pass_ci95_high": 0.36679068372719265,
+      "category_primary_pass_ci95_low": 0.24074744682371402,
+      "category_primary_pass_count": 60,
+      "category_primary_pass_denominator": 200,
+      "forbidden_absent_at_5": 0.795,
+      "forbidden_absent_at_5_ci95_high": 0.8451382379616379,
+      "forbidden_absent_at_5_ci95_low": 0.7337430194757748,
+      "forbidden_absent_at_5_count": 159,
+      "forbidden_absent_at_5_denominator": 200,
+      "hit_at_1": 0.385,
+      "hit_at_1_ci95_high": 0.45400132779753916,
+      "hit_at_1_ci95_low": 0.32033309726923215,
+      "hit_at_1_count": 77,
+      "hit_at_1_denominator": 200,
+      "hit_at_5": 0.61,
+      "hit_at_5_ci95_high": 0.6749165686253038,
+      "hit_at_5_ci95_low": 0.5409374595716976,
+      "hit_at_5_count": 122,
+      "hit_at_5_denominator": 200,
+      "method": "Dense-only",
+      "mrr_at_5": 0.47100000000000003
+    },
+    {
+      "cases": 200,
+      "category_primary_pass": 0.6,
+      "category_primary_pass_ci95_high": 0.6653942143319266,
+      "category_primary_pass_ci95_low": 0.53083672039262,
+      "category_primary_pass_count": 120,
+      "category_primary_pass_denominator": 200,
+      "forbidden_absent_at_5": 0.765,
+      "forbidden_absent_at_5_ci95_high": 0.8184256658476741,
+      "forbidden_absent_at_5_ci95_low": 0.7015863111723746,
+      "forbidden_absent_at_5_count": 153,
+      "forbidden_absent_at_5_denominator": 200,
+      "hit_at_1": 0.775,
+      "hit_at_1_ci95_high": 0.8273763028491088,
+      "hit_at_1_ci95_low": 0.7122587676433947,
+      "hit_at_1_count": 155,
+      "hit_at_1_denominator": 200,
+      "hit_at_5": 0.935,
+      "hit_at_5_ci95_high": 0.961623645350847,
+      "hit_at_5_ci95_low": 0.8919809207009312,
+      "hit_at_5_count": 187,
+      "hit_at_5_denominator": 200,
+      "method": "Date-filter RAG",
+      "mrr_at_5": 0.8475000000000001
+    },
+    {
+      "cases": 200,
+      "category_primary_pass": 0.48125,
+      "category_primary_pass_ci95_high": 0.5489621492718576,
+      "category_primary_pass_ci95_low": 0.411791663783233,
+      "category_primary_pass_count": 96,
+      "category_primary_pass_denominator": 200,
+      "forbidden_absent_at_5": 0.695,
+      "forbidden_absent_at_5_ci95_high": 0.7546358436926496,
+      "forbidden_absent_at_5_ci95_low": 0.6280144790202163,
+      "forbidden_absent_at_5_count": 139,
+      "forbidden_absent_at_5_denominator": 200,
+      "hit_at_1": 0.69,
+      "hit_at_1_ci95_high": 0.750010551639219,
+      "hit_at_1_ci95_low": 0.6228282243374195,
+      "hit_at_1_count": 138,
+      "hit_at_1_denominator": 200,
+      "hit_at_5": 0.86,
+      "hit_at_5_ci95_high": 0.9013301736654437,
+      "hit_at_5_ci95_low": 0.8051011913429243,
+      "hit_at_5_count": 172,
+      "hit_at_5_denominator": 200,
+      "method": "Metadata Temporal RAG",
+      "mrr_at_5": 0.7678333333333334
+    },
+    {
+      "cases": 200,
+      "category_primary_pass": 0.9625,
+      "category_primary_pass_ci95_high": 0.9795943679338476,
+      "category_primary_pass_ci95_low": 0.923067931799067,
+      "category_primary_pass_count": 192,
+      "category_primary_pass_denominator": 200,
+      "forbidden_absent_at_5": 0.995,
+      "forbidden_absent_at_5_ci95_high": 0.9991168312843989,
+      "forbidden_absent_at_5_ci95_low": 0.9722262956021069,
+      "forbidden_absent_at_5_count": 199,
+      "forbidden_absent_at_5_denominator": 200,
+      "hit_at_1": 0.825,
+      "hit_at_1_ci95_high": 0.8713948493372666,
+      "hit_at_1_ci95_low": 0.7663556885175099,
+      "hit_at_1_count": 165,
+      "hit_at_1_denominator": 200,
+      "hit_at_5": 0.895,
+      "hit_at_5_ci95_high": 0.9302925120731899,
+      "hit_at_5_ci95_low": 0.8448196800887696,
+      "hit_at_5_count": 179,
+      "hit_at_5_denominator": 200,
+      "method": "ChronoRAG Full",
+      "mrr_at_5": 0.8554166666666668
+    }
+  ]
+}

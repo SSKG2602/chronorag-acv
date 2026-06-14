@@ -1,0 +1,183 @@
+{
+  "columns": [
+    {
+      "key": "method",
+      "label": "Method"
+    },
+    {
+      "key": "cases",
+      "label": "Cases"
+    },
+    {
+      "key": "retrieval_hit5_or_evidence_available",
+      "label": "Retrieval Hit@5 / Evidence Available"
+    },
+    {
+      "key": "strict_combined_pass",
+      "label": "Strict Combined Pass"
+    },
+    {
+      "key": "deterministic_hard_contract_pass",
+      "label": "Deterministic Hard-Contract Pass"
+    },
+    {
+      "key": "llm_judge_overall_pass",
+      "label": "LLM Judge Overall Pass"
+    },
+    {
+      "key": "llm_judge_semantic_pass",
+      "label": "LLM Judge Semantic Pass"
+    },
+    {
+      "key": "expected_evidence_cited",
+      "label": "Expected Evidence Cited"
+    },
+    {
+      "key": "valid_time_used_correct",
+      "label": "Valid Time Used Correct"
+    },
+    {
+      "key": "notes",
+      "label": "Notes"
+    }
+  ],
+  "metadata": {
+    "generated_at": "2026-06-13T23:05:27.630928+00:00",
+    "rerun_performed": false,
+    "sources": [
+      {
+        "exists": true,
+        "path": "chronorag/stdcomp/results/qa50_llm_baselines/bm25_llm_qa50_metrics.json",
+        "sha256": "c713569fc64a4d49b759eac5d77c31d19496ac9e156fcb19af6453b99d0381f9"
+      },
+      {
+        "exists": true,
+        "path": "chronorag/stdcomp/results/qa50_llm_baselines/dense_llm_qa50_metrics.json",
+        "sha256": "e0771bda949e33bcaf37812f02a82d055c381bb72ed8524a338170d1f2019a1e"
+      },
+      {
+        "exists": true,
+        "path": "chronorag/stdcomp/results/qa50_llm_baselines/date_filter_llm_qa50_metrics.json",
+        "sha256": "c3cead6dcbb72ae14290d1b3b8bef6f114c11949edc557f6b1603ef4b701d52e"
+      },
+      {
+        "exists": true,
+        "path": "benchmarks/layer2_crossdomain/results/layer2b_judge_layer2b_full50_judge_final_results.jsonl",
+        "sha256": "e0b9e77eb1c2c4da6fecdabd209a484cc82d66104ef58858bda9b070d68c5a33"
+      },
+      {
+        "exists": true,
+        "path": "benchmarks/layer2_crossdomain/results/layer2b_chronorag_full_layer2b_full50_vertex_final_results.jsonl",
+        "sha256": "2a5075d0e95831c0fdbc39dc27ab5b004bbac5357d98381931f4a91fa326ad63"
+      },
+      {
+        "exists": true,
+        "path": "chronorag/stdcomp/results/paper_tables/chronorag_qa50_extracted_values.json",
+        "sha256": "ea7a6786697fcf5e30ff7ddbb5a670627d33d4b6028fbfcc211fade645ef7a38"
+      }
+    ],
+    "table_id": "table4_qa50_answer_level_comparison",
+    "title": "QA50 answer-level comparison"
+  },
+  "notes": [
+    "Answer-level QA50 comparison extracted from existing artifacts; no model, retriever, validator, or judge rerun.",
+    "ChronoRAG Full result is an existing prior L2B result and was not rerun.",
+    "Standard retrieval + LLM baselines were run with the same LLM model and validator where possible.",
+    "ChronoRAG used retrieval-layer temporal grounding; standard baselines used normal retrieval and relied on the LLM prompt to distinguish valid time from transaction time.",
+    "Baseline methods are evaluated without evidence injection. ChronoRAG pre-injection evidence availability is the fair retrieval-availability comparison point. ChronoRAG post-injection answer-level results are reported separately to show performance when expected evidence is available to the generator.",
+    "ChronoRAG pre-injection any expected evidence is 0.7400 (37/50), pre-injection all expected evidence is 0.6400 (32/50), and post-injection evidence available is 1.0000 (50/50)."
+  ],
+  "rows": [
+    {
+      "answer_correctness": 0.78,
+      "cases": 50,
+      "deterministic_hard_contract_pass": 0.42,
+      "expected_evidence_available_to_model": 0.56,
+      "expected_evidence_cited": 0.56,
+      "judge_errors": 7,
+      "llm_judge_overall_pass": 0.68,
+      "llm_judge_semantic_pass": 0.78,
+      "method": "BM25 + LLM",
+      "notes": "Standard retrieval top-k=5; LLM prompt handles temporal filtering.",
+      "provider_errors": 0,
+      "retrieval_hit5_or_evidence_available": 0.64,
+      "retrieval_hit5_or_evidence_available_note": "Retrieval Hit@5",
+      "retrieval_hit_at_1": 0.36,
+      "retrieval_hit_at_5": 0.64,
+      "retrieval_mrr_at_5": 0.46066666666666656,
+      "strict_combined_pass": 0.4,
+      "valid_time_used_correct": 0.46
+    },
+    {
+      "answer_correctness": 0.82,
+      "cases": 50,
+      "deterministic_hard_contract_pass": 0.34,
+      "expected_evidence_available_to_model": 0.44,
+      "expected_evidence_cited": 0.44,
+      "judge_errors": 3,
+      "llm_judge_overall_pass": 0.68,
+      "llm_judge_semantic_pass": 0.82,
+      "method": "Dense-only + LLM",
+      "notes": "Standard retrieval top-k=5; LLM prompt handles temporal filtering.",
+      "provider_errors": 0,
+      "retrieval_hit5_or_evidence_available": 0.52,
+      "retrieval_hit5_or_evidence_available_note": "Retrieval Hit@5",
+      "retrieval_hit_at_1": 0.4,
+      "retrieval_hit_at_5": 0.52,
+      "retrieval_mrr_at_5": 0.44233333333333325,
+      "strict_combined_pass": 0.32,
+      "valid_time_used_correct": 0.44
+    },
+    {
+      "answer_correctness": 0.9,
+      "cases": 50,
+      "deterministic_hard_contract_pass": 0.44,
+      "expected_evidence_available_to_model": 0.58,
+      "expected_evidence_cited": 0.58,
+      "judge_errors": 0,
+      "llm_judge_overall_pass": 0.76,
+      "llm_judge_semantic_pass": 0.9,
+      "method": "Date-filter RAG + LLM",
+      "notes": "Standard retrieval top-k=5; LLM prompt handles temporal filtering.",
+      "provider_errors": 0,
+      "retrieval_hit5_or_evidence_available": 0.66,
+      "retrieval_hit5_or_evidence_available_note": "Retrieval Hit@5",
+      "retrieval_hit_at_1": 0.4,
+      "retrieval_hit_at_5": 0.66,
+      "retrieval_mrr_at_5": 0.5006666666666667,
+      "strict_combined_pass": 0.4,
+      "valid_time_used_correct": 0.46
+    },
+    {
+      "cases": 50,
+      "deterministic_hard_contract_pass": null,
+      "expected_evidence_cited": null,
+      "llm_judge_overall_pass": null,
+      "llm_judge_semantic_pass": null,
+      "method": "ChronoRAG Full - pre-injection retrieval",
+      "notes": "Fair retrieval availability comparison; no complete-evidence injection.",
+      "pre_injection_all_expected_evidence_count": 32,
+      "pre_injection_any_expected_evidence_count": 37,
+      "retrieval_hit5_or_evidence_available": 0.74,
+      "retrieval_hit5_or_evidence_available_note": "Any expected evidence retrieved before complete-evidence injection",
+      "strict_combined_pass": null,
+      "valid_time_used_correct": null
+    },
+    {
+      "cases": 50,
+      "deterministic_hard_contract_pass": 0.76,
+      "evidence_available_after_injection_count": 50,
+      "expected_evidence_cited": 0.98,
+      "llm_judge_overall_pass": 0.76,
+      "llm_judge_semantic_pass": 0.96,
+      "method": "ChronoRAG Full - post-injection answer setting",
+      "notes": "Prior L2B complete-evidence answer setting; not rerun.",
+      "pre_injection_all_expected_evidence_count": 32,
+      "pre_injection_any_expected_evidence_count": 37,
+      "retrieval_hit5_or_evidence_available": 1.0,
+      "retrieval_hit5_or_evidence_available_note": "Expected evidence available to generator after complete-evidence injection",
+      "strict_combined_pass": 0.7,
+      "valid_time_used_correct": 0.84
+    }
+  ]
+}

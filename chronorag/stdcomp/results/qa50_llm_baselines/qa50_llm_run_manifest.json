@@ -1,0 +1,38 @@
+{
+  "benchmark": "layer2b_manual_50_qa",
+  "command": "/Users/shreyasshashi/Desktop/chronorag/chronorag/stdcomp/evaluate_qa50_llm_baselines.py --top-k 5 --methods bm25,dense,date_filter --sleep-seconds 8 --max-cases 50 --resume --project ginkgo-2026 --retry-max-attempts 5 --retry-base-sleep-seconds 10 --retry-max-sleep-seconds 90 --out-dir chronorag/stdcomp/results/qa50_llm_baselines",
+  "corpus": {
+    "path": "benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl",
+    "rows": 5000,
+    "sha256": "fe0782eea177ccd1ac90ce21c730c8c69f65c8be388534bc141d3a01a6269287"
+  },
+  "dense_model": "BAAI/bge-small-en-v1.5",
+  "experiment": "qa50_llm_standard_retrieval_baselines",
+  "fairness_constraints": [
+    "Same top_k for all methods.",
+    "Same QA cases, corpus, LLM model, temperature, prompt template, validator, and judge settings for all methods.",
+    "No ChronoRAG retrieval features, TCC, temporal fusion, or forbidden-time suppression in standard retrievers.",
+    "Gold expected evidence IDs are not included in the answer prompt."
+  ],
+  "force": false,
+  "judge_enabled": true,
+  "judge_max_output_tokens": 5000,
+  "judge_runs": 1,
+  "judge_temperature": 0.0,
+  "max_output_tokens": 5000,
+  "methods": [
+    "bm25",
+    "dense",
+    "date_filter"
+  ],
+  "model": "gemini-2.5-flash",
+  "qa": {
+    "path": "benchmarks/layer2_crossdomain/data/layer2b_manual_50_qa.jsonl",
+    "rows_selected": 50,
+    "sha256": "6e41ad8f6bd075060d15a14d175019316417656d8eaacd8f841999a2f9668727"
+  },
+  "resume": true,
+  "sleep_seconds": 8.0,
+  "temperature": 0.0,
+  "top_k": 5
+}

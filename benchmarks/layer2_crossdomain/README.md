@@ -77,10 +77,14 @@ over synthetic placeholders.
 
 ## Methods
 
-Active public retrieval methods:
+Active public retrieval methods and baselines in the paper-ready standard
+comparison:
 
-- `chronorag_full`
-- `metadata_temporal_rag`
+- BM25
+- Dense-only
+- Date-filter RAG
+- Metadata Temporal RAG
+- ChronoRAG Full
 
 `direct_llm_full_context` remains available for older diagnostics in the runner,
 but it is not an active Layer 2A retrieval baseline for the public v3 result.
@@ -113,13 +117,44 @@ Stored report:
 
 Summary:
 
-| Method | Benchmark cases | Result rows | Evaluated | Generic Hit@1 | Generic Hit@5 | Forbidden absent@5 | Category primary pass |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| `chronorag_full` | 200 | 200 | 200 | 0.82 | 0.90 | 0.99 | 0.96 |
-| `metadata_temporal_rag` | 200 | 200 | 200 | 0.69 | 0.86 | 0.69 | 0.48 |
+| Method | Cases | Hit@1 | Hit@5 | MRR@5 | Forbidden Absent@5 | Category Primary Pass |
+|---|---:|---:|---:|---:|---:|---:|
+| BM25 | 200 | 0.7750 | 0.9350 | 0.8467 | 0.7600 | 0.5750 |
+| Dense-only | 200 | 0.3850 | 0.6100 | 0.4710 | 0.7950 | 0.3000 |
+| Date-filter RAG | 200 | 0.7750 | 0.9350 | 0.8475 | 0.7650 | 0.6000 |
+| Metadata Temporal RAG | 200 | 0.6900 | 0.8600 | 0.7678 | 0.6950 | 0.4813 |
+| ChronoRAG Full | 200 | 0.8250 | 0.8950 | 0.8554 | 0.9950 | 0.9625 |
 
 This report scores each method's `selected_evidence_ids`. Prompt previews and
 dry-run answer placeholders are not answer-quality measurements.
+
+BM25 and Date-filter RAG have higher broad Hit@5 than ChronoRAG Full, but
+ChronoRAG Full has stronger Hit@1, MRR@5, Forbidden Absent@5, and Category
+Primary Pass. The result should be read as evidence for temporal-validity
+retrieval, not as a claim that ChronoRAG maximizes broad retrieval recall.
+
+Metric definitions:
+
+- Hit@k is the fraction of cases where at least one expected or acceptable
+  evidence ID appears in the top-k selected evidence set.
+- MRR@5 is the mean reciprocal rank of the first expected or acceptable
+  evidence ID within top-5.
+- Forbidden Absent@5 is the fraction of cases where forbidden evidence IDs are
+  absent from top-5.
+- Category Primary Pass is the category-specific diagnostic for temporal,
+  source/metric, slot, forbidden-evidence, or insufficiency behavior.
+
+Forbidden Absent@5 and Category Primary Pass are constraint-sensitive
+diagnostics for temporal-validity retrieval. They are not intended to replace
+standard IR metrics; they complement Hit@k and MRR@5 by measuring
+temporal-invalidity exclusion and source/category correctness.
+
+The current artifact records benchmark labels as fixed JSONL fields. The
+labels are author-created and treated as fixed before method scoring.
+Large-scale independent annotation is not included in this version and is
+listed as a limitation. Standard comparisons use the same corpus, same
+queries, same top-k=5, same evaluator, and same candidate corpus where
+applicable.
 
 ## Layer 2B Full-50 Answer Validation
 
@@ -142,7 +177,8 @@ Final full-50 scores:
 | Layer 2B metric | Score |
 |---|---:|
 | Deterministic hard-contract pass | 38 / 50 = 76% |
-| LLM judge semantic pass | 38 / 50 = 76% |
+| LLM judge overall pass | 38 / 50 = 76% |
+| LLM judge semantic pass | 48 / 50 = 96% |
 | Strict combined pass | 35 / 50 = 70% |
 | Manually accepted validator-strictness cases | 3 |
 | Manual-audited acceptable pass | 41 / 50 = 82% |
@@ -156,6 +192,24 @@ failures.
 
 Layer 2B is an answer-synthesis and answer-validation evaluation. Retrieval
 quality is reported through the Layer 2A selected-evidence metrics.
+
+BM25 + LLM, Dense-only + LLM, and Date-filter RAG + LLM were evaluated with
+the same 50 QA cases, same corpus, same top-k=5, same Gemini 2.5 Flash model,
+same temperature 0.0, same prompt template, and same validator/judge settings.
+Despite explicit instructions to distinguish valid time from transaction time,
+these baselines reached only 0.4000, 0.3200, and 0.4000 strict combined pass
+respectively. ChronoRAG Full's prior answer-level result reached 0.7000 strict
+combined pass, 0.7600 hard-contract pass, 0.9600 judge semantic pass, 0.9800
+expected evidence citation, and 0.8400 valid-time correctness.
+
+Baseline methods are evaluated without evidence injection. ChronoRAG
+pre-injection evidence availability is the fair retrieval-availability
+comparison point. ChronoRAG post-injection answer-level results are reported
+separately to show performance when expected evidence is available to the
+generator. In the extracted QA50 artifacts, pre-injection any expected evidence
+is 0.7400 (37/50), pre-injection all expected evidence is 0.6400 (32/50), and
+post-injection evidence available is 1.0000 (50/50). Gold expected evidence
+IDs were not included in the LLM baseline prompts.
 
 ## Ablation Result
 
@@ -188,6 +242,15 @@ Overall ablation summary:
 | `chronorag_no_source_metric` | 200 | 0.8300 | 0.8900 | 1.0000 | 0.9688 |
 | `chronorag_no_slot_assembler` | 200 | 0.8300 | 0.8900 | 0.8150 | 0.7750 |
 | `chronorag_full` | 200 | 0.8250 | 0.8950 | 0.9950 | 0.9625 |
+
+### Retrieval Score Optimization Degrades Temporal Validity
+
+The Score-only ablation achieved the highest raw Hit@5 at 0.9850, but
+Forbidden Absent@5 fell to 0.6500 and Category Primary Pass fell to 0.5625.
+ChronoRAG Full achieved lower broad Hit@5 at 0.8950 but much stronger
+Forbidden Absent@5 at 0.9950 and Category Primary Pass at 0.9625. This
+demonstrates that unconstrained retrieval score optimization and
+temporal-validity retrieval are different objectives.
 
 Interpretation should stay conservative. Some categories are explicitly
 anchored enough that an ablation may not drop, and that is a property of this
@@ -250,3 +313,7 @@ python3 benchmarks/layer2_crossdomain/run_layer2_ablations.py \
 
 Provider-backed natural-language temporal QA belongs to Layer 2B
 answer-validation work, not to the Layer 2A retrieval-only report.
+
+Paper-ready comparison tables, Wilson confidence-interval variants, QA50
+extracted values, top-k sensitivity, and not-run validation notes are indexed
+at `docs/paper_assets/chrono_tables_index.md`.

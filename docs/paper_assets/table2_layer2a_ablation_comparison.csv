@@ -1,0 +1,9 @@
+method,cases,hit_at_1,hit_at_5,mrr_at_5,forbidden_absent_at_5,category_primary_pass,artifact_method
+ChronoRAG Full,200,0.825,0.895,,0.995,0.9625,chronorag_full
+Metadata Temporal RAG,200,0.69,0.86,,0.695,0.48125,metadata_temporal_rag
+No Temporal Precision,200,0.75,0.85,,0.945,0.75,chronorag_no_temporal_precision
+No Slot Assembler,200,0.83,0.89,,0.815,0.775,chronorag_no_slot_assembler
+Score-only,200,0.815,0.985,,0.65,0.5625,chronorag_score_only
+No TCC,200,0.835,0.895,,0.995,0.9625,chronorag_no_tcc
+No Transaction Role,200,0.825,0.895,,0.995,0.9625,chronorag_no_transaction_role
+No Source/Metric Adjustment,200,0.83,0.89,,1.0,0.96875,chronorag_no_source_metric

@@ -197,9 +197,9 @@ Vertex.
 Current benchmark evidence supports:
 
 - The Layer 2A retrieval-only result provides controlled evidence that
-  ChronoRAG selects cleaner final evidence than the metadata temporal RAG
-  baseline under temporal-role, source/metric, forbidden-evidence, and
-  slot-coverage constraints.
+  ChronoRAG selects cleaner final evidence than standard BM25, Dense-only,
+  Date-filter RAG, and Metadata Temporal RAG baselines under temporal-role,
+  source/metric, forbidden-evidence, and slot-coverage constraints.
 - ChronoRAG can perform grounded temporal answer synthesis in Layer 2B when
   expected evidence is available to the answer-generation path.
 - Layer 2B exposes remaining error modes in valid-time precision, behavior
@@ -213,6 +213,96 @@ Interpretation boundaries:
   grounded answers satisfy the expected evidence contract.
 - Claims about new datasets, source families, or deployment settings should be
   evaluated through the same layer-specific result structure.
+
+## Current Paper-Ready Result Interpretation
+
+The Layer 2A 200-case result is the main retrieval comparison. It compares
+BM25, Dense-only, Date-filter RAG, Metadata Temporal RAG, and ChronoRAG Full on
+the same 5,000-row corpus, same 200 queries, same top-k=5 boundary, and the
+same retrieval-only evaluator. The contribution is not generic retrieval
+improvement; it is temporally valid evidence selection.
+
+ChronoRAG does not maximize broad Hit@5. BM25 and Date-filter RAG both reach
+Hit@5 of 0.9350, while ChronoRAG Full reaches Hit@5 of 0.8950. ChronoRAG Full
+is stronger on temporal-validity retrieval diagnostics: Hit@1 is 0.8250,
+MRR@5 is 0.8554, Forbidden Absent@5 is 0.9950, and Category Primary Pass is
+0.9625. This supports temporal-validity retrieval rather than a broad claim
+that ChronoRAG is always the highest-recall retriever.
+
+The latest paper-ready tables are indexed at
+`docs/paper_assets/chrono_tables_index.md`, including the four main tables,
+Wilson confidence-interval variants, ChronoRAG QA50 extracted values, top-k
+sensitivity, and not-run validation notes for fusion-weight sensitivity and
+reranker ablation.
+
+### Metric Definitions
+
+- Hit@k: the fraction of cases where at least one expected or acceptable
+  evidence ID appears in the top-k selected evidence set.
+- MRR@5: mean reciprocal rank of the first expected or acceptable evidence ID
+  within the top-5 selected evidence set.
+- Forbidden Absent@5: the fraction of cases where forbidden evidence IDs are
+  absent from the top-5 selected evidence set.
+- Category Primary Pass: the benchmark's category-specific primary diagnostic,
+  such as slot coverage, source or metric correctness, forbidden-evidence
+  exclusion, or exact temporal preference depending on the question category.
+- Strict Combined Pass: the Layer 2B answer-level pass requiring both
+  deterministic hard-contract validation and LLM judge pass.
+- Deterministic Hard-Contract Pass: the rule-based answer-contract validation
+  pass over citations, required fields, expected evidence, valid-time use, and
+  schema/grounding constraints.
+- Judge Semantic Pass: the LLM judge's semantic answer-correctness signal.
+- Valid Time Correct: the answer-level check that the response uses the
+  requested valid time rather than an unrelated transaction, publication,
+  filing, release, or ingestion time.
+
+Forbidden Absent@5 and Category Primary Pass are constraint-sensitive
+diagnostics for temporal-validity retrieval. They are not intended to replace
+standard IR metrics; they complement Hit@k and MRR@5 by measuring
+temporal-invalidity exclusion and source/category correctness.
+
+### Annotation And Baseline Fairness
+
+The current artifact records benchmark labels as fixed JSONL fields. Expected
+evidence IDs, forbidden evidence IDs, and category-primary labels are
+author-created and treated as fixed before method scoring. Large-scale
+independent annotation is not included in this version and is listed as a
+limitation.
+
+Where applicable, retrieval methods use the same corpus, same queries, same
+top-k, same evaluator, and same candidate corpus. BM25, Dense-only, and
+Date-filter RAG do not use Temporal Contextual Chunking, temporal metadata
+scoring, temporal fusion, forbidden-time suppression, valid-time /
+transaction-time separation, or ChronoRAG finalization logic. Gold expected
+evidence IDs were not included in the LLM baseline prompts.
+
+### Retrieval Score Optimization Degrades Temporal Validity
+
+The Score-only ablation achieved the highest raw Hit@5 at 0.9850, but
+Forbidden Absent@5 fell to 0.6500 and Category Primary Pass fell to 0.5625.
+ChronoRAG Full achieved lower broad Hit@5 at 0.8950 but much stronger
+Forbidden Absent@5 at 0.9950 and Category Primary Pass at 0.9625. This
+demonstrates that unconstrained retrieval score optimization and
+temporal-validity retrieval are different objectives.
+
+### LLM Post-Filtering Does Not Replace Retrieval-Layer Temporal Grounding
+
+BM25 + LLM, Dense-only + LLM, and Date-filter RAG + LLM were evaluated with
+the same 50 QA cases, same corpus, same top-k=5, same Gemini 2.5 Flash model,
+same temperature 0.0, same prompt template, and same validator/judge settings.
+Despite explicit instructions to distinguish valid time from transaction time,
+these baselines reached only 0.4000, 0.3200, and 0.4000 strict combined pass
+respectively. ChronoRAG Full's prior answer-level result reached 0.7000 strict
+combined pass, 0.7600 hard-contract pass, 0.9600 judge semantic pass, 0.9800
+expected evidence citation, and 0.8400 valid-time correctness.
+
+Baseline methods are evaluated without evidence injection. ChronoRAG
+pre-injection evidence availability is the fair retrieval-availability
+comparison point. ChronoRAG post-injection answer-level results are reported
+separately to show performance when expected evidence is available to the
+generator. In the extracted QA50 artifacts, pre-injection any expected evidence
+is 0.7400 (37/50), pre-injection all expected evidence is 0.6400 (32/50), and
+post-injection evidence available is 1.0000 (50/50).
 
 ## Layer 1A: Temporal Eval v2
 
@@ -315,10 +405,13 @@ Tracked and generated data are intentionally distinguished:
 - Raw-pool scale manifest:
   `benchmarks/layer2_crossdomain/data/raw_pool_manifest.json`
 
-Methods compared:
+Methods compared in the latest paper-ready standard comparison:
 
-- `chronorag_full`
-- `metadata_temporal_rag`
+- BM25
+- Dense-only
+- Date-filter RAG
+- Metadata Temporal RAG
+- ChronoRAG Full
 
 Scoring boundary:
 
@@ -379,27 +472,26 @@ Final public result files:
 - `benchmarks/layer2_crossdomain/results/layer2_ablation_v3_ablation200.md`
 - `benchmarks/layer2_crossdomain/results/layer2_ablation_v3_ablation200.json`
 
-Layer 2A v3 retrieval-only summary:
+Layer 2A v3 retrieval-only standard comparison:
 
-| Method | Cases | Generic Hit@1 | Generic Hit@5 | Forbidden absent@5 | Category primary pass |
-|---|---:|---:|---:|---:|---:|
-| `chronorag_full` | 200 | 0.82 | 0.90 | 0.99 | 0.96 |
-| `metadata_temporal_rag` | 200 | 0.69 | 0.86 | 0.69 | 0.48 |
+| Method | Cases | Hit@1 | Hit@5 | MRR@5 | Forbidden Absent@5 | Category Primary Pass |
+|---|---:|---:|---:|---:|---:|---:|
+| BM25 | 200 | 0.7750 | 0.9350 | 0.8467 | 0.7600 | 0.5750 |
+| Dense-only | 200 | 0.3850 | 0.6100 | 0.4710 | 0.7950 | 0.3000 |
+| Date-filter RAG | 200 | 0.7750 | 0.9350 | 0.8475 | 0.7650 | 0.6000 |
+| Metadata Temporal RAG | 200 | 0.6900 | 0.8600 | 0.7678 | 0.6950 | 0.4813 |
+| ChronoRAG Full | 200 | 0.8250 | 0.8950 | 0.8554 | 0.9950 | 0.9625 |
 
 ### What the Layer 2A result means
 
-In the controlled v3 benchmark, `chronorag_full` had higher category-primary
-pass than `metadata_temporal_rag`. The difference is not only generic Hit@5:
-the larger practical gap is cleaner final evidence selection under
-category-specific temporal constraints, including cases where forbidden evidence
-must stay out of the final top-k.
-
-`metadata_temporal_rag` still retrieves many relevant rows, especially under
-generic Hit@5. The benchmark shows that relevant retrieval alone is not always
-enough when the final evidence set must satisfy temporal role, source/metric,
-slot coverage, and forbidden-evidence constraints. Less precise finalization or
-constraint handling can allow wrong-role or forbidden evidence to remain in the
-selected evidence set.
+In the controlled v3 benchmark, ChronoRAG Full had the strongest Hit@1, MRR@5,
+Forbidden Absent@5, and Category Primary Pass. BM25 and Date-filter RAG had
+higher broad Hit@5, which is useful context: broad retrieval recall is not
+temporal validity. Relevant retrieval alone is not always enough when the final
+evidence set must satisfy temporal role, source/metric, slot coverage, and
+forbidden-evidence constraints. Less precise finalization or constraint
+handling can allow wrong-role or forbidden evidence to remain in the selected
+evidence set.
 
 These results support the tested claim that explicit temporal roles and final
 evidence gating improve controlled temporal retrieval behavior on this Layer 2A
@@ -419,7 +511,8 @@ Layer 2B full-50 artifacts:
 | Layer 2B metric | Score |
 |---|---:|
 | Deterministic hard-contract pass | 38 / 50 = 76% |
-| LLM judge semantic pass | 38 / 50 = 76% |
+| LLM judge overall pass | 38 / 50 = 76% |
+| LLM judge semantic pass | 48 / 50 = 96% |
 | Strict combined pass | 35 / 50 = 70% |
 | Manually accepted validator-strictness cases | 3 |
 | Manual-audited acceptable pass | 41 / 50 = 82% |
@@ -427,8 +520,10 @@ Layer 2B full-50 artifacts:
 The strict combined pass is the conservative score. The manual-audited
 acceptable pass accepts 3 cases where hard validation failed but judge and
 manual review agreed the answer was semantically correct. Expected-evidence
-injection was used, so Layer 2B measures answer synthesis and validation, not
-retrieval quality. Retrieval quality is reported separately in Layer 2A.
+injection was used for the post-injection answer setting, so Layer 2B measures
+answer synthesis and validation separately from retrieval quality. Retrieval
+quality is reported in Layer 2A and in the QA50 pre-injection evidence
+availability row.
 
 The final full-50 runs were clean: answer provider errors were 0, judge errors
 were 0, judge provider failures were 0, and judge parse failures were 0. The
@@ -653,6 +748,17 @@ Additional visual analysis, such as score heatmaps, temporal-ranking traces,
 and before/after evidence finalization diagrams, would improve interpretability
 of the temporal retrieval process.
 
+### Evaluation Threats To Validity
+
+The 50-case answer-level evaluation is directional and should be scaled.
+Forbidden Absent@5 and Category Primary Pass are custom metrics and depend on
+benchmark label quality. Labels are author-created unless independent
+annotation evidence exists. The corpus is controlled and cross-domain but not a
+public temporal QA benchmark. Fusion-weight sensitivity and reranker isolation
+were not run because no safe runtime switches exist. Generalization beyond
+financial, regulatory, macroeconomic, market, and software-release evidence is
+future work. ChronoRAG depends on temporal extraction quality.
+
 ## Future Work
 
 Future work will focus on strengthening the temporal modeling layer rather than
@@ -821,7 +927,15 @@ under:
 - `docs/PAPER_SOURCE_NOTES.md`
 - `docs/PAPER_QUALITATIVE_CASES.md`
 - `docs/PAPER_FIGURE_INDEX.md`
-- `docs/paper_assets/`
+- `docs/paper_assets/chrono_tables_index.md`
+- `docs/paper_assets/table1_layer2a_retrieval_standard_comparison.md`
+- `docs/paper_assets/table2_layer2a_ablation_comparison.md`
+- `docs/paper_assets/table3_qa50_llm_post_filter_baselines.md`
+- `docs/paper_assets/table4_qa50_answer_level_comparison.md`
+- `docs/paper_assets/chronorag_qa50_extracted_values.md`
+- `docs/paper_assets/topk_sensitivity.md`
+- `docs/paper_assets/fusion_weight_sensitivity_not_run.md`
+- `docs/paper_assets/reranker_ablation_not_run.md`
 
 ## Data and Artifact Structure
 
