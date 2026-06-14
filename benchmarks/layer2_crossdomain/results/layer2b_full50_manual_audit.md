@@ -9,15 +9,15 @@ deterministic hard validation plus LLM judge.
 |---|---:|
 | Cases | 50 |
 | Deterministic hard-contract pass | 38 / 50 = 76% |
-| LLM judge semantic pass | 38 / 50 = 76% |
+| LLM judge semantic pass | 48 / 50 = 96% |
 | Strict combined pass | 35 / 50 = 70% |
 | Manually accepted validator-strictness cases | 3 |
 | Manual-audited acceptable pass | 41 / 50 = 82% |
 
-The 70% result is the strict combined score. The 76% result is the LLM semantic
-judge score. The 82% result is a secondary manual-audited interpretation after
-accepting 3 cases where hard validation was stricter than the answer quality
-deserved.
+The 70% result is the strict combined score. The 96% result is the LLM
+semantic judge score. The 82% result is a secondary manual-audited
+interpretation after accepting 3 cases where hard validation was stricter than
+the answer quality deserved.
 
 ## Artifact Links
 

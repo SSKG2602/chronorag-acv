@@ -333,11 +333,11 @@ post-injection evidence available is 1.0000 (50/50).
 
 ### QA50 LLM Post-Filtering Baseline Comparison
 
-| Method | Cases | Retrieval Hit@5 | Strict Combined Pass | Hit@5 + Pass | Hit@5 + Fail | No Hit@5 + Fail | No Hit@5 + Pass |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| BM25 + LLM | 50 | 32/50 = 0.6400 | 20/50 = 0.4000 | 20 | 12 | 18 | 0 |
-| Dense-only + LLM | 50 | 26/50 = 0.5200 | 16/50 = 0.3200 | 16 | 10 | 24 | 0 |
-| Date-filter RAG + LLM | 50 | 33/50 = 0.6600 | 20/50 = 0.4000 | 20 | 13 | 17 | 0 |
+| Method | Retrieval Hit@5 | Strict Combined Pass | Hard-Contract Pass | Judge Semantic Pass | Valid Time Correct | Expected Evidence Cited |
+|---|---:|---:|---:|---:|---:|---:|
+| BM25 + LLM | 0.6400 | 0.4000 | 0.4200 | 0.7800 | 0.4600 | 0.5600 |
+| Dense-only + LLM | 0.5200 | 0.3200 | 0.3400 | 0.8200 | 0.4400 | 0.4400 |
+| Date-filter RAG + LLM | 0.6600 | 0.4000 | 0.4400 | 0.9000 | 0.4600 | 0.5800 |
 
 ![QA50 LLM post-filtering](rpartifacts/figures/fig6_qa50_llm_post_filtering.png)
 
@@ -345,35 +345,32 @@ Baselines are no-injection LLM post-filtering runs. ChronoRAG Full is the
 post-injection answer setting; pre-injection retrieval availability is reported
 separately.
 
-These baselines test whether standard retrieval followed by an LLM explicitly
-prompted to distinguish valid time from transaction time can replace
-retrieval-layer temporal grounding. The results show two failure modes. First,
-valid evidence is often absent from the retrieved top-k set, so the LLM cannot
-recover it. Second, even when valid evidence is present, the LLM still fails
-strict temporal contract validation in 10–13 cases depending on the retriever.
-This supports the claim that temporal grounding cannot be treated only as a
-downstream prompting problem.
+These baselines use standard retrieval followed by the same LLM prompted to
+distinguish valid time from transaction time. They reach only 32-40% strict
+combined pass, showing that temporal role handling cannot be treated only as a
+downstream prompting problem in this evaluated setting.
 
 ### QA50 ChronoRAG Answer-Level Extracted Values
 
-| Metric | Value |
+| ChronoRAG QA50 Metric | Value |
 |---|---:|
-| Strict combined pass | 0.7000, 35/50 |
-| Deterministic hard-contract pass | 0.7600, 38/50 |
-| Judge overall pass | 0.7600, 38/50 |
-| Judge semantic pass | 0.9600, 48/50 |
-| Expected evidence cited | 0.9800, 49/50 |
-| Valid time correct | 0.8400, 42/50 |
-| Pre-injection retrieval, any expected evidence | 0.7400, 37/50 |
-| Pre-injection retrieval, all expected evidence | 0.6400, 32/50 |
-| Post-injection evidence available | 1.0000, 50/50 |
+| Strict combined pass | 35 / 50 = 70% |
+| Deterministic hard-contract pass | 38 / 50 = 76% |
+| Judge semantic pass | 48 / 50 = 96% |
+| Expected evidence cited | 49 / 50 = 98% |
+| Valid time correct | 42 / 50 = 84% |
+| Pre-injection retrieval, any expected evidence | 37 / 50 = 74% |
+| Pre-injection retrieval, all expected evidence | 32 / 50 = 64% |
+| Post-injection evidence available | 50 / 50 = 100% |
 
-Baseline methods are evaluated without evidence injection. ChronoRAG
-pre-injection evidence availability is the fair retrieval-availability
-comparison point. ChronoRAG post-injection answer-level results are reported
-separately to show performance when expected evidence is available to the
-generator. Layer 2A remains the primary retrieval-quality benchmark; Layer
-2B/QA50 measures answer synthesis and temporal answer-contract behavior.
+Baseline LLM post-filtering methods are evaluated without evidence injection.
+ChronoRAG pre-injection retrieval availability is the fair
+retrieval-availability comparison point. ChronoRAG post-injection answer-level
+results are reported separately to show answer-contract behavior when expected
+evidence is available to the generator. Do not compare ChronoRAG
+post-injection 100% evidence availability as if it were equivalent to baseline
+retrieval Hit@5. Layer 2A remains the primary retrieval-quality benchmark;
+Layer 2B/QA50 measures answer synthesis and temporal answer-contract behavior.
 
 ### QA50 Answer-Level Comparison
 
@@ -577,8 +574,10 @@ Layer 2A v3 retrieval-only standard comparison:
 
 ![Layer 2A retrieval comparison](rpartifacts/figures/fig3_layer2a_retrieval_comparison.png)
 
-BM25 and Date-filter RAG have higher broad Hit@5, while ChronoRAG is strongest
-on temporal-validity diagnostics.
+BM25 and Date-filter RAG achieve higher broad Hit@5, while ChronoRAG Full is
+strongest on Hit@1, MRR@5, Forbidden Absent@5, and Category Primary Pass. The
+result should therefore be read as evidence for temporally valid evidence
+selection, not generic broad-recall superiority.
 
 [Figure 4: Temporal-validity diagnostics](rpartifacts/figures/fig4_temporal_validity_diagnostics.png)
 separates broad retrieval recall from diagnostics that capture forbidden
@@ -1021,9 +1020,13 @@ semantic score is the judge-only answer-quality score. The manual-audited
 acceptable score is a secondary interpretation after accepting 3 manually
 reviewed validator-strictness cases, and it does not replace the strict score.
 
+### Temporal Feature Trace
+
 [Figure 9: Temporal feature heatmap](rpartifacts/figures/fig9_temporal_feature_heatmap.png)
 is a retrieval-only trace; values are per-column min-max normalized. It is a
 mechanism visualization, not a standalone performance metric.
+
+### One-query Retrieval Trace
 
 [Figure 10: One-query retrieval trace](rpartifacts/figures/fig10_one_query_trace.png)
 shows one Layer 2A case where a baseline retrieves wrong-time rows that
@@ -1049,10 +1052,9 @@ under:
 
 ## Research Artifacts
 
-The full figure/table/snippet package is indexed in
-[rpartifacts/README.md](rpartifacts/README.md). It includes paper figures,
-generated tables, GitHub snippets, LinkedIn drafts, and paper insertion notes.
-Figures are referenced above near the sections they support.
+The full figure, table, snippet, and paper-integration package is indexed in
+[rpartifacts/README.md](rpartifacts/README.md). Figures are referenced above
+near the sections they support.
 
 ## Data and Artifact Structure
 
