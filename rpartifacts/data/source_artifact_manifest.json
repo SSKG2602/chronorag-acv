@@ -1,0 +1,100 @@
+{
+  "sources": [
+    {
+      "exists": true,
+      "key": "table1",
+      "kind": "csv",
+      "path": "docs/paper_assets/table1_layer2a_retrieval_standard_comparison.csv"
+    },
+    {
+      "exists": true,
+      "key": "table1_ci",
+      "kind": "csv",
+      "path": "docs/paper_assets/table1_layer2a_retrieval_standard_comparison_with_ci.csv"
+    },
+    {
+      "exists": true,
+      "key": "table2",
+      "kind": "csv",
+      "path": "docs/paper_assets/table2_layer2a_ablation_comparison.csv"
+    },
+    {
+      "exists": true,
+      "key": "table3",
+      "kind": "csv",
+      "path": "docs/paper_assets/table3_qa50_llm_post_filter_baselines.csv"
+    },
+    {
+      "exists": true,
+      "key": "table3_ci",
+      "kind": "csv",
+      "path": "docs/paper_assets/table3_qa50_llm_post_filter_baselines_with_ci.csv"
+    },
+    {
+      "exists": true,
+      "key": "table4",
+      "kind": "csv",
+      "path": "docs/paper_assets/table4_qa50_answer_level_comparison.csv"
+    },
+    {
+      "exists": true,
+      "key": "table4_ci",
+      "kind": "csv",
+      "path": "docs/paper_assets/table4_qa50_answer_level_comparison_with_ci.csv"
+    },
+    {
+      "exists": true,
+      "key": "qa50_extracted_md",
+      "kind": "md",
+      "path": "docs/paper_assets/chronorag_qa50_extracted_values.md"
+    },
+    {
+      "exists": true,
+      "key": "topk",
+      "kind": "csv",
+      "path": "docs/paper_assets/topk_sensitivity.csv"
+    },
+    {
+      "exists": true,
+      "key": "qa50_extracted_json",
+      "kind": "json",
+      "path": "chronorag/stdcomp/results/paper_tables/chronorag_qa50_extracted_values.json"
+    },
+    {
+      "exists": true,
+      "key": "bm25_qa50",
+      "kind": "json",
+      "path": "chronorag/stdcomp/results/qa50_llm_baselines/bm25_llm_qa50_metrics.json"
+    },
+    {
+      "exists": true,
+      "key": "dense_qa50",
+      "kind": "json",
+      "path": "chronorag/stdcomp/results/qa50_llm_baselines/dense_llm_qa50_metrics.json"
+    },
+    {
+      "exists": true,
+      "key": "date_filter_qa50",
+      "kind": "json",
+      "path": "chronorag/stdcomp/results/qa50_llm_baselines/date_filter_llm_qa50_metrics.json"
+    },
+    {
+      "exists": true,
+      "key": "ablation_json",
+      "kind": "json",
+      "path": "benchmarks/layer2_crossdomain/results/layer2_ablation_v3_ablation200.json"
+    },
+    {
+      "exists": true,
+      "key": "retrieval_eval_json",
+      "kind": "json",
+      "path": "benchmarks/layer2_crossdomain/results/layer2_retrieval_only_v3_200_eval.json"
+    },
+    {
+      "exists": true,
+      "key": "stdcomp_json",
+      "kind": "json",
+      "path": "chronorag/stdcomp/results/stdcomp_layer2a_comparison.json"
+    }
+  ]
+}

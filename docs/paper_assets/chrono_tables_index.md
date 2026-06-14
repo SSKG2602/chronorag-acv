@@ -4,6 +4,8 @@ Generated from existing result artifacts only. No retrieval, model, validator, o
 
 Use these tables as the paper-ready result boundary for Layer 2A retrieval, Layer 2A ablations, QA50 standard retrieval + LLM post-filtering, and QA50 answer-level comparison.
 
+Research-artifact package with generated paper figures, GitHub snippets, LinkedIn drafts, and paper inserts: [`rpartifacts/README.md`](../../rpartifacts/README.md)
+
 1. [Layer 2A retrieval-only standard comparison](table1_layer2a_retrieval_standard_comparison.md)
    - CSV: `table1_layer2a_retrieval_standard_comparison.csv`
    - JSON: `chronorag/stdcomp/results/paper_tables/table1_layer2a_retrieval_standard_comparison.json`

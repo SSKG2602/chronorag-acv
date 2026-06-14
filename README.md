@@ -1001,6 +1001,27 @@ under:
 - `docs/paper_assets/fusion_weight_sensitivity_not_run.md`
 - `docs/paper_assets/reranker_ablation_not_run.md`
 
+## Research Artifacts and Paper Figures
+
+The generated research-artifact package is indexed at
+[rpartifacts/README.md](rpartifacts/README.md). It contains paper-ready
+figures, Markdown tables, GitHub README snippets, LinkedIn launch drafts, and
+paper integration notes.
+
+Selected figures:
+
+- [Figure 1: Temporal misgrounding concept](rpartifacts/figures/fig1_temporal_misgrounding_concept.png)
+- [Figure 2: ChronoRAG architecture](rpartifacts/figures/fig2_chronorag_architecture.png)
+- [Figure 3: Layer 2A retrieval comparison](rpartifacts/figures/fig3_layer2a_retrieval_comparison.png)
+- [Figure 5: Score-only ablation](rpartifacts/figures/fig5_score_only_ablation.png)
+- [Figure 6: QA50 LLM post-filtering](rpartifacts/figures/fig6_qa50_llm_post_filtering.png)
+
+Reusable snippets and paper planning:
+
+- [GitHub results snippet](rpartifacts/github/readme_results_section.md)
+- [GitHub figures snippet](rpartifacts/github/readme_figures_section.md)
+- [Paper figure plan](rpartifacts/paper/paper_figure_plan.md)
+
 ## Data and Artifact Structure
 
 ### Tracked source and application code
