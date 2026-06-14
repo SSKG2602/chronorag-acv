@@ -211,6 +211,61 @@ is 0.7400 (37/50), pre-injection all expected evidence is 0.6400 (32/50), and
 post-injection evidence available is 1.0000 (50/50). Gold expected evidence
 IDs were not included in the LLM baseline prompts.
 
+### QA50 LLM Post-Filtering Baseline Comparison
+
+| Method | Cases | Retrieval Hit@5 | Strict Combined Pass | Hit@5 + Pass | Hit@5 + Fail | No Hit@5 + Fail | No Hit@5 + Pass |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| BM25 + LLM | 50 | 32/50 = 0.6400 | 20/50 = 0.4000 | 20 | 12 | 18 | 0 |
+| Dense-only + LLM | 50 | 26/50 = 0.5200 | 16/50 = 0.3200 | 16 | 10 | 24 | 0 |
+| Date-filter RAG + LLM | 50 | 33/50 = 0.6600 | 20/50 = 0.4000 | 20 | 13 | 17 | 0 |
+
+These baselines test whether standard retrieval followed by an LLM explicitly
+prompted to distinguish valid time from transaction time can replace
+retrieval-layer temporal grounding. The results show two failure modes. First,
+valid evidence is often absent from the retrieved top-k set, so the LLM cannot
+recover it. Second, even when valid evidence is present, the LLM still fails
+strict temporal contract validation in 10–13 cases depending on the retriever.
+This supports the claim that temporal grounding cannot be treated only as a
+downstream prompting problem.
+
+### QA50 ChronoRAG Answer-Level Extracted Values
+
+| Metric | Value |
+|---|---:|
+| Strict combined pass | 0.7000, 35/50 |
+| Deterministic hard-contract pass | 0.7600, 38/50 |
+| Judge overall pass | 0.7600, 38/50 |
+| Judge semantic pass | 0.9600, 48/50 |
+| Expected evidence cited | 0.9800, 49/50 |
+| Valid time correct | 0.8400, 42/50 |
+| Pre-injection retrieval, any expected evidence | 0.7400, 37/50 |
+| Pre-injection retrieval, all expected evidence | 0.6400, 32/50 |
+| Post-injection evidence available | 1.0000, 50/50 |
+
+Baseline methods are evaluated without evidence injection. ChronoRAG
+pre-injection evidence availability is the fair retrieval-availability
+comparison point. ChronoRAG post-injection answer-level results are reported
+separately to show performance when expected evidence is available to the
+generator. Layer 2A remains the primary retrieval-quality benchmark; Layer
+2B/QA50 measures answer synthesis and temporal answer-contract behavior.
+
+### QA50 Answer-Level Comparison
+
+| Method | Evidence Available / Retrieval Hit@5 | Strict Combined Pass | Hard-Contract Pass | Judge Semantic Pass | Expected Evidence Cited | Valid Time Correct |
+|---|---:|---:|---:|---:|---:|---:|
+| BM25 + LLM | 0.6400 | 0.4000 | 0.4200 | 0.7800 | 0.5600 | 0.4600 |
+| Dense-only + LLM | 0.5200 | 0.3200 | 0.3400 | 0.8200 | 0.4400 | 0.4400 |
+| Date-filter RAG + LLM | 0.6600 | 0.4000 | 0.4400 | 0.9000 | 0.5800 | 0.4600 |
+| ChronoRAG Full — pre-injection retrieval | 0.7400 any / 0.6400 all | n/a | n/a | n/a | n/a | n/a |
+| ChronoRAG Full — post-injection answer setting | 1.0000 | 0.7000 | 0.7600 | 0.9600 | 0.9800 | 0.8400 |
+
+The answer-level comparison shows that standard retrieval plus LLM temporal
+post-filtering does not recover ChronoRAG-level strict temporal QA performance.
+BM25 + LLM and Date-filter RAG + LLM reach 0.4000 strict combined pass,
+Dense-only + LLM reaches 0.3200, while ChronoRAG Full reaches 0.7000 in the
+prior post-injection answer setting. The pre-injection retrieval row is
+reported separately to keep the retrieval-availability comparison fair.
+
 ## Ablation Result
 
 Stored report:
