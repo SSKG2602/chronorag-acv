@@ -1013,6 +1013,8 @@ Start with this README for the project overview, benchmark layers, current
 scope, and reproduction boundaries. Read `docs/TECHNICAL_REPORT.md` for
 technical details, design rationale, and broader discussion of the temporal RAG
 pipeline, and `docs/TEMPORAL_CONTEXTUAL_CHUNKING.md` for the TCC design.
+For reviewer-facing reproducibility and artifact lookup, use
+`docs/REPRODUCIBILITY.md` and `docs/BENCHMARK_ARTIFACTS_INDEX.md`.
 
 For Layer 2A specifically, read `benchmarks/layer2_crossdomain/README.md` for
 the cross-domain benchmark setup and implementation notes. Read the result
@@ -1057,6 +1059,8 @@ under:
 - `docs/PAPER_SOURCE_NOTES.md`
 - `docs/PAPER_QUALITATIVE_CASES.md`
 - `docs/PAPER_FIGURE_INDEX.md`
+- `docs/REPRODUCIBILITY.md`
+- `docs/BENCHMARK_ARTIFACTS_INDEX.md`
 - `docs/paper_assets/chrono_tables_index.md`
 - `docs/paper_assets/table1_layer2a_retrieval_standard_comparison.md`
 - `docs/paper_assets/table2_layer2a_ablation_comparison.md`
@@ -1120,9 +1124,8 @@ near the sections they support.
   runner.
 - `benchmarks/layer2_crossdomain/data/layer2_questions.jsonl`: final v3 aligned
   Layer 2A questions.
-- `benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl`: generated or
-  working selected 5,000-row corpus when present locally; the smaller sample
-  corpus is the tracked public schema/example artifact.
+- `benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl`: tracked selected
+  5,000-row corpus used by the public Layer 2A and QA50 artifact boundary.
 - `benchmarks/layer2_crossdomain/data/layer2_corpus.sample.jsonl`: tracked
   sample corpus rows documenting schema and examples.
 - `benchmarks/layer2_crossdomain/data/raw_pool_manifest.json`: raw-pool scale

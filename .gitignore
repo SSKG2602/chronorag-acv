@@ -1,33 +1,7 @@
+# Local environments
 .venv/
 venv/
 env/
-.env
-.env.*
-__pycache__/
-*.pyc
-.pytest_cache/
-.mypy_cache/
-.DS_Store
-.vscode/
-.idea/
-storage/pvdb/persisted.json
-storage/pvdb/*.json
-models_bin/
-data/tmp/
-data/cache/
-logs/
-runs/
-dist/
-build/
-*.egg-info
-.coverage
-.ipynb_checkpoints/
-
-# Local raw benchmark sources
-/data/raw/
-
-# Local raw benchmark sources
-/data/raw/
 
 # Local secrets and credentials
 .env
@@ -48,23 +22,36 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.coverage
+.ipynb_checkpoints/
 .DS_Store
 
-# Local environments
-.venv/
-venv/
+# Editors
+.vscode/
+.idea/
 
-# Generated Layer 2 benchmark corpus
-benchmarks/layer2_crossdomain/data/layer2_corpus.jsonl
+# Build artifacts
+dist/
+build/
+*.egg-info
+
+# Local runtime state and raw private sources
+storage/pvdb/persisted.json
+storage/pvdb/*.json
+models_bin/
+data/tmp/
+data/cache/
+/data/raw/
+logs/
+runs/
+*.log
 
 # Generated standard-comparison embedding caches
 chronorag/stdcomp/results/cache/
 chronorag/stdcomp/results/qa50_llm_baselines/cache/
 
-# Layer 2 runtime logs
+# Layer 2 runtime logs and local-only smoke/dry/debug artifacts
 benchmarks/layer2_crossdomain/run_logs/
-
-# Local-only Layer 2B smoke/dry/debug artifacts
 benchmarks/layer2_crossdomain/debug_chronorag_retrieval.py
 benchmarks/layer2_crossdomain/results/*smoke3*
 benchmarks/layer2_crossdomain/results/*dry*

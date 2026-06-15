@@ -11,6 +11,9 @@ README polish, and public communication. Quantitative charts are generated from
 stored result artifacts or retrieval-only traces. Conceptual diagrams are
 explicitly marked as schematics.
 
+For the repository-level benchmark data/result/script map, see
+[`docs/BENCHMARK_ARTIFACTS_INDEX.md`](../docs/BENCHMARK_ARTIFACTS_INDEX.md).
+
 ## Figure Index
 
 | Figure | Grounding | Source artifact paths | Use |

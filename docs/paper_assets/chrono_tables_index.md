@@ -12,6 +12,10 @@ Research-artifact package with generated paper figures, GitHub snippets,
 LinkedIn drafts, and paper inserts:
 [`rpartifacts/README.md`](../../rpartifacts/README.md)
 
+Repository-level reproducibility and artifact lookup:
+[`docs/REPRODUCIBILITY.md`](../REPRODUCIBILITY.md) and
+[`docs/BENCHMARK_ARTIFACTS_INDEX.md`](../BENCHMARK_ARTIFACTS_INDEX.md)
+
 Key polished artifact links:
 
 - [Paper figure plan](../../rpartifacts/paper/paper_figure_plan.md)
