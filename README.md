@@ -1,6 +1,6 @@
-# ChronoRAG
+# ChronoRAG-ACV
 
-ChronoRAG is a temporal retrieval and grounded answer-validation RAG framework.
+ChronoRAG-ACV here after ChronoRAG is a temporal retrieval and grounded answer-validation RAG framework.
 It targets temporal failure modes in retrieval-augmented generation: evidence
 that is topically relevant but valid at the wrong time, filings or publication
 dates mistaken for fact time, broad background rows outranking exact evidence,
@@ -189,15 +189,15 @@ Layer 1B and Layer 2B.
 
 Core pieces:
 
-| Component | Role |
-|---|---|
-| Temporal Contextual Chunking | Preserves raw evidence for grounding while adding structured retrieval text with temporal, entity, unit, source, and document context. |
-| `valid_time` / `transaction_time` separation | Keeps when a claim is true separate from when it was filed, published, released, observed, or ingested. |
-| Temporal precision scoring | Scores year, month, day, timestamp, range, fuzzy range, quarter, and daypart matches before answer synthesis. |
-| Polarity and negative constraints | Treats target dates differently from excluded dates such as `not 1990-03-28`. |
-| Source / metric normalization | Rewards source-family, source-file, metric, claim, and version anchors when the question asks for them. |
-| Slot-aware finalization | Assembles evidence for comparison and multi-slot questions so one side does not dominate top-k. |
-| Benchmark scoring / answer-contract checks | Scores retrieval-only evidence cards directly for Layer 1A and Layer 2A, and checks cited evidence, valid-time use, transaction-time misuse, partial/refusal behavior, and provider-output contracts after synthesis in Layer 1B and Layer 2B. |
+| Component                                    | Role                                                                                                                                                                                                                                           |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Temporal Contextual Chunking                 | Preserves raw evidence for grounding while adding structured retrieval text with temporal, entity, unit, source, and document context.                                                                                                         |
+| `valid_time` / `transaction_time` separation | Keeps when a claim is true separate from when it was filed, published, released, observed, or ingested.                                                                                                                                        |
+| Temporal precision scoring                   | Scores year, month, day, timestamp, range, fuzzy range, quarter, and daypart matches before answer synthesis.                                                                                                                                  |
+| Polarity and negative constraints            | Treats target dates differently from excluded dates such as `not 1990-03-28`.                                                                                                                                                                  |
+| Source / metric normalization                | Rewards source-family, source-file, metric, claim, and version anchors when the question asks for them.                                                                                                                                        |
+| Slot-aware finalization                      | Assembles evidence for comparison and multi-slot questions so one side does not dominate top-k.                                                                                                                                                |
+| Benchmark scoring / answer-contract checks   | Scores retrieval-only evidence cards directly for Layer 1A and Layer 2A, and checks cited evidence, valid-time use, transaction-time misuse, partial/refusal behavior, and provider-output contracts after synthesis in Layer 1B and Layer 2B. |
 
 Retrieval-only layers score evidence cards directly. LLM answer synthesis is
 used only for answer-generation layers, with answer-contract checks applied
@@ -206,12 +206,12 @@ Vertex.
 
 ## Evaluation Map
 
-| Layer | Scope | What It Tests | Boundary |
-|---|---|---|---|
-| Layer 1A | Temporal retrieval benchmark | Whether retrieval finds temporally correct evidence and avoids temporal distractors. | Retrieval-focused only. |
-| Layer 1B | Temporal answer validation | Whether generated or light-mode answers satisfy a grounded temporal answer contract. | Answer-contract validation over controlled cases. |
-| Layer 2A | Cross-domain retrieval-only benchmark | Whether retrieval behavior holds across a selected cross-domain corpus and v3 aligned questions. | Selected evidence IDs only; no natural-language answer scoring. |
-| Layer 2B | Natural-language temporal QA | 50 manually designed questions using ChronoRAG + Vertex + dynamic top-k + answer validation. | Answer synthesis and validation with expected evidence available where needed; retrieval quality remains Layer 2A. |
+| Layer    | Scope                                 | What It Tests                                                                                    | Boundary                                                                                                           |
+| -------- | ------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| Layer 1A | Temporal retrieval benchmark          | Whether retrieval finds temporally correct evidence and avoids temporal distractors.             | Retrieval-focused only.                                                                                            |
+| Layer 1B | Temporal answer validation            | Whether generated or light-mode answers satisfy a grounded temporal answer contract.             | Answer-contract validation over controlled cases.                                                                  |
+| Layer 2A | Cross-domain retrieval-only benchmark | Whether retrieval behavior holds across a selected cross-domain corpus and v3 aligned questions. | Selected evidence IDs only; no natural-language answer scoring.                                                    |
+| Layer 2B | Natural-language temporal QA          | 50 manually designed questions using ChronoRAG + Vertex + dynamic top-k + answer validation.     | Answer synthesis and validation with expected evidence available where needed; retrieval quality remains Layer 2A. |
 
 ## Claims And Boundaries
 
@@ -333,11 +333,11 @@ post-injection evidence available is 1.0000 (50/50).
 
 ### QA50 LLM Post-Filtering Baseline Comparison
 
-| Method | Retrieval Hit@5 | Strict Combined Pass | Hard-Contract Pass | Judge Semantic Pass | Valid Time Correct | Expected Evidence Cited |
-|---|---:|---:|---:|---:|---:|---:|
-| BM25 + LLM | 0.6400 | 0.4000 | 0.4200 | 0.7800 | 0.4600 | 0.5600 |
-| Dense-only + LLM | 0.5200 | 0.3200 | 0.3400 | 0.8200 | 0.4400 | 0.4400 |
-| Date-filter RAG + LLM | 0.6600 | 0.4000 | 0.4400 | 0.9000 | 0.4600 | 0.5800 |
+| Method                | Retrieval Hit@5 | Strict Combined Pass | Hard-Contract Pass | Judge Semantic Pass | Valid Time Correct | Expected Evidence Cited |
+| --------------------- | --------------: | -------------------: | -----------------: | ------------------: | -----------------: | ----------------------: |
+| BM25 + LLM            |          0.6400 |               0.4000 |             0.4200 |              0.7800 |             0.4600 |                  0.5600 |
+| Dense-only + LLM      |          0.5200 |               0.3200 |             0.3400 |              0.8200 |             0.4400 |                  0.4400 |
+| Date-filter RAG + LLM |          0.6600 |               0.4000 |             0.4400 |              0.9000 |             0.4600 |                  0.5800 |
 
 ![QA50 LLM post-filtering](rpartifacts/figures/fig6_qa50_llm_post_filtering.png)
 
@@ -352,16 +352,16 @@ downstream prompting problem in this evaluated setting.
 
 ### QA50 ChronoRAG Answer-Level Extracted Values
 
-| ChronoRAG QA50 Metric | Value |
-|---|---:|
-| Strict combined pass | 35 / 50 = 70% |
-| Deterministic hard-contract pass | 38 / 50 = 76% |
-| Judge semantic pass | 48 / 50 = 96% |
-| Expected evidence cited | 49 / 50 = 98% |
-| Valid time correct | 42 / 50 = 84% |
-| Pre-injection retrieval, any expected evidence | 37 / 50 = 74% |
-| Pre-injection retrieval, all expected evidence | 32 / 50 = 64% |
-| Post-injection evidence available | 50 / 50 = 100% |
+| ChronoRAG QA50 Metric                          |          Value |
+| ---------------------------------------------- | -------------: |
+| Strict combined pass                           |  35 / 50 = 70% |
+| Deterministic hard-contract pass               |  38 / 50 = 76% |
+| Judge semantic pass                            |  48 / 50 = 96% |
+| Expected evidence cited                        |  49 / 50 = 98% |
+| Valid time correct                             |  42 / 50 = 84% |
+| Pre-injection retrieval, any expected evidence |  37 / 50 = 74% |
+| Pre-injection retrieval, all expected evidence |  32 / 50 = 64% |
+| Post-injection evidence available              | 50 / 50 = 100% |
 
 Baseline LLM post-filtering methods are evaluated without evidence injection.
 ChronoRAG pre-injection retrieval availability is the fair
@@ -374,13 +374,13 @@ Layer 2B/QA50 measures answer synthesis and temporal answer-contract behavior.
 
 ### QA50 Answer-Level Comparison
 
-| Method | Evidence Available / Retrieval Hit@5 | Strict Combined Pass | Hard-Contract Pass | Judge Semantic Pass | Expected Evidence Cited | Valid Time Correct |
-|---|---:|---:|---:|---:|---:|---:|
-| BM25 + LLM | 0.6400 | 0.4000 | 0.4200 | 0.7800 | 0.5600 | 0.4600 |
-| Dense-only + LLM | 0.5200 | 0.3200 | 0.3400 | 0.8200 | 0.4400 | 0.4400 |
-| Date-filter RAG + LLM | 0.6600 | 0.4000 | 0.4400 | 0.9000 | 0.5800 | 0.4600 |
-| ChronoRAG Full — pre-injection retrieval | 0.7400 any / 0.6400 all | n/a | n/a | n/a | n/a | n/a |
-| ChronoRAG Full — post-injection answer setting | 1.0000 | 0.7000 | 0.7600 | 0.9600 | 0.9800 | 0.8400 |
+| Method                                         | Evidence Available / Retrieval Hit@5 | Strict Combined Pass | Hard-Contract Pass | Judge Semantic Pass | Expected Evidence Cited | Valid Time Correct |
+| ---------------------------------------------- | -----------------------------------: | -------------------: | -----------------: | ------------------: | ----------------------: | -----------------: |
+| BM25 + LLM                                     |                               0.6400 |               0.4000 |             0.4200 |              0.7800 |                  0.5600 |             0.4600 |
+| Dense-only + LLM                               |                               0.5200 |               0.3200 |             0.3400 |              0.8200 |                  0.4400 |             0.4400 |
+| Date-filter RAG + LLM                          |                               0.6600 |               0.4000 |             0.4400 |              0.9000 |                  0.5800 |             0.4600 |
+| ChronoRAG Full — pre-injection retrieval       |              0.7400 any / 0.6400 all |                  n/a |                n/a |                 n/a |                     n/a |                n/a |
+| ChronoRAG Full — post-injection answer setting |                               1.0000 |               0.7000 |             0.7600 |              0.9600 |                  0.9800 |             0.8400 |
 
 [Figure 7: Injection fairness split](rpartifacts/figures/fig7_injection_fairness_split.png)
 separates pre-injection retrieval availability from the post-injection answer
@@ -416,9 +416,9 @@ Benchmark files:
 
 Stored light-mode result:
 
-| Method | Hit@5 Evidence | Top1 Window | Hit@5 Window | Source Family Hit@5 | Distractor Avoidance | Proxy Behavior Correct |
-|---|---:|---:|---:|---:|---:|---:|
-| Hybrid + temporal fusion + rerank | 0.80 | 0.80 | 0.93 | 0.87 | 0.93 | 0.80 |
+| Method                            | Hit@5 Evidence | Top1 Window | Hit@5 Window | Source Family Hit@5 | Distractor Avoidance | Proxy Behavior Correct |
+| --------------------------------- | -------------: | ----------: | -----------: | ------------------: | -------------------: | ---------------------: |
+| Hybrid + temporal fusion + rerank |           0.80 |        0.80 |         0.93 |                0.87 |                 0.93 |                   0.80 |
 
 These are controlled benchmark results for the 15-case Temporal Eval v2 setting.
 
@@ -541,13 +541,13 @@ identify the public source families used for verification and rebuilding; they
 are not a claim that the generated 5,000-row corpus is directly committed in
 full.
 
-| Source family | Used for | Public source/provenance link |
-|---|---|---|
-| FRED macro series | Federal funds rate and 10-year Treasury yield series such as `FEDFUNDS` and `DGS10`. | `https://fred.stlouisfed.org/docs/api/fred/v2/index.html`; `https://fred.stlouisfed.org/series/FEDFUNDS`; `https://fred.stlouisfed.org/series/DGS10` |
-| FRED market/index series | Market/index series used in the cross-domain pool, including `SP500`, `DJIA`, and `NASDAQCOM`. | `https://fred.stlouisfed.org/series/SP500`; `https://fred.stlouisfed.org/series/DJIA`; `https://fred.stlouisfed.org/series/NASDAQCOM` |
-| SEC EDGAR submissions | Company filing/submission metadata and filing-time examples. | `https://www.sec.gov/search-filings/edgar-application-programming-interfaces` |
-| Federal Register | Federal agency rule/document records and publication-time examples. | `https://www.federalregister.gov/developers/documentation/api/v1` |
-| GitHub releases | Repository release records and software-version temporal examples. | `https://docs.github.com/rest/releases/releases` |
+| Source family            | Used for                                                                                       | Public source/provenance link                                                                                                                        |
+| ------------------------ | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FRED macro series        | Federal funds rate and 10-year Treasury yield series such as `FEDFUNDS` and `DGS10`.           | `https://fred.stlouisfed.org/docs/api/fred/v2/index.html`; `https://fred.stlouisfed.org/series/FEDFUNDS`; `https://fred.stlouisfed.org/series/DGS10` |
+| FRED market/index series | Market/index series used in the cross-domain pool, including `SP500`, `DJIA`, and `NASDAQCOM`. | `https://fred.stlouisfed.org/series/SP500`; `https://fred.stlouisfed.org/series/DJIA`; `https://fred.stlouisfed.org/series/NASDAQCOM`                |
+| SEC EDGAR submissions    | Company filing/submission metadata and filing-time examples.                                   | `https://www.sec.gov/search-filings/edgar-application-programming-interfaces`                                                                        |
+| Federal Register         | Federal agency rule/document records and publication-time examples.                            | `https://www.federalregister.gov/developers/documentation/api/v1`                                                                                    |
+| GitHub releases          | Repository release records and software-version temporal examples.                             | `https://docs.github.com/rest/releases/releases`                                                                                                     |
 
 The reported Layer 2A metrics were produced on the selected 5,000-row
 evaluation corpus derived from these raw/source families. The README separates
@@ -564,13 +564,13 @@ Final public result files:
 
 Layer 2A v3 retrieval-only standard comparison:
 
-| Method | Cases | Hit@1 | Hit@5 | MRR@5 | Forbidden Absent@5 | Category Primary Pass |
-|---|---:|---:|---:|---:|---:|---:|
-| BM25 | 200 | 0.7750 | 0.9350 | 0.8467 | 0.7600 | 0.5750 |
-| Dense-only | 200 | 0.3850 | 0.6100 | 0.4710 | 0.7950 | 0.3000 |
-| Date-filter RAG | 200 | 0.7750 | 0.9350 | 0.8475 | 0.7650 | 0.6000 |
-| Metadata Temporal RAG | 200 | 0.6900 | 0.8600 | 0.7678 | 0.6950 | 0.4813 |
-| ChronoRAG Full | 200 | 0.8250 | 0.8950 | 0.8554 | 0.9950 | 0.9625 |
+| Method                | Cases |  Hit@1 |  Hit@5 |  MRR@5 | Forbidden Absent@5 | Category Primary Pass |
+| --------------------- | ----: | -----: | -----: | -----: | -----------------: | --------------------: |
+| BM25                  |   200 | 0.7750 | 0.9350 | 0.8467 |             0.7600 |                0.5750 |
+| Dense-only            |   200 | 0.3850 | 0.6100 | 0.4710 |             0.7950 |                0.3000 |
+| Date-filter RAG       |   200 | 0.7750 | 0.9350 | 0.8475 |             0.7650 |                0.6000 |
+| Metadata Temporal RAG |   200 | 0.6900 | 0.8600 | 0.7678 |             0.6950 |                0.4813 |
+| ChronoRAG Full        |   200 | 0.8250 | 0.8950 | 0.8554 |             0.9950 |                0.9625 |
 
 ### Runtime Snapshot
 
@@ -626,14 +626,14 @@ Layer 2B full-50 artifacts:
 - `benchmarks/layer2_crossdomain/results/layer2b_judge_layer2b_full50_judge_final_results.md`
 - `benchmarks/layer2_crossdomain/results/layer2b_full50_manual_audit.md`
 
-| Layer 2B metric | Score |
-|---|---:|
-| Deterministic hard-contract pass | 38 / 50 = 76% |
-| LLM judge overall pass | 38 / 50 = 76% |
-| LLM judge semantic pass | 48 / 50 = 96% |
-| Strict combined pass | 35 / 50 = 70% |
-| Manually accepted validator-strictness cases | 3 |
-| Manual-audited acceptable pass | 41 / 50 = 82% |
+| Layer 2B metric                              |         Score |
+| -------------------------------------------- | ------------: |
+| Deterministic hard-contract pass             | 38 / 50 = 76% |
+| LLM judge overall pass                       | 38 / 50 = 76% |
+| LLM judge semantic pass                      | 48 / 50 = 96% |
+| Strict combined pass                         | 35 / 50 = 70% |
+| Manually accepted validator-strictness cases |             3 |
+| Manual-audited acceptable pass               | 41 / 50 = 82% |
 
 The strict combined pass is the conservative score. The manual-audited
 acceptable pass accepts 3 cases where hard validation failed but judge and
@@ -652,32 +652,32 @@ remaining failures are still listed in the manual audit note.
 The ablation runner removes one component at a time where possible and scores
 the same 200 v3 questions.
 
-| Variant | What Is Removed or Changed | Why It Matters |
-|---|---|---|
-| `chronorag_full` | Full Layer 2A ChronoRAG path. | Reference setting for component ablations. |
-| `chronorag_no_tcc` | Uses raw row text instead of Temporal Contextual Chunking retrieval text. | Tests whether enriched temporal/entity/source context helps retrieval. |
-| `chronorag_no_temporal_precision` | Disables explicit temporal precision scoring and negative exact-time suppression. | Tests exact-date ranking and wrong-time trap handling. |
-| `chronorag_no_transaction_role` | Disables final cleanup that demotes transaction-time-only evidence when valid time is requested. | Tests separation of fact time from filing/publication/release time. |
-| `chronorag_no_source_metric` | Disables source and metric adjustment in finalization. | Tests source-family, source-file, metric, claim, and version constraints. |
-| `chronorag_no_slot_assembler` | Disables slot-aware evidence assembly. | Tests multi-slot and cross-domain comparison coverage. |
-| `chronorag_score_only` | Uses fused ranking without finalization components. | Tests whether retrieval finalization adds behavior beyond score ordering. |
-| `metadata_temporal_rag` | Metadata-oriented temporal retrieval baseline. | Provides a comparison point for selected-evidence behavior. |
+| Variant                           | What Is Removed or Changed                                                                       | Why It Matters                                                            |
+| --------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| `chronorag_full`                  | Full Layer 2A ChronoRAG path.                                                                    | Reference setting for component ablations.                                |
+| `chronorag_no_tcc`                | Uses raw row text instead of Temporal Contextual Chunking retrieval text.                        | Tests whether enriched temporal/entity/source context helps retrieval.    |
+| `chronorag_no_temporal_precision` | Disables explicit temporal precision scoring and negative exact-time suppression.                | Tests exact-date ranking and wrong-time trap handling.                    |
+| `chronorag_no_transaction_role`   | Disables final cleanup that demotes transaction-time-only evidence when valid time is requested. | Tests separation of fact time from filing/publication/release time.       |
+| `chronorag_no_source_metric`      | Disables source and metric adjustment in finalization.                                           | Tests source-family, source-file, metric, claim, and version constraints. |
+| `chronorag_no_slot_assembler`     | Disables slot-aware evidence assembly.                                                           | Tests multi-slot and cross-domain comparison coverage.                    |
+| `chronorag_score_only`            | Uses fused ranking without finalization components.                                              | Tests whether retrieval finalization adds behavior beyond score ordering. |
+| `metadata_temporal_rag`           | Metadata-oriented temporal retrieval baseline.                                                   | Provides a comparison point for selected-evidence behavior.               |
 
 ### Stored ablation scores
 
 These scores are copied from
 `benchmarks/layer2_crossdomain/results/layer2_ablation_v3_ablation200.md`.
 
-| Variant | Cases | Generic Hit@1 | Generic Hit@5 | Forbidden absent@5 | Category primary pass | Delta vs chronorag_full | Interpretation |
-|---|---:|---:|---:|---:|---:|---:|---|
-| `chronorag_full` | 200 | 0.8250 | 0.8950 | 0.9950 | 0.9625 | 0.0000 | Reference setting for this ablation run. |
-| `chronorag_no_tcc` | 200 | 0.8350 | 0.8950 | 0.9950 | 0.9625 | 0.0000 | Same overall category-primary pass as full in this controlled run. |
-| `chronorag_no_temporal_precision` | 200 | 0.7500 | 0.8500 | 0.9450 | 0.7500 | -0.2125 | Lower category-primary pass when precision handling is disabled. |
-| `chronorag_no_transaction_role` | 200 | 0.8250 | 0.8950 | 0.9950 | 0.9625 | 0.0000 | Same overall category-primary pass as full in this controlled run. |
-| `chronorag_no_source_metric` | 200 | 0.8300 | 0.8900 | 1.0000 | 0.9688 | 0.0062 | Source/metric ablation did not reduce overall primary pass in this run. |
-| `chronorag_no_slot_assembler` | 200 | 0.8300 | 0.8900 | 0.8150 | 0.7750 | -0.1875 | Lower forbidden-absence and category-primary pass without slot assembly. |
-| `chronorag_score_only` | 200 | 0.8150 | 0.9850 | 0.6500 | 0.5625 | -0.4000 | High generic Hit@5 but lower final selected-evidence behavior. |
-| `metadata_temporal_rag` | 200 | 0.6900 | 0.8600 | 0.6950 | 0.4813 | -0.4813 | Independent metadata baseline with lower category-primary pass here. |
+| Variant                           | Cases | Generic Hit@1 | Generic Hit@5 | Forbidden absent@5 | Category primary pass | Delta vs chronorag_full | Interpretation                                                           |
+| --------------------------------- | ----: | ------------: | ------------: | -----------------: | --------------------: | ----------------------: | ------------------------------------------------------------------------ |
+| `chronorag_full`                  |   200 |        0.8250 |        0.8950 |             0.9950 |                0.9625 |                  0.0000 | Reference setting for this ablation run.                                 |
+| `chronorag_no_tcc`                |   200 |        0.8350 |        0.8950 |             0.9950 |                0.9625 |                  0.0000 | Same overall category-primary pass as full in this controlled run.       |
+| `chronorag_no_temporal_precision` |   200 |        0.7500 |        0.8500 |             0.9450 |                0.7500 |                 -0.2125 | Lower category-primary pass when precision handling is disabled.         |
+| `chronorag_no_transaction_role`   |   200 |        0.8250 |        0.8950 |             0.9950 |                0.9625 |                  0.0000 | Same overall category-primary pass as full in this controlled run.       |
+| `chronorag_no_source_metric`      |   200 |        0.8300 |        0.8900 |             1.0000 |                0.9688 |                  0.0062 | Source/metric ablation did not reduce overall primary pass in this run.  |
+| `chronorag_no_slot_assembler`     |   200 |        0.8300 |        0.8900 |             0.8150 |                0.7750 |                 -0.1875 | Lower forbidden-absence and category-primary pass without slot assembly. |
+| `chronorag_score_only`            |   200 |        0.8150 |        0.9850 |             0.6500 |                0.5625 |                 -0.4000 | High generic Hit@5 but lower final selected-evidence behavior.           |
+| `metadata_temporal_rag`           |   200 |        0.6900 |        0.8600 |             0.6950 |                0.4813 |                 -0.4813 | Independent metadata baseline with lower category-primary pass here.     |
 
 The ablation score table is the fastest way to see which component removals
 changed behavior in the controlled 200-question Layer 2A v3 benchmark. The
