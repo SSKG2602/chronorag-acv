@@ -1,6 +1,9 @@
 # ChronoRAG-ACV
 
-ChronoRAG-ACV here after ChronoRAG is a temporal retrieval and grounded answer-validation RAG framework.
+ChronoRAG-ACV: Temporal-Validity Evidence Selection and Answer-Contract Validation for Retrieval-Augmented Generation.
+
+ChronoRAG-ACV here after ChronoRAG.
+
 It targets temporal failure modes in retrieval-augmented generation: evidence
 that is topically relevant but valid at the wrong time, filings or publication
 dates mistaken for fact time, broad background rows outranking exact evidence,
